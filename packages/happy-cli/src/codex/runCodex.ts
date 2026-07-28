@@ -1010,9 +1010,9 @@ export async function runCodex(opts: {
                     continue;
                 }
 
-                const includeAppendSystemPrompt = Boolean(
-                    message.mode.appendSystemPrompt && !appendSystemPromptInjected,
-                );
+                // This fork keeps mobile/web UI instructions out of the Codex
+                // conversation, so remote option-chip prompts are never injected.
+                const includeAppendSystemPrompt = false;
                 const imageInputs = await prepareCodexImageInputItems(message.attachments, {
                     sessionId: session.sessionId,
                 });
@@ -1034,7 +1034,7 @@ export async function runCodex(opts: {
                     message: message.message,
                     mode: message.mode,
                     includeAppendSystemPrompt,
-                    includeTitleInstruction: first,
+                    includeTitleInstruction: false,
                 });
 
                 const result = await client.sendTurnAndWait(turnPrompt, {
