@@ -185,6 +185,8 @@ export const ja: TranslationStructure = {
         },
         display: '表示',
         displayDescription: 'レイアウトと間隔を調整',
+        compactToolCalls: 'ツール呼び出しをコンパクト表示',
+        compactToolCallsDescription: '非対話型のツール呼び出しを1行で表示し、行を開いて詳細を確認します',
         inlineToolCalls: 'ツール呼び出しをインライン表示',
         inlineToolCallsDescription: 'チャットメッセージ内にツール呼び出しを直接表示',
         expandTodoLists: 'Todoリストを展開',
@@ -528,11 +530,26 @@ export const ja: TranslationStructure = {
         offlineUnableToSpawn: 'オフラインのため新しいセッションを生成できません',
     },
 
+    agentQuestion: {
+        title: "質問",
+        submit: "回答を送信",
+        chooseMultiple: "当てはまるものをすべて選択",
+        ownAnswer: "自分で回答",
+        ownAnswerPlaceholder: "回答を入力",
+        submitFailed: "回答を送信できませんでした",
+        dismiss: "閉じる",
+        unsupportedTitle: "未対応のリクエスト",
+        unsupportedDescription: ({ kind }: { kind: string }) => `このバージョンの Happy は「${kind}」リクエストを表示できません。アプリを更新してください。`,
+        moreQuestions: ({ count }: { count: number }) =>
+            count === 1 ? "他に1件の質問" : `${count} 件の質問`,
+    },
+
     sidebar: {
         sessionsTitle: 'Happy',
         showArchived: 'アーカイブを表示',
         hideArchived: 'アーカイブを非表示',
         newSession: '新しいセッション',
+        projects: "プロジェクト",
     },
 
     zen: {

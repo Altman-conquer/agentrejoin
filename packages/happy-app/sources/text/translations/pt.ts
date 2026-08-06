@@ -183,6 +183,8 @@ export const pt: TranslationStructure = {
         },
         display: 'Exibição',
         displayDescription: 'Controle layout e espaçamento',
+        compactToolCalls: 'Chamadas de ferramentas compactas',
+        compactToolCallsDescription: 'Mostre chamadas não interativas em uma linha; abra a linha para ver detalhes',
         inlineToolCalls: 'Chamadas de ferramentas inline',
         inlineToolCallsDescription: 'Exibir chamadas de ferramentas diretamente nas mensagens do chat',
         expandTodoLists: 'Expandir listas de tarefas',
@@ -526,11 +528,26 @@ export const pt: TranslationStructure = {
         offlineUnableToSpawn: 'Não é possível criar nova sessão, você está offline',
     },
 
+    agentQuestion: {
+        title: "Pergunta",
+        submit: "Enviar resposta",
+        chooseMultiple: "Escolha todas as que se aplicam",
+        ownAnswer: "Sua própria resposta",
+        ownAnswerPlaceholder: "Escreva uma resposta",
+        submitFailed: "Não foi possível enviar sua resposta",
+        dismiss: "Dispensar",
+        unsupportedTitle: "Solicitação não suportada",
+        unsupportedDescription: ({ kind }: { kind: string }) => `Esta versão do Happy não pode exibir uma solicitação «${kind}». Atualize o app para responder.`,
+        moreQuestions: ({ count }: { count: number }) =>
+            count === 1 ? "mais 1 pergunta" : `${count} perguntas a mais`,
+    },
+
     sidebar: {
         sessionsTitle: 'Happy',
         showArchived: 'Mostrar arquivadas',
         hideArchived: 'Ocultar arquivadas',
         newSession: 'Nova sessão',
+        projects: "Projetos",
     },
 
     zen: {

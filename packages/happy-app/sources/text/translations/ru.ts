@@ -170,6 +170,8 @@ export const ru: TranslationStructure = {
         },
         display: 'Отображение',
         displayDescription: 'Управление макетом и интервалами',
+        compactToolCalls: 'Компактные вызовы инструментов',
+        compactToolCallsDescription: 'Показывать неинтерактивные вызовы одной строкой; нажмите строку для подробностей',
         inlineToolCalls: 'Встроенные вызовы инструментов',
         inlineToolCallsDescription: 'Отображать вызовы инструментов прямо в сообщениях чата',
         expandTodoLists: 'Развернуть списки задач',
@@ -543,11 +545,26 @@ export const ru: TranslationStructure = {
         offlineUnableToSpawn: 'Невозможно создать сессию, машина offline',
     },
 
+    agentQuestion: {
+        title: "Вопрос",
+        submit: "Отправить ответ",
+        chooseMultiple: "Выберите все подходящие",
+        ownAnswer: "Свой ответ",
+        ownAnswerPlaceholder: "Напишите свой ответ",
+        submitFailed: "Не удалось отправить ответ",
+        dismiss: "Скрыть",
+        unsupportedTitle: "Неподдерживаемый запрос",
+        unsupportedDescription: ({ kind }: { kind: string }) => `Эта версия Happy не может показать запрос «${kind}». Обновите приложение, чтобы ответить.`,
+        moreQuestions: ({ count }: { count: number }) =>
+            count === 1 ? "ещё 1 вопрос" : `${count} вопросов ещё`,
+    },
+
     sidebar: {
         sessionsTitle: 'Happy',
         showArchived: 'Показать архив',
         hideArchived: 'Скрыть архив',
         newSession: 'Новая сессия',
+        projects: "Проекты",
     },
 
     zen: {

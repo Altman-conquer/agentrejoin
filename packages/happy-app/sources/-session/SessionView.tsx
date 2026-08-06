@@ -1,6 +1,7 @@
 import { AgentContentView } from '@/components/AgentContentView';
 import { MobileGlassBackdrop } from '@/components/MobileGlass';
 import { AgentGoalBar, type AgentGoalAction } from '@/components/AgentGoalBar';
+import { AgentQuestionBanner } from '@/components/AgentQuestionBanner';
 import { AgentInput } from '@/components/AgentInput';
 import { resolveVisibleAgentGoalStatus } from '@/components/agentGoalStatus';
 import type { MultiTextInputHandle } from '@/components/MultiTextInput';
@@ -635,6 +636,57 @@ export function SessionViewLoaded({
     const isLandscape = useIsLandscape();
     const deviceType = useDeviceType();
     const isTablet = useIsTablet();
+    // Only the portrait phone chat uses an overlay dock. Tablet, desktop,
+    // landscape, and embedded views retain their existing split layout.
+    const usesFloatingMobileDock = !embedded
+        && deviceType === 'phone'
+        && Platform.OS !== 'web'
+        && !isRunningOnMac()
+        && !isLandscape;
+    const [bottomDockInset, setBottomDockInset] = React.useState(0);
+    const [isChatAtBottom, setIsChatAtBottom] = React.useState(true);
+    const chatAtBottomRef = React.useRef(true);
+    const showBottomDockDetails = !usesFloatingMobileDock || isChatAtBottom;
+    const usesFloatingMobileDockRef = React.useRef(usesFloatingMobileDock);
+    const showBottomDockDetailsRef = React.useRef(showBottomDockDetails);
+    usesFloatingMobileDockRef.current = usesFloatingMobileDock;
+    showBottomDockDetailsRef.current = showBottomDockDetails;
+
+    const handleBottomDockInsetChange = React.useCallback((nextInset: number) => {
+        setBottomDockInset((currentInset) => {
+            // Hiding the auxiliary dock chrome must not shrink FlatList's
+            // spacer: that resize changes its scroll offset and makes the
+            // chrome immediately reappear. Keep the existing reserve while
+            // reading older history; it is refreshed at the newest message.
+            const nextReservedInset = Platform.OS === 'ios'
+                && usesFloatingMobileDockRef.current
+                && !showBottomDockDetailsRef.current
+                ? Math.max(currentInset, nextInset)
+                : nextInset;
+            return Math.abs(currentInset - nextReservedInset) < 1
+                ? currentInset
+                : nextReservedInset;
+        });
+    }, []);
+    const handleChatBottomVisibilityChange = React.useCallback((visible: boolean) => {
+        if (!usesFloatingMobileDock || chatAtBottomRef.current === visible) {
+            return;
+        }
+        chatAtBottomRef.current = visible;
+        setIsChatAtBottom(visible);
+    }, [usesFloatingMobileDock]);
+
+    React.useEffect(() => {
+        if (!usesFloatingMobileDock) {
+            setBottomDockInset(0);
+        }
+    }, [usesFloatingMobileDock]);
+
+    React.useEffect(() => {
+        chatAtBottomRef.current = true;
+        setIsChatAtBottom(true);
+    }, [sessionId, usesFloatingMobileDock]);
+
     const realtimeStatus = useRealtimeStatus();
     const { messages, isLoaded } = useSessionMessages(sessionId);
     const acknowledgedCliVersions = useLocalSetting('acknowledgedCliVersions');
@@ -938,8 +990,12 @@ export function SessionViewLoaded({
                     <ChatList
                         session={session}
                         topContentInset={chatListTopContentInset}
+                        bottomContentInset={usesFloatingMobileDock ? bottomDockInset : undefined}
                         headerOverlayHeight={safeArea.top + MOBILE_GLASS_HEADER_HEIGHT}
                         onHeaderBackdropVisibilityChange={onHeaderBackdropVisibilityChange}
+                        onBottomDockVisibilityChange={usesFloatingMobileDock
+                            ? handleChatBottomVisibilityChange
+                            : undefined}
                     />
                 )}
             </Deferred>
@@ -990,6 +1046,7 @@ export function SessionViewLoaded({
             alwaysShowContextSize={alwaysShowContextSize}
             zenMode={zenMode}
             showSessionStatusInfoInSettings={false}
+            showStatusDetails={!usesFloatingMobileDock || isChatAtBottom}
             sessionStatusGitBranch={statusBarGitBranch}
             sessionStatusModelLabel={statusBarModelLabel}
             sessionStatusEffortLabel={statusBarEffortLabel}
@@ -1003,7 +1060,7 @@ export function SessionViewLoaded({
     // Resume button when canResume is true, falls back to the
     // copy-this-command hint when the experiments toggle is off or the
     // machine isn't reachable.
-    const inactiveHint = isDisconnected && !isRig ? (
+    const inactiveHint = showBottomDockDetails && isDisconnected && !isRig ? (
         <CenteredInputWidth horizontalPadding={sessionInputHorizontalPadding}>
             <InactiveArchivedHint
                 resumeCommandBlock={expResumeSession ? resumeCommandBlock : null}
@@ -1016,7 +1073,7 @@ export function SessionViewLoaded({
 
     const showSessionStatusBar = sessionStatusBarDisplay === 'above' || sessionStatusBarDisplay === 'below';
     const sessionStatusBarPosition = sessionStatusBarDisplay === 'above' ? 'above' : 'below';
-    const sessionStatusBar = showSessionStatusBar ? (
+    const sessionStatusBar = showBottomDockDetails && showSessionStatusBar ? (
         <CenteredInputWidth horizontalPadding={sessionInputHorizontalPadding}>
             <SessionStatusBar
                 gitBranch={statusBarGitBranch}
@@ -1038,7 +1095,7 @@ export function SessionViewLoaded({
     const input = (
         <>
             {inactiveHint}
-            {visibleAgentGoal && (
+            {showBottomDockDetails && visibleAgentGoal && (
                 <CenteredInputWidth horizontalPadding={sessionInputHorizontalPadding}>
                     <AgentGoalBar
                         goal={visibleAgentGoal}
@@ -1047,8 +1104,11 @@ export function SessionViewLoaded({
                     />
                 </CenteredInputWidth>
             )}
+            <CenteredInputWidth horizontalPadding={sessionInputHorizontalPadding}>
+                <AgentQuestionBanner sessionId={sessionId} />
+            </CenteredInputWidth>
             {sessionStatusBarPosition === 'above' ? sessionStatusBar : null}
-            <RigActivityBar metadata={session.metadata} />
+            {showBottomDockDetails && <RigActivityBar metadata={session.metadata} />}
             {composer}
             {sessionStatusBarPosition === 'below' ? sessionStatusBar : null}
         </>
@@ -1097,6 +1157,8 @@ export function SessionViewLoaded({
                     content={content}
                     input={input}
                     placeholder={placeholder}
+                    floatingDock={usesFloatingMobileDock}
+                    onDockInsetChange={handleBottomDockInsetChange}
                 />
             </View >
 

@@ -185,6 +185,8 @@ export const zhHans: TranslationStructure = {
         },
         display: '显示',
         displayDescription: '控制布局和间距',
+        compactToolCalls: '紧凑显示工具调用',
+        compactToolCallsDescription: '将非交互式工具调用显示为单行；打开该行可查看详情',
         inlineToolCalls: '内联工具调用',
         inlineToolCallsDescription: '在聊天消息中直接显示工具调用',
         expandTodoLists: '展开待办列表',
@@ -528,11 +530,26 @@ export const zhHans: TranslationStructure = {
         offlineUnableToSpawn: '无法生成新会话，已离线',
     },
 
+    agentQuestion: {
+        title: "问题",
+        submit: "发送回答",
+        chooseMultiple: "选择所有适用项",
+        ownAnswer: "自定义回答",
+        ownAnswerPlaceholder: "输入你的回答",
+        submitFailed: "无法发送你的回答",
+        dismiss: "忽略",
+        unsupportedTitle: "不支持的请求",
+        unsupportedDescription: ({ kind }: { kind: string }) => `此版本的 Happy 无法显示「${kind}」请求。请更新应用后回复。`,
+        moreQuestions: ({ count }: { count: number }) =>
+            count === 1 ? "还有 1 个问题" : `${count} 个问题`,
+    },
+
     sidebar: {
         sessionsTitle: 'Happy',
         showArchived: '显示已归档',
         hideArchived: '隐藏已归档',
         newSession: '新建会话',
+        projects: "项目",
     },
 
     zen: {

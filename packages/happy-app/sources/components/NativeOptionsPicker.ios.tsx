@@ -1,17 +1,23 @@
 import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useUnistyles } from 'react-native-unistyles';
 import {
     Button,
     Host,
     HStack,
     Image,
     Menu,
+    Section,
     Spacer,
     Text,
 } from '@expo/ui/swift-ui';
 import {
+    accessibilityLabel,
+    buttonStyle,
+    contentShape,
+    disabled,
     frame,
-    opacity,
+    shapes,
     tint,
 } from '@expo/ui/swift-ui/modifiers';
 import type { NativeOptionsPickerProps } from './NativeOptionsPicker';
@@ -25,12 +31,20 @@ const styles = StyleSheet.create({
         position: 'relative',
         width: '100%',
     },
+    // The React Native row is kept for layout only: it gives the container its
+    // height and width while SwiftUI draws everything that is visible.
+    trigger: {
+        width: '100%',
+        minWidth: 0,
+        opacity: 0,
+    },
     host: {
         ...StyleSheet.absoluteFillObject,
     },
 });
 
 export function NativeOptionsPicker({
+    title,
     triggerLabel,
     systemImage: triggerSystemImage,
     options,
@@ -38,36 +52,70 @@ export function NativeOptionsPicker({
     onSelect,
     children,
 }: NativeOptionsPickerProps) {
+    const { theme } = useUnistyles();
     return (
         <View style={styles.container}>
-            <View pointerEvents="none">{children}</View>
-            <Host
-                colorScheme="dark"
-                style={styles.host}
+            <View
+                pointerEvents="none"
+                accessible={false}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+                style={styles.trigger}
             >
+                {children}
+            </View>
+            {/* The host must not perform keyboard avoidance: it is pinned over a
+                control React Native already positions, so SwiftUI keyboard
+                avoidance would drag the trigger off it. */}
+            <Host ignoreSafeArea="keyboard" style={styles.host}>
                 <Menu
-                    modifiers={[tint('#FFFFFF')]}
+                    // The tint is what colors the label, so it has to follow the
+                    // theme: SwiftUI draws the visible row here, and a fixed
+                    // white would render it invisible in light mode.
+                    // No glass capsule: the plain style leaves the system less
+                    // chrome to morph when the menu opens.
+                    modifiers={[tint(theme.colors.text), buttonStyle('plain')]}
                     label={(
+                        // The whole row is the label, so every part of it opens
+                        // the menu: the icon, the value, and the space between.
                         <HStack
+                            spacing={12}
                             modifiers={[
-                                frame({ maxWidth: 10000, minHeight: 42 }),
-                                opacity(0.01),
+                                frame({ maxWidth: 10000, maxHeight: 10000, minHeight: 42 }),
+                                contentShape(shapes.rectangle()),
+                                accessibilityLabel(`${title}: ${triggerLabel}`),
                             ]}
                         >
-                            {!!triggerSystemImage && <Image systemName={systemImage(triggerSystemImage)} />}
+                            {triggerSystemImage ? (
+                                <Image systemName={systemImage(triggerSystemImage)} size={18} />
+                            ) : null}
                             <Text>{triggerLabel}</Text>
                             <Spacer minLength={8} />
                         </HStack>
                     )}
                 >
-                    {options.map((option) => (
+                    {/* A native menu's section header becomes a UIMenu title,
+                        which is a plain string, so an SF Symbol placed there is
+                        dropped. A disabled item is the one menu row that renders
+                        an icon, so the heading is built from one. */}
+                    <Section>
                         <Button
-                            key={option.key}
-                            label={option.label}
-                            systemImage={option.key === selectedKey ? systemImage('checkmark') : undefined}
-                            onPress={() => onSelect(option.key)}
+                            label={title}
+                            systemImage={triggerSystemImage ? systemImage(triggerSystemImage) : undefined}
+                            modifiers={[disabled(true)]}
+                            onPress={() => {}}
                         />
-                    ))}
+                    </Section>
+                    <Section>
+                        {options.map((option) => (
+                            <Button
+                                key={option.key}
+                                label={option.label}
+                                systemImage={option.key === selectedKey ? systemImage('checkmark') : undefined}
+                                onPress={() => onSelect(option.key)}
+                            />
+                        ))}
+                    </Section>
                 </Menu>
             </Host>
         </View>

@@ -3,10 +3,12 @@ import { View, Pressable, FlatList, NativeScrollEvent, NativeSyntheticEvent, Pla
 import { Text } from '@/components/StyledText';
 import { usePathname } from 'expo-router';
 import { SessionListViewItem, SessionRowData } from '@/sync/storage';
+import { filterProjectGroup, sessionMatchesQuery } from '@/sync/projectGroups';
 import { Ionicons } from '@expo/vector-icons';
 import { type SessionState, formatLastSeen, vibingMessages } from '@/utils/sessionUtils';
 import { Avatar } from './Avatar';
 import { ActiveSessionsGroupCompact } from './ActiveSessionsGroupCompact';
+import { ProjectGroup } from './ProjectGroup';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVisibleSessionListViewData } from '@/hooks/useVisibleSessionListViewData';
 import { Typography } from '@/constants/Typography';
@@ -248,13 +250,16 @@ export function SessionsList({
             return sourceData;
         }
 
-        const matches = (session: SessionRowData) => [
-            session.name,
-            session.subtitle,
-            session.path,
-            session.machineId,
-            session.flavor,
-        ].some((value) => value?.toLocaleLowerCase().includes(normalizedQuery));
+        const matches = (session: SessionRowData) => sessionMatchesQuery(session, normalizedQuery);
+
+        // Projects nest their sessions inside worktrees, so they need a pass of
+        // their own: the index walk below only ever sees flat `session` items.
+        const keptProjects = new Map<number, SessionListViewItem>();
+        sourceData.forEach((item, index) => {
+            if (item.type !== 'project') return;
+            const project = filterProjectGroup(item.project, normalizedQuery);
+            if (project) keptProjects.set(index, { ...item, project });
+        });
 
         const keepIndices = new Set<number>();
         let currentHeaderIndex: number | null = null;
@@ -284,6 +289,15 @@ export function SessionsList({
                 if (sessions.length > 0) result.push({ ...item, sessions });
                 return;
             }
+            if (item.type === 'projects-header') {
+                if (keptProjects.size > 0) result.push(item);
+                return;
+            }
+            if (item.type === 'project') {
+                const kept = keptProjects.get(index);
+                if (kept) result.push(kept);
+                return;
+            }
             if (keepIndices.has(index)) result.push(item);
         });
         return result;
@@ -302,6 +316,8 @@ export function SessionsList({
             case 'active-sessions': return 'active-sessions';
             case 'archive-toggle': return 'archive-toggle';
             case 'project-group': return `project-group-${item.machine.id}-${item.displayPath}-${index}`;
+            case 'projects-header': return 'projects-header';
+            case 'project': return `project-${item.project.id}`;
             case 'session': return `session-${item.session.id}`;
         }
     }, []);
@@ -332,6 +348,23 @@ export function SessionsList({
                 return (
                     <ActiveSessionsGroupCompact
                         sessions={item.sessions}
+                        selectedSessionId={selectedSessionId}
+                    />
+                );
+
+            case 'projects-header':
+                return (
+                    <View style={styles.headerSection}>
+                        <Text style={styles.headerText}>
+                            {t('sidebar.projects')}
+                        </Text>
+                    </View>
+                );
+
+            case 'project':
+                return (
+                    <ProjectGroup
+                        project={item.project}
                         selectedSessionId={selectedSessionId}
                     />
                 );
