@@ -131,3 +131,30 @@ export async function buildCodexThreadBackfillEnvelopes(opts: {
 
     return envelopes;
 }
+
+/**
+ * Read a persisted Codex thread and replay its historical items into a new
+ * Happy session. Keeping this separate from the live event mapper lets both
+ * normal resume and forked sessions render their existing conversation.
+ */
+export async function replayCodexThreadHistory(opts: {
+    threadId: string;
+    readThread: (params: { threadId: string; includeTurns: boolean }) => Promise<{
+        thread: Pick<Thread, 'turns' | 'name' | 'preview'>;
+    }>;
+    sendEnvelope: (envelope: SessionEnvelope) => void;
+    uploadLocalImage: LocalImageUpload;
+}): Promise<{ envelopeCount: number; thread: Pick<Thread, 'turns' | 'name' | 'preview'> }> {
+    const { thread } = await opts.readThread({
+        threadId: opts.threadId,
+        includeTurns: true,
+    });
+    const envelopes = await buildCodexThreadBackfillEnvelopes({
+        thread,
+        uploadLocalImage: opts.uploadLocalImage,
+    });
+    for (const envelope of envelopes) {
+        opts.sendEnvelope(envelope);
+    }
+    return { envelopeCount: envelopes.length, thread };
+}

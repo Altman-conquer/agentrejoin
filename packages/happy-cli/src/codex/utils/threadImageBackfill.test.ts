@@ -13,7 +13,7 @@ vi.mock('@/configuration', () => ({
     configuration: { happyHomeDir: '/home/test/.happy' },
 }));
 
-import { buildCodexThreadBackfillEnvelopes } from './threadImageBackfill';
+import { buildCodexThreadBackfillEnvelopes, replayCodexThreadHistory } from './threadImageBackfill';
 
 const tempDirs: string[] = [];
 
@@ -32,6 +32,50 @@ afterEach(async () => {
 });
 
 describe('buildCodexThreadBackfillEnvelopes', () => {
+    it('reads a persisted thread and replays its envelopes into Happy', async () => {
+        const readThread = vi.fn().mockResolvedValue({
+            thread: {
+                turns: [{
+                    id: 'turn-1',
+                    startedAt: 100,
+                    completedAt: 101,
+                    status: 'completed',
+                    items: [
+                        { id: 'user-1', type: 'userMessage', content: [{ type: 'text', text: 'previous request' }] },
+                        { id: 'agent-1', type: 'agentMessage', text: 'previous response' },
+                    ],
+                }],
+            },
+        });
+        const sendEnvelope = vi.fn();
+
+        const result = await replayCodexThreadHistory({
+            threadId: 'thread-1',
+            readThread,
+            sendEnvelope,
+            uploadLocalImage: vi.fn(),
+        });
+
+        expect(readThread).toHaveBeenCalledWith({ threadId: 'thread-1', includeTurns: true });
+        expect(result.envelopeCount).toBe(4);
+        expect(sendEnvelope.mock.calls.map(([envelope]) => envelope.ev.t)).toEqual([
+            'turn-start',
+            'text',
+            'text',
+            'turn-end',
+        ]);
+        expect(sendEnvelope.mock.calls[1][0]).toMatchObject({
+            role: 'user',
+            codexItemId: 'user-1',
+            ev: { t: 'text', text: 'previous request' },
+        });
+        expect(sendEnvelope.mock.calls[2][0]).toMatchObject({
+            role: 'agent',
+            codexItemId: 'agent-1',
+            ev: { t: 'text', text: 'previous response' },
+        });
+    });
+
     it('inserts uploaded local image file envelopes before the matching user text', async () => {
         const imagePath = await makePngFile('input.png');
         const uploadLocalImage = vi.fn(async (_attachment, opts) => createEnvelope('user', {

@@ -4,6 +4,7 @@
  */
 
 import { io, Socket } from 'socket.io-client';
+import { stat } from 'node:fs/promises';
 import { logger } from '@/ui/logger';
 import { configuration } from '@/configuration';
 import { MachineMetadata, DaemonState, Machine, Update, UpdateMachineBody } from './types';
@@ -109,6 +110,14 @@ async function withCodexAppServerClient<T>(handler: (client: CodexAppServerClien
         return await handler(client);
     } finally {
         await client.disconnect();
+    }
+}
+
+async function isExistingDirectory(path: string): Promise<boolean> {
+    try {
+        return (await stat(path)).isDirectory();
+    } catch {
+        return false;
     }
 }
 
@@ -293,6 +302,65 @@ export class ApiMachineClient {
                     type: 'success',
                     points: listCodexRewindPoints(thread),
                 };
+            });
+        });
+
+        // Read persisted thread metadata through Codex's app-server instead of
+        // relying on the private JSONL/session-index layout under CODEX_HOME.
+        // This makes saved CLI conversations discoverable from Happy before a
+        // Happy-managed session exists for them.
+        this.rpcHandlerManager.registerHandler('codex-list-threads', async () => {
+            return withCodexAppServerClient(async (client) => {
+                const threads: Array<{ thread: any; archived: boolean }> = [];
+
+                const collect = async (archived: boolean): Promise<void> => {
+                    let cursor: string | null = null;
+                    const seenCursors = new Set<string>();
+
+                    do {
+                        const page = await client.listThreads({
+                            cursor,
+                            limit: 100,
+                            archived,
+                            sortKey: 'updated_at',
+                            sortDirection: 'desc',
+                            // An empty list disables Codex's default interactive-source
+                            // filter. Subagent threads are filtered below.
+                            sourceKinds: [],
+                        });
+                        for (const thread of page.data) {
+                            threads.push({ thread, archived });
+                        }
+                        cursor = page.nextCursor;
+                        if (cursor && seenCursors.has(cursor)) {
+                            break;
+                        }
+                        if (cursor) {
+                            seenCursors.add(cursor);
+                        }
+                    } while (cursor);
+                };
+
+                await collect(false);
+                await collect(true);
+
+                const topLevelThreads = threads.filter(({ thread }) => (
+                    !thread.ephemeral && !thread.parentThreadId && typeof thread.cwd === 'string'
+                ));
+                const summaries = await Promise.all(topLevelThreads.map(async ({ thread, archived }) => ({
+                    id: thread.id,
+                    name: typeof thread.name === 'string' ? thread.name : null,
+                    preview: typeof thread.preview === 'string' ? thread.preview : '',
+                    cwd: thread.cwd,
+                    cwdExists: await isExistingDirectory(thread.cwd),
+                    updatedAt: typeof thread.updatedAt === 'number'
+                        ? Math.round(thread.updatedAt * 1_000)
+                        : 0,
+                    archived,
+                })));
+
+                summaries.sort((a, b) => b.updatedAt - a.updatedAt);
+                return { threads: summaries };
             });
         });
 

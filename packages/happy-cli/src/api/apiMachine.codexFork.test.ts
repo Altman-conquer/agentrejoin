@@ -5,6 +5,7 @@ const { codexClientMethods } = vi.hoisted(() => ({
         connect: vi.fn(),
         disconnect: vi.fn(),
         forkThread: vi.fn(),
+        listThreads: vi.fn(),
         readThread: vi.fn(),
         rollbackThread: vi.fn(),
         injectItems: vi.fn(),
@@ -126,6 +127,69 @@ describe('ApiMachineClient Codex fork RPCs', () => {
             threadId: 'thread-source',
             includeTurns: true,
         });
+    });
+
+    it('lists all top-level Codex threads without filtering by working directory', async () => {
+        codexClientMethods.listThreads.mockImplementation(async ({ archived }: { archived: boolean }) => ({
+            data: archived ? [{
+                id: 'thread-archived',
+                cwd: '/tmp',
+                name: 'Archived thread',
+                preview: 'old work',
+                updatedAt: 10,
+                parentThreadId: null,
+                ephemeral: false,
+            }] : [{
+                id: 'thread-active',
+                cwd: '/path/that/no/longer/exists',
+                name: null,
+                preview: 'current work',
+                updatedAt: 20,
+                parentThreadId: null,
+                ephemeral: false,
+            }, {
+                id: 'thread-subagent',
+                cwd: '/tmp',
+                preview: 'internal work',
+                updatedAt: 30,
+                parentThreadId: 'thread-active',
+                ephemeral: false,
+            }],
+            nextCursor: null,
+        }));
+
+        const { ApiMachineClient } = await import('./apiMachine');
+        const client = new ApiMachineClient('token', machineClient());
+        client.setRPCHandlers({
+            spawnSession: vi.fn(),
+            stopSession: vi.fn(),
+            requestShutdown: vi.fn(),
+        });
+
+        const result = await handlersFrom(client).get('machine-1:codex-list-threads')?.({});
+
+        expect(result).toEqual({
+            threads: [{
+                id: 'thread-active',
+                name: null,
+                preview: 'current work',
+                cwd: '/path/that/no/longer/exists',
+                cwdExists: false,
+                updatedAt: 20_000,
+                archived: false,
+            }, {
+                id: 'thread-archived',
+                name: 'Archived thread',
+                preview: 'old work',
+                cwd: '/tmp',
+                cwdExists: true,
+                updatedAt: 10_000,
+                archived: true,
+            }],
+        });
+        expect(codexClientMethods.listThreads).toHaveBeenCalledWith(expect.objectContaining({ archived: false }));
+        expect(codexClientMethods.listThreads).toHaveBeenCalledWith(expect.objectContaining({ archived: true }));
+        expect(codexClientMethods.listThreads).toHaveBeenCalledWith(expect.objectContaining({ sourceKinds: [] }));
     });
 
     it('duplicates a Codex thread by rolling back turns after the selected item', async () => {

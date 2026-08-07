@@ -40,7 +40,8 @@ import { enqueueCodexUserText, isCodexClearText } from './codexClearCommand';
 import { downloadCodexFileEventAttachment } from './utils/attachmentEvents';
 import { prepareCodexImageInputItems } from './utils/imageInput';
 import { createSerialAsyncHandler } from './utils/serialAsyncHandler';
-import { buildCodexThreadBackfillEnvelopes } from './utils/threadImageBackfill';
+import { replayCodexThreadHistory } from './utils/threadImageBackfill';
+import { codexThreadDisplayTitle, codexThreadName, provisionalCodexThreadTitle } from './utils/threadTitle';
 import {
     buildCodexTurnPrompt,
     hashCodexEnhancedMode,
@@ -275,6 +276,26 @@ export async function runCodex(opts: {
     let currentModel: string | undefined = opts.model ?? DEFAULT_CODEX_MODEL;
     let currentEffort: ReasoningEffort | undefined = opts.effort ?? DEFAULT_CODEX_EFFORT;
     let currentAppendSystemPrompt: string | undefined = undefined;
+    const shouldSyncNewCodexTitle = !reconnectSessionId
+        && !opts.resumeThreadId
+        && !process.env.HAPPY_FORK_CODEX_THREAD_ID;
+    let provisionalTitleSet = false;
+    let codexTitleSet = false;
+
+    const setSessionTitle = (title: string) => {
+        session.updateMetadata((currentMetadata) => {
+            if (currentMetadata.summary?.text === title) {
+                return currentMetadata;
+            }
+            return {
+                ...currentMetadata,
+                summary: {
+                    text: title,
+                    updatedAt: Date.now(),
+                },
+            };
+        });
+    };
 
     const resetCurrentModeDefaults = () => {
         // Reset permission mode and prompts to what the session was launched
@@ -384,6 +405,12 @@ export async function runCodex(opts: {
         });
         if (enqueueResult === 'clear') {
             logger.debug('[Codex] /clear command pushed to isolated queue');
+        } else if (shouldSyncNewCodexTitle && !provisionalTitleSet && !session.getMetadata()?.summary?.text) {
+            const title = provisionalCodexThreadTitle(message.content.text);
+            if (title) {
+                setSessionTitle(title);
+                provisionalTitleSet = true;
+            }
         }
     }, (error) => {
         logger.warn('[Codex] Failed to handle user message', {
@@ -869,6 +896,40 @@ export async function runCodex(opts: {
         await client.connect();
         logger.debug('[codex]: client.connect done');
 
+        const backfillCodexThread = async (threadId: string, source: 'resume' | 'fork') => {
+            try {
+                const result = await replayCodexThreadHistory({
+                    threadId,
+                    readThread: (params) => client.readThread(params),
+                    sendEnvelope: (envelope) => session.sendSessionProtocolMessage(envelope),
+                    uploadLocalImage: (attachment, imageOpts) => (
+                        session.uploadLocalImageAttachmentEnvelope(attachment, imageOpts)
+                    ),
+                });
+                logger.debug(`[CODEX ${source.toUpperCase()} BACKFILL] Replayed ${result.envelopeCount} historical envelopes from thread ${threadId}`);
+                return result.thread;
+            } catch (error) {
+                logger.debug(`[CODEX ${source.toUpperCase()} BACKFILL] Failed to read thread ${threadId}:`, error);
+                return null;
+            }
+        };
+
+        const syncNewCodexThreadTitle = async (threadId: string) => {
+            if (!shouldSyncNewCodexTitle || codexTitleSet) {
+                return;
+            }
+            try {
+                const { thread } = await client.readThread({ threadId, includeTurns: false });
+                const title = codexThreadName(thread);
+                if (title) {
+                    setSessionTitle(title);
+                    codexTitleSet = true;
+                }
+            } catch (error) {
+                logger.debug(`[CODEX TITLE] Failed to read title for thread ${threadId}:`, error);
+            }
+        };
+
         if (opts.resumeThreadId) {
             await resumeExistingThread({
                 client,
@@ -880,6 +941,13 @@ export async function runCodex(opts: {
                 // Side chats start empty — keep the resume notice out of the UI.
                 announce: !isSideChat,
             });
+            if (!isSideChat) {
+                const thread = await backfillCodexThread(opts.resumeThreadId, 'resume');
+                const title = thread ? codexThreadDisplayTitle(thread) : null;
+                if (title) {
+                    setSessionTitle(title);
+                }
+            }
             first = false;
             appendSystemPromptInjected = true;
         }
@@ -891,24 +959,7 @@ export async function runCodex(opts: {
             // pre-fork history into the UI: a side chat starts empty from the
             // moment it was opened, so the user only sees the aside they began.
             if (!isSideChat) {
-                try {
-                    const { thread } = await client.readThread({
-                        threadId: forkCodexThreadId,
-                        includeTurns: true,
-                    });
-                    const envelopes = await buildCodexThreadBackfillEnvelopes({
-                        thread,
-                        uploadLocalImage: (attachment, imageOpts) => (
-                            session.uploadLocalImageAttachmentEnvelope(attachment, imageOpts)
-                        ),
-                    });
-                    for (const envelope of envelopes) {
-                        session.sendSessionProtocolMessage(envelope);
-                    }
-                    logger.debug(`[CODEX FORK BACKFILL] Replayed ${envelopes.length} historical envelopes from thread ${forkCodexThreadId}`);
-                } catch (error) {
-                    logger.debug(`[CODEX FORK BACKFILL] Failed to read thread ${forkCodexThreadId}:`, error);
-                }
+                await backfillCodexThread(forkCodexThreadId, 'fork');
             }
             session.updateMetadata((currentMetadata) => ({
                 ...currentMetadata,
@@ -1056,6 +1107,7 @@ export async function runCodex(opts: {
                     // UI handling already done by the event handler (turn_aborted).
                     logger.debug('[Codex] Turn aborted');
                 }
+                await syncNewCodexThreadTitle(activeThreadId);
             } catch (error) {
                 // Only actual errors reach here (process crash, connection failure, etc.)
                 logger.warn('Error in codex session:', error);

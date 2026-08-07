@@ -1768,4 +1768,57 @@ describe('CodexAppServerClient sandbox integration', () => {
 
         await client.disconnect();
     });
+
+    it('lists saved Codex threads by recency', async () => {
+        const requests: MockRpcMessage[] = [];
+        const proc = createMockProcess({
+            pid: 3008,
+            onRequest: (msg, stdout) => {
+                requests.push(msg);
+                if (msg.method === 'thread/list' && msg.id != null) {
+                    setTimeout(() => {
+                        pushJsonLine(stdout, {
+                            id: msg.id,
+                            result: {
+                                data: [{
+                                    id: 'thread-1',
+                                    cwd: '/tmp/project',
+                                    name: 'Saved conversation',
+                                    preview: 'Resume this task',
+                                    updatedAt: 1_700_000_000,
+                                    parentThreadId: null,
+                                    ephemeral: false,
+                                    turns: [],
+                                }],
+                                nextCursor: null,
+                            },
+                        });
+                    }, 0);
+                }
+            },
+        });
+        mockSpawn.mockImplementation(() => proc);
+
+        const { CodexAppServerClient } = await import('./codexAppServerClient');
+        const client = new CodexAppServerClient();
+        await client.connect();
+
+        await expect(client.listThreads({ limit: 50, sourceKinds: [], archived: true })).resolves.toEqual({
+            data: [expect.objectContaining({ id: 'thread-1', name: 'Saved conversation' })],
+            nextCursor: null,
+        });
+        expect(requests).toContainEqual(expect.objectContaining({
+            method: 'thread/list',
+            params: {
+                cursor: null,
+                limit: 50,
+                sortKey: 'updated_at',
+                sortDirection: 'desc',
+                sourceKinds: [],
+                archived: true,
+            },
+        }));
+
+        await client.disconnect();
+    });
 });

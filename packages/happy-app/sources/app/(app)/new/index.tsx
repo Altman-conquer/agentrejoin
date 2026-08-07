@@ -37,7 +37,13 @@ import { useAllMachines, useLocalSetting, useSessions, useSetting, storage } fro
 import type { NewSessionAgentType } from '@/sync/persistence';
 import { sync } from '@/sync/sync';
 import { isMachineOnline } from '@/utils/machineUtils';
-import { machineSpawnNewSession, sessionSetAgentModes, type SessionAgentModesPatch } from '@/sync/ops';
+import {
+    listCodexThreads,
+    machineSpawnNewSession,
+    sessionSetAgentModes,
+    type CodexThreadSummary,
+    type SessionAgentModesPatch,
+} from '@/sync/ops';
 import { createWorktree, listWorktrees } from '@/utils/worktree';
 import { resolveAbsolutePath } from '@/utils/pathUtils';
 import { formatPathRelativeToHome, formatLastSeen } from '@/utils/sessionUtils';
@@ -380,6 +386,59 @@ function PickerContent({
                 )}
             </ScrollView>
         </View>
+    );
+}
+
+function CodexThreadPickerContent({
+    threads,
+    homeDir,
+    loading,
+    onSelect,
+}: {
+    threads: CodexThreadSummary[];
+    homeDir?: string;
+    loading: boolean;
+    onSelect: (threadId: string) => void;
+}) {
+    const { theme } = useUnistyles();
+
+    if (loading) {
+        return (
+            <View style={pickerStyles.loadingContainer}>
+                <ActivityIndicator color={theme.colors.text} />
+            </View>
+        );
+    }
+
+    if (threads.length === 0) {
+        return (
+            <View style={pickerStyles.loadingContainer}>
+                <Text style={[pickerStyles.emptyText, { color: theme.colors.textSecondary }]}>No saved Codex conversations found</Text>
+            </View>
+        );
+    }
+
+    const items: PickerItem[] = threads.map((thread) => {
+        const preview = thread.preview.trim().replace(/\s+/g, ' ');
+        const label = thread.name?.trim() || preview || 'Untitled Codex conversation';
+        const location = formatPathRelativeToHome(thread.cwd, homeDir);
+        const availability = thread.cwdExists ? location : `original path missing; uses selected project`;
+        const archived = thread.archived ? 'archived' : null;
+        return {
+            key: thread.id,
+            label,
+            subtitle: [availability, formatLastSeen(thread.updatedAt), archived].filter(Boolean).join(' · '),
+        };
+    });
+
+    return (
+        <PickerContent
+            title="Resume Codex conversation"
+            items={items}
+            selectedKey={null}
+            onSelect={onSelect}
+            searchPlaceholder="search conversations..."
+        />
     );
 }
 
@@ -782,6 +841,9 @@ function NewSessionScreen() {
     const [modelIndex, setModelIndex] = React.useState(0);
     const [effortIndex, setEffortIndex] = React.useState(0);
     const [isSpawning, setIsSpawning] = React.useState(false);
+    const [isCodexResumePickerOpen, setIsCodexResumePickerOpen] = React.useState(false);
+    const [isLoadingCodexThreads, setIsLoadingCodexThreads] = React.useState(false);
+    const [codexThreads, setCodexThreads] = React.useState<CodexThreadSummary[]>([]);
     const [activePicker, setActivePicker] = React.useState<PickerType | null>(null);
     const [composerSettingsPage, setComposerSettingsPage] = React.useState<ComposerSettingPickerType | null>(null);
     const [mobileComposerHeight, setMobileComposerHeight] = React.useState(NATIVE_COMPOSER_RESERVED_HEIGHT);
@@ -1085,6 +1147,73 @@ function NewSessionScreen() {
 
         return items;
     }, [currentEffort, currentModel, currentPermission, permissionStyle?.icon, selectedAgent, showEffort, showModel, showPermission]);
+
+    const openCodexResumePicker = React.useCallback(async () => {
+        if (!selectedMachineId || !selectedMachine || !isMachineOnline(selectedMachine)) {
+            Modal.alert(t('common.error'), 'Machine is offline');
+            return;
+        }
+
+        setIsCodexResumePickerOpen(true);
+        setIsLoadingCodexThreads(true);
+        try {
+            setCodexThreads(await listCodexThreads(selectedMachineId));
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to load Codex conversations';
+            Modal.alert(t('common.error'), errorMessage);
+            setIsCodexResumePickerOpen(false);
+        } finally {
+            setIsLoadingCodexThreads(false);
+        }
+    }, [selectedMachine, selectedMachineId]);
+
+    const resumeCodexThread = React.useCallback(async (threadId: string) => {
+        if (!selectedMachineId || !selectedMachine || !isMachineOnline(selectedMachine)) {
+            Modal.alert(t('common.error'), 'Machine is offline');
+            return;
+        }
+
+        const thread = codexThreads.find((candidate) => candidate.id === threadId);
+        if (!thread) {
+            Modal.alert(t('common.error'), 'Codex conversation is no longer available');
+            return;
+        }
+
+        const fallbackDirectory = resolvedSelectedPath
+            ?? resolveAbsolutePath(trimPathInput(selectedPath) || '~', selectedHomeDir);
+        const directory = thread.cwdExists ? thread.cwd : fallbackDirectory;
+
+        setIsSpawning(true);
+        try {
+            const result = await machineSpawnNewSession({
+                machineId: selectedMachineId,
+                directory,
+                approvedNewDirectoryCreation: false,
+                agent: 'codex',
+                resumeCodexThreadId: thread.id,
+            });
+
+            switch (result.type) {
+                case 'success':
+                    setIsCodexResumePickerOpen(false);
+                    await sync.refreshSessions();
+                    router.back();
+                    navigateToSession(result.sessionId);
+                    break;
+                case 'requestToApproveDirectoryCreation':
+                    Modal.alert(t('common.error'), 'Choose an existing project directory before resuming this conversation');
+                    break;
+                case 'error':
+                    Modal.alert(t('common.error'), result.errorMessage);
+                    break;
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to resume Codex conversation';
+            Modal.alert(t('common.error'), errorMessage);
+        } finally {
+            setIsSpawning(false);
+        }
+    }, [codexThreads, navigateToSession, resolvedSelectedPath, router, selectedHomeDir, selectedMachine, selectedMachineId, selectedPath]);
 
     // Display values
     const machineName = selectedMachine ? getMachineName(selectedMachine) : 'Select machine';
@@ -1624,6 +1753,22 @@ function NewSessionScreen() {
                             </BubblePressable>
                             {renderActivePickerPopover('path')}
 
+                            {isNativeMobile && selectedAgent === 'codex' && (
+                                <BubblePressable
+                                    scaleFeedback={false}
+                                    style={(p) => [styles.configRow, p.pressed && styles.configRowPressed]}
+                                    onPress={() => { void openCodexResumePicker(); }}
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Resume existing Codex conversation"
+                                >
+                                    <Ionicons name="time-outline" size={15} color={theme.colors.textSecondary} />
+                                    <Text style={[styles.configLabel, styles.configValueText]} numberOfLines={1}>
+                                        Resume existing Codex conversation
+                                    </Text>
+                                    <Ionicons name="chevron-forward" size={13} color={theme.colors.textSecondary} />
+                                </BubblePressable>
+                            )}
+
                             {!isNativeMobile && (
                                 <>
                                     <View style={styles.configRow}>
@@ -2132,6 +2277,20 @@ function NewSessionScreen() {
                     ) : pickerData ? (
                         <PickerContent {...pickerData} onSelect={handlePickerSelect} />
                     ) : null}
+                </BottomSheet>
+            )}
+
+            {isNativeMobile && (
+                <BottomSheet
+                    visible={isCodexResumePickerOpen}
+                    onClose={() => setIsCodexResumePickerOpen(false)}
+                >
+                    <CodexThreadPickerContent
+                        threads={codexThreads}
+                        homeDir={selectedHomeDir}
+                        loading={isLoadingCodexThreads}
+                        onSelect={(threadId) => { void resumeCodexThread(threadId); }}
+                    />
                 </BottomSheet>
             )}
         </KeyboardAvoidingView>
@@ -2853,6 +3012,12 @@ const pickerStyles = {
         paddingVertical: 20,
         ...Typography.default(),
         ...Platform.select({ web: { userSelect: 'none' } as any, default: {} }),
+    } as const,
+    loadingContainer: {
+        minHeight: 160,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        paddingHorizontal: 16,
     } as const,
 };
 

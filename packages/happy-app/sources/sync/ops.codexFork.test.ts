@@ -52,6 +52,26 @@ describe('codex fork ops', () => {
         );
     });
 
+    it('lists persisted Codex threads from the selected machine', async () => {
+        machineRPC.mockResolvedValue({
+            threads: [{
+                id: 'thread-1',
+                name: 'Saved task',
+                preview: 'Continue this work',
+                cwd: '/tmp/project',
+                cwdExists: true,
+                updatedAt: 1_700_000_000_000,
+                archived: false,
+            }],
+        });
+
+        const { listCodexThreads } = await import('./ops');
+        await expect(listCodexThreads('machine-1')).resolves.toEqual([
+            expect.objectContaining({ id: 'thread-1', cwd: '/tmp/project' }),
+        ]);
+        expect(machineRPC).toHaveBeenCalledWith('machine-1', 'codex-list-threads', {});
+    });
+
     it('forks a full Codex thread and spawns a Codex session resumed to the new thread', async () => {
         machineRPC.mockImplementation(async (_machineId: string, method: string) => {
             if (method === 'codex-fork-thread') {

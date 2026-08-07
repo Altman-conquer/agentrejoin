@@ -36,6 +36,8 @@ import type {
     ThreadGoalClearParams,
     ThreadGoalClearResponse,
     Thread,
+    ThreadListParams,
+    ThreadListResponse,
     InterruptConversationParams,
     ReviewDecision,
     EventMsg,
@@ -906,6 +908,25 @@ export class CodexAppServerClient {
             includeTurns: opts.includeTurns ?? true,
         };
         return await this.request('thread/read', params) as ReadConversationResponse;
+    }
+
+    async listThreads(opts: {
+        cursor?: string | null;
+        limit?: number | null;
+        sortKey?: ThreadListParams['sortKey'];
+        sortDirection?: ThreadListParams['sortDirection'];
+        sourceKinds?: ThreadListParams['sourceKinds'];
+        archived?: boolean | null;
+    } = {}): Promise<ThreadListResponse> {
+        const params: ThreadListParams = {
+            cursor: opts.cursor ?? null,
+            limit: opts.limit ?? null,
+            sortKey: opts.sortKey ?? 'updated_at',
+            sortDirection: opts.sortDirection ?? 'desc',
+            sourceKinds: opts.sourceKinds ?? null,
+            archived: opts.archived ?? false,
+        };
+        return await this.request('thread/list', params) as ThreadListResponse;
     }
 
     async rollbackThread(opts: {

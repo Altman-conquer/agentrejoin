@@ -102,11 +102,32 @@ export type ThreadTurn = {
 
 export type Thread = {
     id: ThreadId;
+    sessionId?: string;
     forkedFromId?: string | null;
+    parentThreadId?: string | null;
+    name?: string | null;
+    preview?: string;
+    ephemeral?: boolean;
     path?: string | null;
     cwd?: string;
+    updatedAt?: number;
+    status?: unknown;
     turns?: ThreadTurn[];
     [key: string]: unknown;
+};
+
+export type ThreadListParams = {
+    cursor?: string | null;
+    limit?: number | null;
+    sortKey?: 'created_at' | 'updated_at' | 'recency_at' | null;
+    sortDirection?: 'asc' | 'desc' | null;
+    sourceKinds?: string[] | null;
+    archived?: boolean | null;
+};
+
+export type ThreadListResponse = {
+    data: Thread[];
+    nextCursor: string | null;
 };
 
 export type ThreadGoalStatus = "active" | "paused" | "blocked" | "usageLimited" | "budgetLimited" | "complete";

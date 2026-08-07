@@ -193,6 +193,16 @@ export interface SpawnSessionOptions {
     isSideChat?: boolean;
 }
 
+export type CodexThreadSummary = {
+    id: string;
+    name: string | null;
+    preview: string;
+    cwd: string;
+    cwdExists: boolean;
+    updatedAt: number;
+    archived: boolean;
+};
+
 // Options for forking a Claude session on a machine
 export interface ClaudeForkSessionOptions {
     machineId: string;
@@ -280,6 +290,15 @@ export async function machineSpawnNewSession(options: SpawnSessionOptions): Prom
             errorMessage: error instanceof Error ? error.message : 'Failed to spawn session'
         };
     }
+}
+
+export async function listCodexThreads(machineId: string): Promise<CodexThreadSummary[]> {
+    const result = await apiSocket.machineRPC<{ threads: CodexThreadSummary[] }, {}>(
+        machineId,
+        'codex-list-threads',
+        {},
+    );
+    return result.threads;
 }
 
 /**
