@@ -1,5 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SandboxConfig } from '@/persistence';
+import { delimiter, join } from 'node:path';
 
 const {
     mockExecSync,
@@ -114,10 +115,14 @@ const sandboxConfig: SandboxConfig = {
 
 describe('CodexAppServerClient sandbox integration', () => {
     const originalRustLog = process.env.RUST_LOG;
+    const originalPath = process.env.PATH;
+    const packageBin = join(process.cwd(), 'node_modules', '.bin');
+    const globalBin = join(process.cwd(), 'global-bin');
 
     beforeEach(() => {
         vi.clearAllMocks();
         process.env.RUST_LOG = originalRustLog;
+        process.env.PATH = [packageBin, globalBin].join(delimiter);
         mockExecSync.mockReturnValue('codex-cli 0.107.0');
         mockInitializeSandbox.mockResolvedValue(mockSandboxCleanup);
         mockWrapForMcpTransport.mockResolvedValue({ command: 'sh', args: ['-c', 'wrapped codex app-server'] });
@@ -126,6 +131,7 @@ describe('CodexAppServerClient sandbox integration', () => {
 
     afterAll(() => {
         process.env.RUST_LOG = originalRustLog;
+        process.env.PATH = originalPath;
     });
 
     it('reports goal action support for Codex versions with goal action requests', async () => {
@@ -146,6 +152,12 @@ describe('CodexAppServerClient sandbox integration', () => {
         await client.connect();
 
         expect(mockInitializeSandbox).toHaveBeenCalledWith(sandboxConfig, process.cwd());
+        expect(mockExecSync).toHaveBeenCalledWith(
+            'codex --version',
+            expect.objectContaining({
+                env: expect.objectContaining({ PATH: globalBin }),
+            }),
+        );
         expect(mockWrapForMcpTransport).toHaveBeenCalledWith('codex', ['app-server', '--listen', 'stdio://']);
         expect(mockSpawn).toHaveBeenCalledWith(
             'sh',
@@ -153,6 +165,7 @@ describe('CodexAppServerClient sandbox integration', () => {
             expect.objectContaining({
                 env: expect.objectContaining({
                     CODEX_SANDBOX: 'seatbelt',
+                    PATH: globalBin,
                     RUST_LOG: expect.stringContaining('codex_core::rollout::list=off'),
                 }),
             }),

@@ -52,6 +52,7 @@ import type {
 import type { SandboxConfig } from '@/persistence';
 import { initializeSandbox, wrapForMcpTransport } from '@/sandbox/manager';
 import packageJson from '../../package.json';
+import { createGlobalCodexEnvironment } from './globalCodexEnvironment';
 
 type PendingRequest = {
     resolve: (result: unknown) => void;
@@ -107,17 +108,17 @@ function parseCodexCliVersion(version: string): { major: number; minor: number; 
     return { major, minor, patch };
 }
 
-function readCodexCliVersion(): { major: number; minor: number; patch: number } | null {
+function readCodexCliVersion(env: NodeJS.ProcessEnv = createGlobalCodexEnvironment()): { major: number; minor: number; patch: number } | null {
     try {
-        const version = execSync('codex --version', { encoding: 'utf8', windowsHide: true }).trim();
+        const version = execSync('codex --version', { encoding: 'utf8', windowsHide: true, env }).trim();
         return parseCodexCliVersion(version);
     } catch {
         return null;
     }
 }
 
-function isAppServerAvailable(): boolean {
-    const version = readCodexCliVersion();
+function isAppServerAvailable(env: NodeJS.ProcessEnv): boolean {
+    const version = readCodexCliVersion(env);
     if (!version) {
         return false;
     }
@@ -597,9 +598,10 @@ export class CodexAppServerClient {
     async connect(): Promise<void> {
         if (this.connected) return;
 
-        if (!isAppServerAvailable()) {
+        const globalCodexEnv = createGlobalCodexEnvironment();
+        if (!isAppServerAvailable(globalCodexEnv)) {
             throw new Error(
-                'Codex CLI is not installed\n\n' +
+                'Global Codex CLI is not installed\n\n' +
                 'Please install Codex CLI using one of these methods:\n\n' +
                 'Option 1 - npm (recommended):\n  npm install -g @openai/codex\n\n' +
                 'Option 2 - Homebrew (macOS):\n  brew install --cask codex\n\n' +
@@ -627,7 +629,7 @@ export class CodexAppServerClient {
 
         // Build env — same filtering as the old MCP client
         const env: Record<string, string> = {};
-        for (const [key, value] of Object.entries(process.env)) {
+        for (const [key, value] of Object.entries(globalCodexEnv)) {
             if (typeof value === 'string') env[key] = value;
         }
         // Mute noisy rollout list logging

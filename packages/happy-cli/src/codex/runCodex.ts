@@ -42,6 +42,7 @@ import { prepareCodexImageInputItems } from './utils/imageInput';
 import { createSerialAsyncHandler } from './utils/serialAsyncHandler';
 import { replayCodexThreadHistory } from './utils/threadImageBackfill';
 import { codexThreadDisplayTitle, codexThreadName, provisionalCodexThreadTitle } from './utils/threadTitle';
+import { createGlobalCodexEnvironment } from './globalCodexEnvironment';
 import {
     buildCodexTurnPrompt,
     hashCodexEnhancedMode,
@@ -99,9 +100,14 @@ export async function runCodex(opts: {
 }): Promise<void> {
     // Early check: ensure Codex CLI is installed before proceeding
     try {
-        execSync('codex --version', { encoding: 'utf8', stdio: 'pipe', windowsHide: true });
+        execSync('codex --version', {
+            encoding: 'utf8',
+            stdio: 'pipe',
+            windowsHide: true,
+            env: createGlobalCodexEnvironment(),
+        });
     } catch {
-        console.error('\n\x1b[1m\x1b[33mCodex CLI is not installed\x1b[0m\n');
+        console.error('\n\x1b[1m\x1b[33mGlobal Codex CLI is not installed\x1b[0m\n');
         console.error('Please install Codex CLI using one of these methods:\n');
         console.error('\x1b[1mOption 1 - npm (recommended):\x1b[0m');
         console.error('  \x1b[36mnpm install -g @openai/codex\x1b[0m\n');
