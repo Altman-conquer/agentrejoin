@@ -1,7 +1,7 @@
 ---
 name: dev
 description: >
-  Local development guide for the Happy monorepo. How to build, install,
+  Local development guide for the AgentRejoin monorepo. How to build, install,
   test, and run the CLI, server, mobile app, and desktop (Tauri) locally.
   Use when the user types /dev, asks how to "build", "start dev", "install
   locally", or "run the ___ package".
@@ -9,7 +9,7 @@ description: >
 
 # /dev - Local Development
 
-Happy is a pnpm monorepo. Everything uses pnpm workspaces — do not use `npm` or `yarn` directly.
+AgentRejoin is a pnpm monorepo. Everything uses pnpm workspaces - do not use `npm` or `yarn` directly.
 
 ## First-time setup
 
@@ -109,17 +109,17 @@ When the user asks to "rebuild the desktop app", "kill the running one and reins
 
 Variants → product name → build script:
 
-    production    Happy.app           pnpm --filter happy-app tauri:build:production
-    preview       Happy (preview).app pnpm --filter happy-app tauri:build:preview
-    dev           Happy (dev).app     pnpm --filter happy-app tauri:build:dev
+    production    AgentRejoin.app           pnpm --filter happy-app tauri:build:production
+    preview       AgentRejoin (preview).app pnpm --filter happy-app tauri:build:preview
+    dev           AgentRejoin.app     pnpm --filter happy-app tauri:build:dev
 
 Build output for all variants:
 
     packages/happy-app/src-tauri/target/release/bundle/macos/<ProductName>.app
 
-If the variant is ambiguous, check what's running with `ps aux | grep "/Applications/.*Happy" | grep -v grep` and match. Production is the default.
+If the variant is ambiguous, check what's running with `ps aux | grep "/Applications/.*AgentRejoin" | grep -v grep` and match. Production is the default.
 
-Steps (substitute `$NAME` with the product name, e.g. `Happy` or `Happy (dev)`):
+Steps (substitute `$NAME` with the product name, e.g. `AgentRejoin`):
 
 ```bash
 # 1. build (slow: ~3–10 min, expo web export then cargo release build)

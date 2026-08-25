@@ -622,7 +622,7 @@ export async function startDaemon(): Promise<void> {
         logger.debug('[DAEMON RUN] Failed to spawn process - no PID returned');
         return Promise.resolve({
           type: 'error',
-          errorMessage: 'Failed to spawn Happy process - no PID returned'
+          errorMessage: 'Failed to spawn AgentRejoin process - no PID returned'
         });
       }
 

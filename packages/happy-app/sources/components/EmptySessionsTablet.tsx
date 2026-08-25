@@ -6,6 +6,7 @@ import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useAllMachines } from '@/sync/storage';
 import { isMachineOnline } from '@/utils/machineUtils';
 import { useRouter } from 'expo-router';
+import { t } from '@/text';
 
 const stylesheet = StyleSheet.create((theme) => ({
     container: {
@@ -64,43 +65,38 @@ export function EmptySessionsTablet() {
         return machines.some(machine => isMachineOnline(machine));
     }, [machines]);
     
-    const handleStartNewSession = () => {
+    const openConversations = () => {
         router.navigate('/new');
     };
     
     return (
         <View style={styles.container}>
             <Ionicons 
-                name="terminal-outline" 
+                name="chatbubbles-outline"
                 size={64} 
                 color={theme.colors.textSecondary}
                 style={styles.iconContainer}
             />
             
             <Text style={styles.titleText}>
-                No active sessions
+                {t('sessionHistory.empty')}
             </Text>
             
             {hasOnlineMachines ? (
-                <>
-                    <Text style={styles.descriptionText}>
-                        Start a new session on any of your connected machines.
+                <Pressable
+                    style={styles.button}
+                    onPress={openConversations}
+                >
+                    <Ionicons
+                        name="server-outline"
+                        size={20}
+                        color={theme.colors.button.primary.tint}
+                        style={styles.buttonIcon}
+                    />
+                    <Text style={styles.buttonText}>
+                        {t('newSession.title')}
                     </Text>
-                    <Pressable
-                        style={styles.button}
-                        onPress={handleStartNewSession}
-                    >
-                        <Ionicons
-                            name="add"
-                            size={20}
-                            color={theme.colors.button.primary.tint}
-                            style={styles.buttonIcon}
-                        />
-                        <Text style={styles.buttonText}>
-                            Start New Session
-                        </Text>
-                    </Pressable>
-                </>
+                </Pressable>
             ) : (
                 <Text style={styles.descriptionText}>
                     Open a new terminal on your computer to start session.

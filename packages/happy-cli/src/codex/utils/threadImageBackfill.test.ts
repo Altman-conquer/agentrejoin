@@ -13,7 +13,12 @@ vi.mock('@/configuration', () => ({
     configuration: { happyHomeDir: '/home/test/.happy' },
 }));
 
-import { buildCodexThreadBackfillEnvelopes, replayCodexThreadHistory } from './threadImageBackfill';
+import {
+    buildCodexThreadBackfillEnvelopes,
+    codexThreadHistoryLocalId,
+    prepareCodexThreadSync,
+    replayCodexThreadHistory,
+} from './threadImageBackfill';
 
 const tempDirs: string[] = [];
 
@@ -233,5 +238,114 @@ describe('buildCodexThreadBackfillEnvelopes', () => {
             'tool-call-start',
             'start',
         ]);
+    });
+});
+
+describe('prepareCodexThreadSync', () => {
+    it('keeps the local ID stable when an attachment gets a new blob reference', () => {
+        const envelopeOptions = {
+            id: 'user-image:image:1',
+            turn: 'turn-image',
+            codexItemId: 'user-image',
+        };
+        const first = createEnvelope('user', {
+            t: 'file',
+            ref: 'first-upload-ref',
+            name: 'codex-image-1.png',
+            size: 9,
+            mimeType: 'image/png',
+        }, envelopeOptions);
+        const second = createEnvelope('user', {
+            t: 'file',
+            ref: 'second-upload-ref',
+            name: 'codex-image-1.png',
+            size: 9,
+            mimeType: 'image/png',
+        }, envelopeOptions);
+
+        expect(codexThreadHistoryLocalId('thread-1', first)).toBe(
+            codexThreadHistoryLocalId('thread-1', second),
+        );
+    });
+
+    it('prepares only completed turns not emitted by the current process', async () => {
+        const readThread = vi.fn().mockResolvedValue({
+            thread: {
+                updatedAt: 123,
+                turns: [
+                    {
+                        id: 'turn-known',
+                        status: 'completed',
+                        startedAt: 10,
+                        completedAt: 11,
+                        items: [{ id: 'known-agent', type: 'agentMessage', text: 'known' }],
+                    },
+                    {
+                        id: 'turn-new',
+                        status: 'completed',
+                        startedAt: 20,
+                        completedAt: 21,
+                        items: [
+                            { id: 'new-user', type: 'userMessage', content: [{ type: 'text', text: 'remote prompt' }] },
+                            { id: 'new-agent', type: 'agentMessage', text: 'remote response' },
+                        ],
+                    },
+                ],
+            },
+        });
+
+        const result = await prepareCodexThreadSync({
+            threadId: 'thread/1',
+            knownCompletedTurnIds: new Set(['turn-known']),
+            readThread,
+            uploadLocalImage: vi.fn(),
+        });
+
+        expect(readThread).toHaveBeenCalledWith({ threadId: 'thread/1', includeTurns: true });
+        expect(result).toMatchObject({
+            completedTurnIds: ['turn-new'],
+            latestTurnId: 'turn-new',
+            remoteInProgress: false,
+            threadUpdatedAt: 123,
+        });
+        expect(result.envelopes.map(({ envelope }) => envelope.ev.t)).toEqual([
+            'turn-start',
+            'text',
+            'text',
+            'turn-end',
+        ]);
+        const localIds = result.envelopes.map(({ localId }) => localId);
+        expect(localIds.every((localId) => localId.startsWith('codex-thread:thread%2F1:'))).toBe(true);
+        expect(new Set(localIds).size).toBe(4);
+    });
+
+    it('does not import or upload anything while the remote thread has an active turn', async () => {
+        const uploadLocalImage = vi.fn();
+        const result = await prepareCodexThreadSync({
+            threadId: 'thread-active',
+            knownCompletedTurnIds: new Set(),
+            readThread: vi.fn().mockResolvedValue({
+                thread: {
+                    turns: [
+                        {
+                            id: 'turn-complete',
+                            status: 'completed',
+                            items: [{ id: 'agent-complete', type: 'agentMessage', text: 'done' }],
+                        },
+                        {
+                            id: 'turn-active',
+                            status: 'inProgress',
+                            items: [{ id: 'agent-active', type: 'agentMessage', text: 'working' }],
+                        },
+                    ],
+                },
+            }),
+            uploadLocalImage,
+        });
+
+        expect(result.remoteInProgress).toBe(true);
+        expect(result.envelopes).toEqual([]);
+        expect(result.completedTurnIds).toEqual([]);
+        expect(uploadLocalImage).not.toHaveBeenCalled();
     });
 });

@@ -15,7 +15,7 @@ import { HomeHeaderNotAuth } from "@/components/HomeHeader";
 import { MainView } from "@/components/MainView";
 import { t } from '@/text';
 
-export default function Home() {
+export default function AppHome() {
     const auth = useAuth();
     if (!auth.isAuthenticated) {
         return <NotAuthenticated />;

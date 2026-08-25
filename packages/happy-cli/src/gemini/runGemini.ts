@@ -81,7 +81,7 @@ export async function runGemini(opts: {
   const machineId = settings?.machineId;
   const sandboxConfig = settings?.sandboxConfig;
   if (!machineId) {
-    console.error(`[START] No machine ID found in settings, which is unexpected since authAndSetupMachineIfNeeded should have created it. Please report this issue on https://github.com/slopus/happy-cli/issues`);
+    console.error(`[START] No machine ID found in settings, which is unexpected since authAndSetupMachineIfNeeded should have created it. Please report this issue on https://github.com/Altman-conquer/agentrejoin/issues`);
     process.exit(1);
   }
   logger.debug(`Using machineId: ${machineId}`);
@@ -99,7 +99,7 @@ export async function runGemini(opts: {
     const vendorToken = await api.getVendorToken('gemini');
     if (vendorToken?.oauth?.access_token) {
       cloudToken = vendorToken.oauth.access_token;
-      logger.debug('[Gemini] Using OAuth token from Happy cloud');
+      logger.debug('[Gemini] Using OAuth token from AgentRejoin');
       
       // Extract email from id_token for per-account project matching
       if (vendorToken.oauth.id_token) {

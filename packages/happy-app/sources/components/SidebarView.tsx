@@ -80,7 +80,6 @@ export const SidebarView = React.memo(() => {
 
     return (
         <View style={[styles.container, { paddingTop: safeArea.top + headerHeight }]}>
-            {/* New Session button */}
             <Pressable
                 onPress={handleNewSession}
                 style={({ pressed }) => [
@@ -89,7 +88,7 @@ export const SidebarView = React.memo(() => {
                     pressed && styles.newSessionButtonPressed,
                 ]}
             >
-                <Ionicons name="create-outline" size={16} color={stylesheet.newSessionText.color} />
+                <Ionicons name="server-outline" size={16} color={stylesheet.newSessionText.color} />
                 <Text style={styles.newSessionText}>{t('sidebar.newSession')}</Text>
                 <ShortcutHintBadge shortcutKey="N" style={styles.shortcutBadgeInline} />
             </Pressable>

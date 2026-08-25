@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1965 523">
+  <g transform="translate(15 7) scale(.497)">
+    <g fill="none" stroke="#111318" stroke-width="52" stroke-linejoin="round">
+      <rect x="164" y="220" width="414" height="500" rx="84"/>
+      <rect x="446" y="304" width="414" height="500" rx="84"/>
+    </g>
+    <path d="M290 512h388" fill="none" stroke="#22A85A" stroke-width="64" stroke-linecap="round"/>
+    <path d="m618 442 78 70-78 70" fill="none" stroke="#22A85A" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="290" cy="512" r="32" fill="#22A85A"/>
+  </g>
+  <text x="535" y="354" fill="#111318" font-family="DejaVu Sans, sans-serif" font-size="200" font-weight="700">AgentRejoin</text>
+</svg>

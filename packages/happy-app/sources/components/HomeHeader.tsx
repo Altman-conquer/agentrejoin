@@ -143,7 +143,7 @@ function HeaderRight() {
                 shortcutHintsVisible && styles.headerButtonShortcutActive,
             ]}
         >
-            <Ionicons name="add-outline" size={28} color={theme.colors.header.tint} />
+            <Ionicons name="server-outline" size={23} color={theme.colors.header.tint} />
             <ShortcutHintBadge shortcutKey="N" style={styles.headerShortcutBadge} />
         </Pressable>
     );

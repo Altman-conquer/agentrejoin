@@ -333,7 +333,7 @@ class OfflineState {
                 return `${f.operation} failed: ${desc}${url}`;
             })
             .join('; ');
-        console.log(`⚠️  Happy server unreachable, offline mode with auto-reconnect enabled - error details: ${summary}`);
+        console.log(`⚠️  AgentRejoin server unreachable, offline mode with auto-reconnect enabled - error details: ${summary}`);
 
         // Print detail lines if present - consistent 3-space indent with arrow
         const allDetails = [...this.failures.values()]

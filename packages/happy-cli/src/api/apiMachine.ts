@@ -23,6 +23,7 @@ import {
     ForkTruncateUuidNotFoundError,
     ForkSourceMissingError,
 } from '@/claude/utils/claudeSessionFork';
+import { listClaudeSessions } from '@/claude/utils/listClaudeSessions';
 import { CodexAppServerClient } from '@/codex/codexAppServerClient';
 import {
     CodexForkRewindPointNotFoundError,
@@ -121,6 +122,73 @@ async function isExistingDirectory(path: string): Promise<boolean> {
     }
 }
 
+const CODEX_RECENT_THREAD_LIMIT = 20;
+const CODEX_THREAD_PAGE_SIZE = 100;
+const CODEX_THREAD_CACHE_TTL_MS = 5 * 60_000;
+
+type CodexThreadSummary = {
+    id: string;
+    name: string | null;
+    preview: string;
+    cwd: string;
+    cwdExists: boolean;
+    updatedAt: number;
+    archived: boolean;
+};
+
+type CodexThreadCache = {
+    threads: CodexThreadSummary[];
+    complete: boolean;
+    expiresAt: number;
+};
+
+async function readCodexThreadSummaries(
+    client: CodexAppServerClient,
+    all: boolean,
+): Promise<Omit<CodexThreadCache, 'expiresAt'>> {
+    const sources = await Promise.all([false, true].map(async (archived) => {
+        const threads: any[] = [];
+        let cursor: string | null = null;
+
+        do {
+            const page = await client.listThreads({
+                cursor,
+                limit: all ? CODEX_THREAD_PAGE_SIZE : CODEX_RECENT_THREAD_LIMIT,
+                archived,
+                sortKey: 'updated_at',
+                sortDirection: 'desc',
+                // An empty list disables Codex's default interactive-source filter.
+                sourceKinds: [],
+            });
+            threads.push(...page.data);
+            cursor = page.nextCursor ?? null;
+        } while (all && cursor);
+
+        return { archived, threads, complete: cursor === null };
+    }));
+
+    const topLevelThreads = sources.flatMap(({ archived, threads }) => (
+        threads
+            .filter((thread) => !thread.ephemeral && !thread.parentThreadId && typeof thread.cwd === 'string')
+            .map((thread) => ({ thread, archived }))
+    ));
+    const summaries = await Promise.all(topLevelThreads.map(async ({ thread, archived }) => ({
+        id: thread.id,
+        name: typeof thread.name === 'string' ? thread.name : null,
+        preview: typeof thread.preview === 'string' ? thread.preview : '',
+        cwd: thread.cwd,
+        cwdExists: await isExistingDirectory(thread.cwd),
+        updatedAt: typeof thread.updatedAt === 'number' ? Math.round(thread.updatedAt * 1_000) : 0,
+        archived,
+    })));
+
+    summaries.sort((a, b) => b.updatedAt - a.updatedAt);
+    return {
+        threads: summaries,
+        complete: sources.every((source) => source.complete),
+    };
+}
+
 export class ApiMachineClient {
     private socket!: Socket<ServerToDaemonEvents, DaemonToServerEvents>;
     private keepAliveInterval: NodeJS.Timeout | null = null;
@@ -129,6 +197,8 @@ export class ApiMachineClient {
     private rpcHandlerManager: RpcHandlerManager;
     private resumeSessionHandler: ((sessionId: string, options?: { model?: string; permissionMode?: string }) => Promise<SpawnSessionResult>) | null = null;
     private reconnectInterval: NodeJS.Timeout | null = null;
+    private codexThreadCache: CodexThreadCache | null = null;
+    private codexThreadCacheLoad: Promise<CodexThreadCache> | null = null;
 
     constructor(
         private token: string,
@@ -145,6 +215,33 @@ export class ApiMachineClient {
         // null = unrestricted: the daemon serves the whole machine, and its
         // process.cwd() is an accident of where it was started, not a workspace.
         registerCommonHandlers(this.rpcHandlerManager, null);
+    }
+
+    private async getCodexThreadCache(all: boolean, refresh: boolean): Promise<CodexThreadCache> {
+        if (refresh) this.codexThreadCache = null;
+
+        while (true) {
+            if (this.codexThreadCache && this.codexThreadCache.expiresAt > Date.now()
+                && (!all || this.codexThreadCache.complete)) {
+                return this.codexThreadCache;
+            }
+
+            if (this.codexThreadCacheLoad) {
+                await this.codexThreadCacheLoad;
+                continue;
+            }
+
+            const load = withCodexAppServerClient(async (client) => {
+                const result = await readCodexThreadSummaries(client, all);
+                return { ...result, expiresAt: Date.now() + CODEX_THREAD_CACHE_TTL_MS };
+            });
+            this.codexThreadCacheLoad = load;
+            try {
+                this.codexThreadCache = await load;
+            } finally {
+                if (this.codexThreadCacheLoad === load) this.codexThreadCacheLoad = null;
+            }
+        }
     }
 
     setRPCHandlers({
@@ -248,6 +345,10 @@ export class ApiMachineClient {
             }
         });
 
+        this.rpcHandlerManager.registerHandler('claude-list-sessions', async () => ({
+            sessions: await listClaudeSessions(),
+        }));
+
         this.rpcHandlerManager.registerHandler('claude-duplicate-session', async (params: any) => {
             const { directory, claudeSessionId, cutAfterUuid } = params || {};
             if (typeof directory !== 'string' || directory.length === 0) {
@@ -305,63 +406,16 @@ export class ApiMachineClient {
             });
         });
 
-        // Read persisted thread metadata through Codex's app-server instead of
-        // relying on the private JSONL/session-index layout under CODEX_HOME.
-        // This makes saved CLI conversations discoverable from Happy before a
-        // Happy-managed session exists for them.
-        this.rpcHandlerManager.registerHandler('codex-list-threads', async () => {
-            return withCodexAppServerClient(async (client) => {
-                const threads: Array<{ thread: any; archived: boolean }> = [];
-
-                const collect = async (archived: boolean): Promise<void> => {
-                    let cursor: string | null = null;
-                    const seenCursors = new Set<string>();
-
-                    do {
-                        const page = await client.listThreads({
-                            cursor,
-                            limit: 100,
-                            archived,
-                            sortKey: 'updated_at',
-                            sortDirection: 'desc',
-                            // An empty list disables Codex's default interactive-source
-                            // filter. Subagent threads are filtered below.
-                            sourceKinds: [],
-                        });
-                        for (const thread of page.data) {
-                            threads.push({ thread, archived });
-                        }
-                        cursor = page.nextCursor;
-                        if (cursor && seenCursors.has(cursor)) {
-                            break;
-                        }
-                        if (cursor) {
-                            seenCursors.add(cursor);
-                        }
-                    } while (cursor);
-                };
-
-                await collect(false);
-                await collect(true);
-
-                const topLevelThreads = threads.filter(({ thread }) => (
-                    !thread.ephemeral && !thread.parentThreadId && typeof thread.cwd === 'string'
-                ));
-                const summaries = await Promise.all(topLevelThreads.map(async ({ thread, archived }) => ({
-                    id: thread.id,
-                    name: typeof thread.name === 'string' ? thread.name : null,
-                    preview: typeof thread.preview === 'string' ? thread.preview : '',
-                    cwd: thread.cwd,
-                    cwdExists: await isExistingDirectory(thread.cwd),
-                    updatedAt: typeof thread.updatedAt === 'number'
-                        ? Math.round(thread.updatedAt * 1_000)
-                        : 0,
-                    archived,
-                })));
-
-                summaries.sort((a, b) => b.updatedAt - a.updatedAt);
-                return { threads: summaries };
-            });
+        // Read persisted metadata through Codex's public app-server API. Keep
+        // only small summaries in memory; Relay never sees plaintext contents.
+        this.rpcHandlerManager.registerHandler('codex-list-threads', async (params: any) => {
+            const all = params?.all === true;
+            const cache = await this.getCodexThreadCache(all, params?.refresh === true);
+            const threads = all ? cache.threads : cache.threads.slice(0, CODEX_RECENT_THREAD_LIMIT);
+            return {
+                threads,
+                hasMore: !cache.complete || threads.length < cache.threads.length,
+            };
         });
 
         this.rpcHandlerManager.registerHandler('codex-duplicate-thread', async (params: any) => {

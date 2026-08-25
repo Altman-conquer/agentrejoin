@@ -1,15 +1,15 @@
 {
   "name": "happy",
   "version": "1.2.0",
-  "description": "Mobile and Web client for Claude Code and Codex",
+  "description": "AgentRejoin - resume Claude Code and Codex sessions from mobile or web",
   "author": "Kirill Dubovitskiy",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "type": "module",
-  "homepage": "https://happy.engineering",
-  "bugs": "https://github.com/slopus/happy/issues",
+  "homepage": "https://agentrejoin.zhandj.com",
+  "bugs": "https://github.com/Altman-conquer/agentrejoin/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/slopus/happy"
+    "url": "https://github.com/Altman-conquer/agentrejoin"
   },
   "bin": {
     "happy": "./bin/happy.mjs",

@@ -117,7 +117,7 @@ export default React.memo(function VoiceSettingsScreen() {
         const upsellVariant = getVoiceUpsellVariantLabel(voiceExperimentStatus.upsellVariant);
         const gatingMode = voiceExperimentStatus.gatingMode === 'direct-byo-agent'
             ? 'direct BYO agent bypass'
-            : 'Happy server gate';
+            : 'AgentRejoin server gate';
 
         return [
             `voice-upsell: ${upsellVariant}`,
@@ -192,7 +192,7 @@ export default React.memo(function VoiceSettingsScreen() {
             {devModeEnabled && (
                 <ItemGroup
                     title="Developer"
-                    footer="Developer-only diagnostics and local override controls for the current voice rollout. The paid voice gate runs through Happy server unless Direct Connection and a custom ElevenLabs agent are both enabled."
+                    footer="Developer-only diagnostics and local override controls for the current voice rollout. The paid voice gate runs through the AgentRejoin server unless Direct Connection and a custom ElevenLabs agent are both enabled."
                 >
                     <Item
                         title="Voice Experiment Override"

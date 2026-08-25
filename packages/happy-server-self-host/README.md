@@ -1,7 +1,7 @@
-# happy-server-self-host
+# AgentRejoin self-host server
 
-Self-host runtime for [Happy](https://happy.engineering) — the sync server plus
-the bundled web app, packaged for `happy server`.
+Self-host runtime for AgentRejoin: the relay plus the bundled web app, packaged
+for the compatibility command `happy server`.
 
 ## Usage
 
@@ -25,7 +25,7 @@ happy-server serve     # start the server
 ## What this package is
 
 This is the *publishing shell* around `packages/happy-server`, which is private
-and is what the hosted Happy backend deploys. The server source lives there; this
+and is what the hosted AgentRejoin backend deploys. The server source lives there; this
 package bundles its `sources/standalone.ts` entrypoint into `dist/standalone.mjs`
 and ships the Prisma schema, migrations, and exported web app alongside it.
 

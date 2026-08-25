@@ -17,7 +17,7 @@ import { randomUUID } from "node:crypto";
 
 function createMcpServer(handler: (title: string) => Promise<{ success: boolean; error?: string }>): McpServer {
     const mcp = new McpServer({
-        name: "Happy MCP",
+        name: "AgentRejoin MCP",
         version: "1.0.0",
     });
 

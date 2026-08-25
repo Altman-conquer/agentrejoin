@@ -579,6 +579,33 @@ describe('ApiSessionClient v3 messages API migration', () => {
         });
     });
 
+    it('uses an explicit local ID for idempotent session protocol messages', async () => {
+        const client = new ApiSessionClient('fake-token', session);
+        mockAxiosPost.mockResolvedValueOnce({
+            data: {
+                messages: [{ id: 'msg-1', seq: 1, localId: 'codex-thread:thread-1:turn-1:0', createdAt: 1, updatedAt: 1 }]
+            }
+        });
+
+        client.sendSessionProtocolMessage({
+            id: 'env-1',
+            time: 1000,
+            role: 'agent',
+            turn: 'turn-1',
+            ev: { t: 'text', text: 'historical response' }
+        }, {
+            localId: 'codex-thread:thread-1:turn-1:0'
+        });
+
+        await waitForCheck(() => {
+            expect(mockAxiosPost).toHaveBeenCalledTimes(1);
+        });
+
+        expect(mockAxiosPost.mock.calls[0][1].messages[0].localId).toBe(
+            'codex-thread:thread-1:turn-1:0'
+        );
+    });
+
     it('sends only modern payload for user session envelopes', async () => {
         const client = new ApiSessionClient('fake-token', session);
         mockAxiosPost.mockResolvedValueOnce({

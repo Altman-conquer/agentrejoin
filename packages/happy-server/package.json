@@ -1,15 +1,15 @@
 {
   "name": "happy-server",
   "version": "0.0.0",
-  "description": "Happy backend server",
+  "description": "AgentRejoin encrypted relay server",
   "repository": {
     "type": "git",
-    "url": "https://github.com/slopus/happy"
+    "url": "https://github.com/Altman-conquer/agentrejoin"
   },
-  "homepage": "https://happy.engineering",
-  "bugs": "https://github.com/slopus/happy/issues",
+  "homepage": "https://agentrejoin.zhandj.com",
+  "bugs": "https://github.com/Altman-conquer/agentrejoin/issues",
   "author": "Kirill Dubovitskiy",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "private": true,
   "type": "module",
   "main": "./sources/index.ts",

@@ -477,7 +477,7 @@ export async function runAcp(opts: {
   });
   const response = await api.getOrCreateSession({ tag: sessionTag, metadata, state });
   if (response) {
-    logAcp('muted', `Happy Session ID: ${response.id}`);
+    logAcp('muted', `AgentRejoin Session ID: ${response.id}`);
   }
 
   let session: ApiSessionClient;
@@ -952,7 +952,7 @@ export async function runAcp(opts: {
     try {
       happyServer.stop();
     } catch (error) {
-      logger.debug(`[${opts.agentName}] Failed to stop Happy MCP server:`, error);
+      logger.debug(`[${opts.agentName}] Failed to stop AgentRejoin MCP server:`, error);
     }
 
     try {

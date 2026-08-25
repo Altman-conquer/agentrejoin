@@ -303,6 +303,9 @@ export type Metadata = {
   gitBranch?: string,
   claudeSessionId?: string, // Claude Code session ID
   codexThreadId?: string, // Codex app-server thread ID
+  codexThreadSyncAvailable?: boolean, // Runtime registered sync-codex-thread RPC
+  resumeCodexThreadId?: string, // Original Codex thread requested by a failed resume
+  resumeStatus?: 'loading' | 'active-writer' | 'failed',
   tools?: string[],
   slashCommands?: string[],
   mcpServers?: Array<{ name: string; status: string }>,

@@ -18,7 +18,6 @@ import { SessionActionsAnchor, SessionActionsPopover } from './SessionActionsPop
 import { useSessionActionAlert } from '@/hooks/useSessionQuickActions';
 import { sessionKill } from '@/sync/ops';
 import { isWorktreePath, getRepoPath, getWorktreeName } from '@/utils/worktree';
-import { useNewSessionDraft } from '@/hooks/useNewSessionDraft';
 import { useRouter } from 'expo-router';
 import { SessionShortcutHintBadge } from './ShortcutHints';
 import { buildActiveSessionDisplayGroups } from '@/utils/sessionDisplayOrder';
@@ -61,7 +60,6 @@ const SectionHeader = React.memo(({ session, displayPath }: { session: SessionRo
     const styles = stylesheet;
     const { theme } = useUnistyles();
     const router = useRouter();
-    const draft = useNewSessionDraft();
 
     const sessionPath = session.path || '';
     const isWorktree = isWorktreePath(sessionPath);
@@ -77,16 +75,8 @@ const SectionHeader = React.memo(({ session, displayPath }: { session: SessionRo
     const hasBranch = !!branchName;
 
     const handleAdd = React.useCallback(() => {
-        const machineId = session.machineId;
-        if (machineId) {
-            draft.setMachineId(machineId);
-        }
-        const pathToSet = formatPathRelativeToHome(repoPath, session.homeDir ?? undefined);
-        draft.setPath(pathToSet);
-        draft.setSessionType(isWorktree ? 'worktree' : 'simple');
-        draft.setWorktreeKey(isWorktree ? sessionPath : null);
         router.navigate('/new');
-    }, [session.machineId, session.homeDir, repoPath, isWorktree, sessionPath, draft, router]);
+    }, [router]);
 
     const [isHovered, setIsHovered] = React.useState(false);
 
@@ -137,7 +127,7 @@ const SectionHeader = React.memo(({ session, displayPath }: { session: SessionRo
                 hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
                 style={[styles.addButton, { opacity: Platform.OS !== 'web' || isHovered ? 1 : 0 }]}
             >
-                <Ionicons name="add-outline" size={14} color={theme.colors.textSecondary} />
+                <Ionicons name="server-outline" size={14} color={theme.colors.textSecondary} />
             </Pressable>
         </View>
     );

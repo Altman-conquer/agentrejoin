@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Happy",
+  "productName": "AgentRejoin",
   "version": "0.1.0",
   "identifier": "com.slopus.happy",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Happy",
+        "title": "AgentRejoin",
         "width": 1680,
         "height": 1050,
         "minWidth": 720,

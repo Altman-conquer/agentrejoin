@@ -28,7 +28,7 @@ import { Modal } from '@/modal';
 import { voiceHooks } from '@/realtime/hooks/voiceHooks';
 import { getCurrentVoiceConversationId, getCurrentVoiceSessionDurationSeconds, startRealtimeSession, stopRealtimeSession } from '@/realtime/RealtimeSession';
 import { gitStatusSync } from '@/sync/gitStatusSync';
-import { sessionAbort, sessionGoalAction, sessionSetAgentModes, spawnSideChat, sessionKill, sessionArchive } from '@/sync/ops';
+import { sessionAbort, sessionGoalAction, sessionSetAgentModes, sessionSyncCodexThread, spawnSideChat, sessionKill, sessionArchive } from '@/sync/ops';
 import { storage, useIsDataReady, useLocalSetting, useRealtimeStatus, useSessionGitStatus, useSessionMessages, useSessionUsage, useSetting, useSideChatSessions } from '@/sync/storage';
 import { useSession } from '@/sync/storage';
 import { getSessionForkSource } from '@/utils/sessionFork';
@@ -360,22 +360,40 @@ export const SessionView = React.memo((props: { id: string }) => {
                 : undefined,
         };
     }, [session, isDataReady]);
-    const headerRight = session && deviceType === 'phone' && Platform.OS !== 'web'
-        ? (
-            <Pressable
-                onPress={() => router.push(`/session/${sessionId}/info`)}
-                hitSlop={10}
-            >
-                <Avatar
-                    id={getSessionAvatarId(session)}
-                    size={28}
-                    monochrome={!headerProps.isConnected}
-                    flavor={session.metadata?.flavor}
-                    clientId={session.metadata?.client?.id}
+    const canShowCodexSync = session?.metadata?.flavor === 'codex'
+        && typeof session.metadata.codexThreadId === 'string'
+        && session.metadata.codexThreadId.length > 0;
+    // Keep the native right control to one icon wide so the centered title
+    // cannot slide underneath a wider compound control.
+    const canShowSessionAvatar = !!session
+        && !canShowCodexSync
+        && deviceType === 'phone'
+        && Platform.OS !== 'web';
+    const headerRight = session && (canShowCodexSync || canShowSessionAvatar) ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            {canShowCodexSync ? (
+                <CodexThreadSyncButton
+                    sessionId={sessionId}
+                    disabled={!headerProps.isConnected || session.thinking}
+                    supported={session.metadata?.codexThreadSyncAvailable === true}
                 />
-            </Pressable>
-        )
-        : null;
+            ) : null}
+            {canShowSessionAvatar ? (
+                <Pressable
+                    onPress={() => router.push(`/session/${sessionId}/info`)}
+                    hitSlop={10}
+                >
+                    <Avatar
+                        id={getSessionAvatarId(session)}
+                        size={28}
+                        monochrome={!headerProps.isConnected}
+                        flavor={session.metadata?.flavor}
+                        clientId={session.metadata?.client?.id}
+                    />
+                </Pressable>
+            ) : null}
+        </View>
+    ) : null;
 
     const mainContent = (
         <>
@@ -548,6 +566,75 @@ export const SessionView = React.memo((props: { id: string }) => {
         </View>
     );
 });
+
+function CodexThreadSyncButton(props: { sessionId: string; disabled: boolean; supported: boolean }) {
+    const { theme } = useUnistyles();
+    const [syncing, setSyncing] = React.useState(false);
+    const syncingRef = React.useRef(false);
+    const disabled = props.disabled || syncing;
+
+    const handlePress = React.useCallback(async () => {
+        if (props.disabled || syncingRef.current) {
+            return;
+        }
+        if (!props.supported) {
+            Modal.alert(t('session.codexSync'), t('session.codexSyncRequiresRestart'));
+            return;
+        }
+        syncingRef.current = true;
+        setSyncing(true);
+        try {
+            const result = await sessionSyncCodexThread(props.sessionId);
+            if (result.type === 'success') {
+                Modal.alert(
+                    t('common.success'),
+                    result.addedTurnCount > 0
+                        ? t('session.codexSyncComplete', { count: result.addedTurnCount })
+                        : t('session.codexSyncUpToDate'),
+                );
+                return;
+            }
+            if (result.type === 'busy') {
+                Modal.alert(t('session.codexSync'), t('session.codexSyncBusy'));
+                return;
+            }
+            if (result.errorMessage === 'RPC method not available') {
+                Modal.alert(t('session.codexSync'), t('session.codexSyncRequiresRestart'));
+                return;
+            }
+            Modal.alert(t('common.error'), result.errorMessage || t('session.codexSyncFailed'));
+        } finally {
+            syncingRef.current = false;
+            setSyncing(false);
+        }
+    }, [props.disabled, props.sessionId, props.supported]);
+
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('session.codexSync')}
+            accessibilityState={{ disabled, busy: syncing }}
+            disabled={disabled}
+            hitSlop={8}
+            onPress={handlePress}
+            style={({ pressed }) => ({
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: pressed ? theme.colors.surfacePressed : 'transparent',
+                opacity: disabled ? 0.5 : 1,
+            })}
+        >
+            {syncing ? (
+                <ActivityIndicator size="small" color={theme.colors.header.tint} />
+            ) : (
+                <Ionicons name="sync-outline" size={20} color={theme.colors.header.tint} />
+            )}
+        </Pressable>
+    );
+}
 
 const SIDEBAR_MIN_WINDOW_WIDTH = 1100;
 
@@ -763,6 +850,8 @@ export function SessionViewLoaded({
     const expResumeSession = useSetting('expResumeSession');
     const { canResume, resumeSession, resumingSession } = useSessionQuickActions(session);
     const isDisconnected = !sessionStatus.isConnected;
+    const resumeBlocked = session.metadata?.resumeStatus !== undefined;
+    const resumeLoading = session.metadata?.resumeStatus === 'loading';
     const resumeCommandBlock = getResumeCommandBlock(session);
 
     // Image attachment state (expImageUpload feature flag)
@@ -986,7 +1075,7 @@ export function SessionViewLoaded({
     let content = (
         <>
             <Deferred>
-                {messages.length > 0 && (
+                {messages.length > 0 && !resumeLoading && (
                     <ChatList
                         session={session}
                         topContentInset={chatListTopContentInset}
@@ -1001,9 +1090,9 @@ export function SessionViewLoaded({
             </Deferred>
         </>
     );
-    const placeholder = messages.length === 0 ? (
+    const placeholder = resumeLoading || messages.length === 0 ? (
         <>
-            {isLoaded ? (
+            {resumeLoading || isLoaded ? (
                 <EmptyMessages session={session} />
             ) : (
                 <ActivityIndicator size="small" color={theme.colors.textSecondary} />
@@ -1027,7 +1116,7 @@ export function SessionViewLoaded({
             onEffortLevelChange={isRigReasoningSelectionEnabled(session.metadata) ? updateEffortLevel : undefined}
             metadata={session.metadata}
             connectionStatus={connectionStatus}
-            blockSend={isRig && session.thinking && session.metadata?.capabilities?.steering !== true}
+            blockSend={resumeBlocked || (isRig && session.thinking && session.metadata?.capabilities?.steering !== true)}
             onSend={handleSend}
             onMicPress={(embedded || isDisconnected) ? undefined : micButtonState.onMicPress}
             isMicActive={(embedded || isDisconnected) ? false : micButtonState.isMicActive}
@@ -1060,7 +1149,7 @@ export function SessionViewLoaded({
     // Resume button when canResume is true, falls back to the
     // copy-this-command hint when the experiments toggle is off or the
     // machine isn't reachable.
-    const inactiveHint = showBottomDockDetails && isDisconnected && !isRig ? (
+    const inactiveHint = showBottomDockDetails && isDisconnected && !isRig && !resumeBlocked ? (
         <CenteredInputWidth horizontalPadding={sessionInputHorizontalPadding}>
             <InactiveArchivedHint
                 resumeCommandBlock={expResumeSession ? resumeCommandBlock : null}

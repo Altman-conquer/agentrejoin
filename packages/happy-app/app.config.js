@@ -2,14 +2,14 @@ const { execFileSync } = require('node:child_process');
 
 const variant = process.env.APP_ENV || 'development';
 const name = {
-    development: "Happy (dev)",
-    preview: "Happy (preview)",
-    production: "Happy"
+    development: "AgentRejoin",
+    preview: "AgentRejoin (preview)",
+    production: "AgentRejoin"
 }[variant];
 const bundleId = {
-    development: "com.slopus.happy.dev",
-    preview: "com.slopus.happy.preview",
-    production: "com.ex3ndr.happy"
+    development: "com.zhandj.agentrejoin.dev",
+    preview: "com.zhandj.agentrejoin.preview",
+    production: "com.zhandj.agentrejoin"
 }[variant];
 // const stagingElevenLabsAgentId = 'agent_7801k2c0r5hjfraa1kdbytpvs6yt';
 const productionElevenLabsAgentId = 'agent_6701k211syvvegba4kt7m68nxjmw';
@@ -58,12 +58,12 @@ const buildMetadata = loadBuildMetadata();
 export default {
     expo: {
         name,
-        slug: "happy",
-        version: "1.7.0",
+        slug: "agentrejoin",
+        version: "1.0.0",
         runtimeVersion: "21",
         orientation: "default",
         icon: "./sources/assets/images/icon.png",
-        scheme: "happy",
+        scheme: ["agentrejoin", "happy"],
         userInterfaceStyle: "automatic",
         ios: {
             supportsTablet: true,
@@ -88,7 +88,7 @@ export default {
                     : { NSAllowsLocalNetworking: true, NSAllowsArbitraryLoads: true }
             },
             ...(variant === 'production'
-                ? { associatedDomains: ["applinks:app.happy.engineering"] }
+                ? { associatedDomains: ["applinks:agentrejoin.zhandj.com"] }
                 : {})
         },
         android: {
@@ -112,7 +112,6 @@ export default {
                 "android.permission.READ_MEDIA_VIDEO",
             ],
             package: bundleId,
-            googleServicesFile: "./google-services.json",
             intentFilters: variant === 'production' ? [
                 {
                     "action": "VIEW",
@@ -120,7 +119,7 @@ export default {
                     "data": [
                         {
                             "scheme": "https",
-                            "host": "app.happy.engineering",
+                            "host": "agentrejoin.zhandj.com",
                             "pathPrefix": "/"
                         }
                     ],
@@ -207,21 +206,13 @@ export default {
                 }
             ]
         ],
-        updates: {
-            url: "https://u.expo.dev/4558dd3d-cd5a-47cd-bad9-e591a241cc06",
-            requestHeaders: {
-                "expo-channel-name": "production"
-            }
-        },
+        updates: { enabled: false },
         experiments: {
             typedRoutes: true
         },
         extra: {
             router: {
                 root: "./sources/app"
-            },
-            eas: {
-                projectId: "4558dd3d-cd5a-47cd-bad9-e591a241cc06"
             },
             app: {
                 postHogKey: process.env.EXPO_PUBLIC_POSTHOG_API_KEY,
@@ -233,7 +224,6 @@ export default {
                 buildCommitSha: buildMetadata.commitSha,
                 buildCommitTimestamp: buildMetadata.commitTimestamp,
             }
-        },
-        owner: "bulkacorp"
+        }
     }
 };

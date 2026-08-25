@@ -48,18 +48,18 @@ export async function handleConnectCommand(args: string[]): Promise<void> {
 
 function showConnectHelp(): void {
     console.log(`
-${chalk.bold('happy connect')} - Connect AI vendor API keys to Happy cloud
+${chalk.bold('happy connect')} - Connect AI vendor API keys to AgentRejoin
 
 ${chalk.bold('Usage:')}
-  happy connect codex        Store your Codex API key in Happy cloud
-  happy connect claude       Store your Anthropic API key in Happy cloud
-  happy connect gemini       Store your Gemini API key in Happy cloud
+  happy connect codex        Store your Codex API key in AgentRejoin
+  happy connect claude       Store your Anthropic API key in AgentRejoin
+  happy connect gemini       Store your Gemini API key in AgentRejoin
   happy connect status       Show connection status for all vendors
   happy connect help         Show this help message
 
 ${chalk.bold('Description:')}
   The connect command allows you to securely store your AI vendor API keys
-  in Happy cloud. This enables you to use these services through Happy
+  in AgentRejoin. This enables you to use these services through AgentRejoin
   without exposing your API keys locally.
 
 ${chalk.bold('Examples:')}
@@ -69,19 +69,19 @@ ${chalk.bold('Examples:')}
   happy connect status
 
 ${chalk.bold('Notes:')} 
-  • You must be authenticated with Happy first (run 'happy auth login')
-  • API keys are encrypted and stored securely in Happy cloud
-  • You can manage your stored keys at app.happy.engineering
+  • You must be authenticated with AgentRejoin first (run 'happy auth login')
+  • API keys are encrypted and stored securely by your configured relay
+  • You can manage stored keys in the connected AgentRejoin web app
 `);
 }
 
 async function handleConnectVendor(vendor: 'codex' | 'claude' | 'gemini', displayName: string): Promise<void> {
-    console.log(chalk.bold(`\n🔌 Connecting ${displayName} to Happy cloud\n`));
+    console.log(chalk.bold(`\n🔌 Connecting ${displayName} to AgentRejoin\n`));
 
     // Check if authenticated
     const credentials = await readCredentials();
     if (!credentials) {
-        console.log(chalk.yellow('⚠️  Not authenticated with Happy'));
+        console.log(chalk.yellow('⚠️  Not authenticated with AgentRejoin'));
         console.log(chalk.gray('  Please run "happy auth login" first'));
         process.exit(1);
     }
@@ -126,7 +126,7 @@ async function handleConnectStatus(): Promise<void> {
     // Check if authenticated
     const credentials = await readCredentials();
     if (!credentials) {
-        console.log(chalk.yellow('⚠️  Not authenticated with Happy'));
+        console.log(chalk.yellow('⚠️  Not authenticated with AgentRejoin'));
         console.log(chalk.gray('  Please run "happy auth login" first'));
         process.exit(1);
     }

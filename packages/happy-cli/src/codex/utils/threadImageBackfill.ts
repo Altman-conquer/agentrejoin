@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 
 import type { CreateEnvelopeOptions, SessionEnvelope } from '@slopus/happy-wire';
 import { createEnvelope } from '@slopus/happy-wire';
@@ -157,4 +158,91 @@ export async function replayCodexThreadHistory(opts: {
         opts.sendEnvelope(envelope);
     }
     return { envelopeCount: envelopes.length, thread };
+}
+
+export type PreparedCodexThreadSync = {
+    envelopes: Array<{ envelope: SessionEnvelope; localId: string }>;
+    completedTurnIds: string[];
+    latestTurnId?: string;
+    remoteInProgress: boolean;
+    threadUpdatedAt?: number;
+};
+
+export function codexThreadHistoryLocalId(
+    threadId: string,
+    envelope: SessionEnvelope,
+): string {
+    const stableEvent = envelope.ev.t === 'file'
+        ? {
+            t: envelope.ev.t,
+            name: envelope.ev.name,
+            size: envelope.ev.size,
+            mimeType: envelope.ev.mimeType,
+        }
+        : envelope.ev;
+    const digest = createHash('sha256')
+        .update(JSON.stringify({
+            role: envelope.role,
+            turn: envelope.turn,
+            subagent: envelope.subagent,
+            codexItemId: envelope.codexItemId,
+            ev: stableEvent,
+        }))
+        .digest('hex');
+    return `codex-thread:${encodeURIComponent(threadId)}:${digest}`;
+}
+
+/**
+ * Read a persisted thread and prepare only completed turns that this Happy
+ * process has not already emitted. The caller owns the final context refresh
+ * and message flush so it can keep those operations serialized with live turns.
+ */
+export async function prepareCodexThreadSync(opts: {
+    threadId: string;
+    knownCompletedTurnIds: ReadonlySet<string>;
+    readThread: (params: { threadId: string; includeTurns: boolean }) => Promise<{
+        thread: Pick<Thread, 'turns' | 'updatedAt'>;
+    }>;
+    uploadLocalImage: LocalImageUpload;
+}): Promise<PreparedCodexThreadSync> {
+    const { thread } = await opts.readThread({
+        threadId: opts.threadId,
+        includeTurns: true,
+    });
+    const turns = thread.turns ?? [];
+    const remoteInProgress = turns.some(isCodexTurnInProgress);
+    const completedTurns = turns.filter((turn) => !isCodexTurnInProgress(turn));
+    const latestTurnId = completedTurns[completedTurns.length - 1]?.id;
+
+    // Do not resume or partially import a thread while another Codex client is
+    // still writing its current turn.
+    if (remoteInProgress) {
+        return {
+            envelopes: [],
+            completedTurnIds: [],
+            ...(latestTurnId ? { latestTurnId } : {}),
+            remoteInProgress: true,
+            ...(typeof thread.updatedAt === 'number' ? { threadUpdatedAt: thread.updatedAt } : {}),
+        };
+    }
+
+    const newTurns = completedTurns.filter((turn) => !opts.knownCompletedTurnIds.has(turn.id));
+    const rawEnvelopes = await buildCodexThreadBackfillEnvelopes({
+        thread: { turns: newTurns },
+        uploadLocalImage: opts.uploadLocalImage,
+    });
+    const envelopes = rawEnvelopes.map((envelope) => {
+        return {
+            envelope,
+            localId: codexThreadHistoryLocalId(opts.threadId, envelope),
+        };
+    });
+
+    return {
+        envelopes,
+        completedTurnIds: newTurns.map((turn) => turn.id),
+        ...(latestTurnId ? { latestTurnId } : {}),
+        remoteInProgress: false,
+        ...(typeof thread.updatedAt === 'number' ? { threadUpdatedAt: thread.updatedAt } : {}),
+    };
 }

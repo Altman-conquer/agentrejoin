@@ -1,6 +1,6 @@
-# Contributing to Happy
+# Contributing to AgentRejoin
 
-Happy is built by engineers who use AI coding tools all day — and we built Happy so we could use them from anywhere. Contributions that make Happy better for that workflow are welcome.
+AgentRejoin is built for people who use coding agents every day and want to resume them from anywhere. Contributions that improve that workflow are welcome.
 
 If you don't get a response on your PR or issue, tag **@bra1ndump**.
 
@@ -54,12 +54,12 @@ Every issue should start with a **one-paragraph summary** of the problem. Don't 
 ### Getting Started
 
 ```bash
-git clone https://github.com/slopus/happy.git
-cd happy
+git clone https://github.com/Altman-conquer/agentrejoin.git
+cd agentrejoin
 pnpm install
 ```
 
-### Happy App (Mobile + Web)
+### AgentRejoin App (Mobile + Web)
 
 ```bash
 pnpm --filter happy-app start          # Expo dev server
@@ -73,9 +73,9 @@ The app has three build variants — all can be installed simultaneously on the 
 
 | Variant | Bundle ID | App Name | Use Case |
 |---------|-----------|----------|----------|
-| Development | `com.slopus.happy.dev` | Happy (dev) | Local development with hot reload |
-| Preview | `com.slopus.happy.preview` | Happy (preview) | Beta testing & OTA updates |
-| Production | `com.ex3ndr.happy` | Happy | App Store release |
+| Development | `com.zhandj.agentrejoin.dev` | AgentRejoin | Local development with hot reload |
+| Preview | `com.zhandj.agentrejoin.preview` | AgentRejoin (preview) | Beta testing |
+| Production | `com.zhandj.agentrejoin` | AgentRejoin | App Store release |
 
 Swap `ios:dev` for `ios:preview` or `ios:production` (same for `android:`).
 
@@ -86,7 +86,7 @@ pnpm --filter happy-app tauri:dev      # Run with hot reload
 pnpm --filter happy-app tauri:build:dev
 ```
 
-### Happy CLI
+### AgentRejoin CLI
 
 ```bash
 pnpm --filter happy build
@@ -103,7 +103,7 @@ npm unlink -g happy && npm i -g happy@latest
 
 To sandbox dev data, set `HAPPY_HOME_DIR=~/.happy-dev` in your shell before running `happy`.
 
-### Happy Server
+### AgentRejoin Server
 
 ```bash
 pnpm --filter happy-server standalone:dev   # Local server (no Docker needed)
@@ -124,9 +124,9 @@ This is a monorepo with four packages:
 - **happy-agent** — Remote agent control
 - **happy-server** — Backend for encrypted sync
 
-For architecture details, check the [docs/](.) folder or ask Happy itself — it knows how the project is set up.
+For architecture details, check the [docs/](.) folder or ask AgentRejoin itself - it knows how the project is set up.
 
 ## Community
 
 - [Discord](https://discord.gg/fX9WBAhyfD) — best place for questions and discussion
-- [Documentation](https://happy.engineering/docs/)
+- [Website](https://agentrejoin.zhandj.com)

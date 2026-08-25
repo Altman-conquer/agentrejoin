@@ -56,6 +56,23 @@ interface SessionGoalActionRequest {
     objective?: string;
 }
 
+export type SyncCodexThreadResult =
+    | {
+        type: 'success';
+        addedEnvelopeCount: number;
+        addedTurnCount: number;
+        latestTurnId?: string;
+        threadUpdatedAt?: number;
+    }
+    | {
+        type: 'busy';
+        reason: 'happy-turn-active' | 'remote-turn-active' | 'sync-in-progress';
+    }
+    | {
+        type: 'error';
+        errorMessage: string;
+    };
+
 // Bash operation types
 interface SessionBashRequest {
     command: string;
@@ -203,6 +220,24 @@ export type CodexThreadSummary = {
     archived: boolean;
 };
 
+export type CodexThreadListResult = {
+    threads: CodexThreadSummary[];
+    hasMore: boolean;
+};
+
+export type ListCodexThreadsOptions = {
+    all?: boolean;
+    refresh?: boolean;
+};
+
+export type ClaudeSessionSummary = {
+    id: string;
+    preview: string;
+    cwd: string;
+    cwdExists: boolean;
+    updatedAt: number;
+};
+
 // Options for forking a Claude session on a machine
 export interface ClaudeForkSessionOptions {
     machineId: string;
@@ -292,13 +327,24 @@ export async function machineSpawnNewSession(options: SpawnSessionOptions): Prom
     }
 }
 
-export async function listCodexThreads(machineId: string): Promise<CodexThreadSummary[]> {
-    const result = await apiSocket.machineRPC<{ threads: CodexThreadSummary[] }, {}>(
+export async function listCodexThreads(
+    machineId: string,
+    options: ListCodexThreadsOptions = {},
+): Promise<CodexThreadListResult> {
+    return await apiSocket.machineRPC<CodexThreadListResult, ListCodexThreadsOptions>(
         machineId,
         'codex-list-threads',
+        options,
+    );
+}
+
+export async function listClaudeSessions(machineId: string): Promise<ClaudeSessionSummary[]> {
+    const result = await apiSocket.machineRPC<{ sessions: ClaudeSessionSummary[] }, {}>(
+        machineId,
+        'claude-list-sessions',
         {},
     );
-    return result.threads;
+    return result.sessions;
 }
 
 /**
@@ -805,6 +851,37 @@ export async function sessionGoalAction(
         action,
         ...(objective !== undefined ? { objective } : {}),
     } satisfies SessionGoalActionRequest);
+}
+
+/**
+ * Pull completed turns written to the active Codex thread by another client.
+ */
+export async function sessionSyncCodexThread(sessionId: string): Promise<SyncCodexThreadResult> {
+    try {
+        const response = await apiSocket.sessionRPC<SyncCodexThreadResult | { error?: unknown }, Record<string, never>>(
+            sessionId,
+            'sync-codex-thread',
+            {},
+        );
+        if (
+            response
+            && typeof response === 'object'
+            && 'type' in response
+            && (response.type === 'success' || response.type === 'busy' || response.type === 'error')
+        ) {
+            return response as SyncCodexThreadResult;
+        }
+        const rpcError = response && typeof response === 'object' && 'error' in response
+            && typeof response.error === 'string'
+            ? response.error
+            : 'Codex thread sync returned an invalid response';
+        return { type: 'error', errorMessage: rpcError };
+    } catch (error) {
+        return {
+            type: 'error',
+            errorMessage: error instanceof Error ? error.message : 'Failed to sync Codex thread',
+        };
+    }
 }
 
 /**

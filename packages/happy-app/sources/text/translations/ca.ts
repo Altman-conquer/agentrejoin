@@ -11,14 +11,14 @@ function plural({ count, singular, plural }: { count: number; singular: string; 
 }
 
 /**
- * Catalan translations for the Happy app
+ * Catalan translations for the AgentRejoin app
  * Must match the exact structure of the English translations
  */
 export const ca: TranslationStructure = {
     tabs: {
         // Tab navigation labels
         inbox: 'Safata',
-        sessions: 'Terminals',
+        sessions: 'Converses',
         settings: 'Configuració',
     },
 
@@ -121,7 +121,7 @@ export const ca: TranslationStructure = {
         developer: 'Desenvolupador',
         developerTools: 'Eines de desenvolupador',
         about: 'Quant a',
-        aboutFooter: 'Happy Coder és un client mòbil de Codex i Claude Code. Tot està xifrat punt a punt i el teu compte es guarda només al teu dispositiu. No està afiliat amb Anthropic.',
+        aboutFooter: 'AgentRejoin és un client mòbil de Codex i Claude Code. Tot està xifrat punt a punt i el teu compte es guarda només al teu dispositiu. No està afiliat amb Anthropic.',
         whatsNew: 'Novetats',
         whatsNewSubtitle: 'Mira les últimes actualitzacions i millores',
         reportIssue: 'Informa d\'un problema',
@@ -296,7 +296,7 @@ export const ca: TranslationStructure = {
     },
 
     newSession: {
-        title: 'Iniciar nova sessió',
+        title: 'Converses del servidor',
         machineOffline: 'La màquina està fora de línia',
         switchMachinesHint: '• Canvia de màquina fent clic a la màquina de dalt',
     },
@@ -335,6 +335,18 @@ export const ca: TranslationStructure = {
         forkErrorMissingMetadata: 'Falten metadades de la sessió necessàries per bifurcar.',
         forkErrorGeneric: 'No s\'ha pogut bifurcar la sessió.',
         forkClaudeOnly: 'La bifurcació només està disponible per a sessions de Claude.',
+        codexSync: 'Sincronitza la conversa de Codex',
+        codexSyncComplete: ({ count }: { count: number }) => `S’han sincronitzat ${count} torns nous.`,
+        codexSyncUpToDate: 'Aquesta conversa ja està actualitzada.',
+        codexSyncBusy: 'Espera que acabi el torn actiu i torna-ho a provar.',
+        codexSyncFailed: 'No s’ha pogut sincronitzar la conversa de Codex.',
+        codexSyncRequiresRestart: 'Aquesta sessió utilitza una versió anterior de AgentRejoin. Finalitza-la i reprèn-la una vegada abans de tornar a sincronitzar.',
+        resumeLoading: 'Resuming conversation…',
+        resumeLoadingDescription: 'Loading the Codex conversation and its message history.',
+        resumeFailed: 'Could not resume this conversation',
+        resumeActiveWriter: 'This conversation is still open in another Codex process. Exit it on the server, then try again.',
+        resumeFailedDescription: 'The server rejected the resume request. Return to the conversation list and try again.',
+        resumeRetry: 'Retry resume',
     },
 
     commandPalette: {
@@ -345,7 +357,7 @@ export const ca: TranslationStructure = {
         // Used by Server Configuration screen (app/(app)/server.tsx)
         serverConfiguration: 'Configuració del servidor',
         enterServerUrl: 'Introdueix una URL del servidor',
-        notValidHappyServer: 'No és un servidor Happy vàlid',
+        notValidAgentRejoinServer: 'No és un servidor AgentRejoin vàlid',
         changeServer: 'Canvia el servidor',
         continueWithServer: 'Continuar amb aquest servidor?',
         resetToDefault: 'Reinicia per defecte',
@@ -365,9 +377,9 @@ export const ca: TranslationStructure = {
         killSessionConfirm: 'Segur que vols finalitzar aquesta sessió?',
         archiveSession: 'Arxiva la sessió',
         archiveSessionConfirm: 'Segur que vols arxivar aquesta sessió?',
-        happySessionIdCopied: 'ID de la sessió de Happy copiat al porta-retalls',
-        failedToCopySessionId: 'Ha fallat copiar l\'ID de la sessió de Happy',
-        happySessionId: 'ID de la sessió de Happy',
+        happySessionIdCopied: 'ID de la sessió de AgentRejoin copiat al porta-retalls',
+        failedToCopySessionId: 'Ha fallat copiar l\'ID de la sessió de AgentRejoin',
+        happySessionId: 'ID de la sessió de AgentRejoin',
         claudeCodeSessionId: 'ID de la sessió de Claude Code',
         claudeCodeSessionIdCopied: 'ID de la sessió de Claude Code copiat al porta-retalls',
         codexThreadId: 'ID del fil de Codex',
@@ -390,7 +402,7 @@ export const ca: TranslationStructure = {
         resumeSessionSubtitle: 'Resume this session on the same machine',
         resumeSessionSameMachineOnly: 'This session can only be resumed on the same machine it started on.',
         resumeSessionMachineOffline: 'This machine is offline. Resume is only available while it is online.',
-        resumeSessionNeedsHappyAgent: 'Resume is unavailable on this machine. Run `happy-agent auth login` to enable it.',
+        resumeSessionNeedsAgentRejoinAgent: 'Resume is unavailable on this machine. Run `happy-agent auth login` to enable it.',
         resumeSessionMissingMachine: 'This session is missing its machine metadata, so it cannot be resumed.',
         resumeSessionMissingBackendId: 'This session does not have a resumable Claude or Codex identifier.',
         resumeSessionUnexpectedDirectoryPrompt: 'Resume cannot create directories. Start the session manually from its original path.',
@@ -401,7 +413,7 @@ export const ca: TranslationStructure = {
         path: 'Camí',
         operatingSystem: 'Sistema operatiu',
         processId: 'ID del procés',
-        happyHome: 'Directori de Happy',
+        happyHome: 'Directori de AgentRejoin',
         copyMetadata: 'Copia les metadades',
         agentState: 'Estat de l\'agent',
         controlledByUser: 'Controlat per l\'usuari',
@@ -431,7 +443,7 @@ export const ca: TranslationStructure = {
         emptyMainScreen: {
             // Used by EmptyMainScreen component
             readyToCode: 'Llest per programar?',
-            installCli: 'Instal·la el Happy CLI',
+            installCli: 'Instal·la el AgentRejoin CLI',
             runIt: 'Executa\'l',
             scanQrCode: 'Escaneja el codi QR',
             openCamera: 'Obre la càmera',
@@ -538,16 +550,16 @@ export const ca: TranslationStructure = {
         submitFailed: "No s'ha pogut enviar la resposta",
         dismiss: "Descarta",
         unsupportedTitle: "Sol·licitud no compatible",
-        unsupportedDescription: ({ kind }: { kind: string }) => `Aquesta versió de Happy no pot mostrar una sol·licitud «${kind}». Actualitza l'app per respondre.`,
+        unsupportedDescription: ({ kind }: { kind: string }) => `Aquesta versió de AgentRejoin no pot mostrar una sol·licitud «${kind}». Actualitza l'app per respondre.`,
         moreQuestions: ({ count }: { count: number }) =>
             count === 1 ? "1 pregunta més" : `${count} preguntes més`,
     },
 
     sidebar: {
-        sessionsTitle: 'Happy',
+        sessionsTitle: 'AgentRejoin',
         showArchived: 'Mostra arxivades',
         hideArchived: 'Amaga arxivades',
-        newSession: 'Nova sessió',
+        newSession: 'Converses del servidor',
         projects: "Projectes",
     },
 
@@ -705,13 +717,13 @@ export const ca: TranslationStructure = {
         },
         // Bring your own agent
         byoTitle: 'Porta el teu propi agent',
-        byoDescription: 'Utilitza el teu propi agent d\'ElevenLabs en lloc del predeterminat de Happy. No cal subscripció — connecta directament amb el teu propi compte d\'ElevenLabs. El teu agent ha de definir dues eines de client: messageClaudeCode (envia text a l\'agent de codi) i processPermissionRequest (permet o denega l\'ús d\'eines). Rep el context de la sessió a través de la variable dinàmica {{initialConversationContext}}.',
+        byoDescription: 'Utilitza el teu propi agent d\'ElevenLabs en lloc del predeterminat de AgentRejoin. No cal subscripció — connecta directament amb el teu propi compte d\'ElevenLabs. El teu agent ha de definir dues eines de client: messageClaudeCode (envia text a l\'agent de codi) i processPermissionRequest (permet o denega l\'ús d\'eines). Rep el context de la sessió a través de la variable dinàmica {{initialConversationContext}}.',
         customAgentId: 'ElevenLabs Agent ID',
         customAgentIdNotSet: 'No configurat',
-        customAgentIdDescription: 'Introdueix el teu ElevenLabs Agent ID. Deixa-ho buit per utilitzar el predeterminat de Happy.',
+        customAgentIdDescription: 'Introdueix el teu ElevenLabs Agent ID. Deixa-ho buit per utilitzar el predeterminat de AgentRejoin.',
         customAgentIdPlaceholder: 'e.g. abc123def456',
         bypassToken: 'Connexió directa',
-        bypassTokenSubtitle: 'Omet el servidor de Happy, connecta directament a ElevenLabs',
+        bypassTokenSubtitle: 'Omet el servidor de AgentRejoin, connecta directament a ElevenLabs',
         promptGuideTitle: 'Guia de prompt de l\'agent',
         promptGuideDescription: 'El teu agent d\'ElevenLabs necessita:\n\n• Eina: messageClaudeCode — paràmetre: message (string). Envia un missatge a la sessió de codi activa.\n• Eina: processPermissionRequest — paràmetre: decision ("allow" o "deny"). Aprova o denega un permís d\'eina pendent.\n• Variable dinàmica: {{initialConversationContext}} — rep l\'historial i el context de la sessió en iniciar.\n\nL\'agent actua com a pont de veu entre l\'usuari i els agents de codi. Ha de ser concís, respondre només quan se li parla i informar quan un agent de codi acaba la feina.',
         usageTitle: 'Ús (últims 30 dies)',
@@ -800,7 +812,7 @@ export const ca: TranslationStructure = {
         invalidConnectionLink: 'Enllaç de connexió no vàlid',
         invalidConnectionLinkDescription: 'L\'enllaç de connexió falta o no és vàlid. Comprova l\'URL i torna-ho a provar.',
         connectTerminal: 'Connecta el terminal',
-        terminalRequestDescription: 'Un terminal està sol·licitant connectar-se al teu compte de Happy Coder. Això permetrà al terminal enviar i rebre missatges de forma segura.',
+        terminalRequestDescription: 'Un terminal està sol·licitant connectar-se al teu compte de AgentRejoin. Això permetrà al terminal enviar i rebre missatges de forma segura.',
         connectionDetails: 'Detalls de la connexió',
         publicKey: 'Clau pública',
         encryption: 'Xifratge',

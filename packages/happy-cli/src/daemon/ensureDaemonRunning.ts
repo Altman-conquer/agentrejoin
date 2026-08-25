@@ -7,13 +7,13 @@ const DAEMON_READY_TIMEOUT_MS = 5000
 const DAEMON_READY_POLL_INTERVAL_MS = 100
 
 export async function ensureDaemonRunning(): Promise<void> {
-  logger.debug('Ensuring Happy background service is running & matches our version...')
+  logger.debug('Ensuring AgentRejoin background service is running & matches our version...')
 
   if (await isDaemonRunningCurrentlyInstalledHappyVersion()) {
     return
   }
 
-  logger.debug('Starting Happy background service...')
+  logger.debug('Starting AgentRejoin background service...')
 
   const daemonProcess = spawnHappyCLI(['daemon', 'start-sync'], {
     detached: true,
@@ -29,11 +29,11 @@ export async function ensureDaemonRunning(): Promise<void> {
   const deadline = Date.now() + DAEMON_READY_TIMEOUT_MS
   while (Date.now() < deadline) {
     if (await checkIfDaemonRunningAndCleanupStaleState()) {
-      logger.debug('Happy background service is ready')
+      logger.debug('AgentRejoin background service is ready')
       return
     }
     await new Promise(resolve => setTimeout(resolve, DAEMON_READY_POLL_INTERVAL_MS))
   }
 
-  logger.debug(`Happy background service did not become ready within ${DAEMON_READY_TIMEOUT_MS}ms; continuing anyway`)
+  logger.debug(`AgentRejoin background service did not become ready within ${DAEMON_READY_TIMEOUT_MS}ms; continuing anyway`)
 }

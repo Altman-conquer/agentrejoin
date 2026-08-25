@@ -1,4 +1,4 @@
-# Happy
+# AgentRejoin CLI
 
 Code on the go — control AI coding agents from your phone, browser, or terminal.
 
@@ -44,10 +44,10 @@ happy acp -- custom-agent --flag
 > **Note on agy permissions:** the agy backend runs `agy --print`, which is
 > one-shot and has no interactive approval surface — tool calls proceed
 > automatically without ever prompting you. The permission mode you pick in
-> Happy only chooses which flag is passed to agy: the default modes use
+> AgentRejoin only chooses which flag is passed to agy: the default modes use
 > `--sandbox`, and the bypass/yolo-style modes (including `acceptEdits`) use
 > `--dangerously-skip-permissions`. Neither adds a per-tool approval gate
-> inside Happy, so selecting "default" for an agy session does **not** give
+> inside AgentRejoin, so selecting "default" for an agy session does **not** give
 > you an approval prompt the way it does for Claude Code.
 
 ## Daemon
@@ -92,7 +92,7 @@ happy auth login
 happy auth logout
 ```
 
-Happy uses cryptographic key pairs for authentication — your private key stays on your machine. All session data is end-to-end encrypted before leaving your device.
+AgentRejoin uses cryptographic key pairs for authentication - your private key stays on your machine. All session data is end-to-end encrypted before leaving your device.
 
 To connect third-party agent APIs:
 
@@ -125,15 +125,15 @@ happy connect status
 
 | Variable | Description |
 |----------|-------------|
-| `HAPPY_SERVER_URL` | Custom server URL (default: `https://api.cluster-fluster.com`) |
-| `HAPPY_WEBAPP_URL` | Custom web app URL (default: `https://app.happy.engineering`) |
-| `HAPPY_HOME_DIR` | Custom home directory for Happy data (default: `~/.happy`) |
+| `HAPPY_SERVER_URL` | Custom server URL (default: `https://agentrejoin.zhandj.com`) |
+| `HAPPY_WEBAPP_URL` | Custom web app URL (default: `https://agentrejoin.zhandj.com/app`) |
+| `HAPPY_HOME_DIR` | Custom home directory for AgentRejoin data (default: `~/.happy`) |
 | `HAPPY_DISABLE_CAFFEINATE` | Disable macOS sleep prevention |
 | `HAPPY_EXPERIMENTAL` | Enable experimental features |
 
 ### Sandbox (experimental)
 
-Happy can run agents inside an OS-level sandbox to restrict file system and network access.
+AgentRejoin can run agents inside an OS-level sandbox to restrict file system and network access.
 
 ```bash
 happy sandbox configure
@@ -144,8 +144,8 @@ happy sandbox disable
 ### Building from source
 
 ```bash
-git clone https://github.com/slopus/happy
-cd happy-cli
+git clone https://github.com/Altman-conquer/agentrejoin
+cd agentrejoin
 yarn install
 yarn workspace happy cli --help
 ```
@@ -160,4 +160,4 @@ yarn workspace happy cli --help
 
 ## License
 
-MIT
+GNU AGPL v3 - see the repository root [LICENSE](../../LICENSE).

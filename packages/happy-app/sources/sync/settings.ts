@@ -45,8 +45,8 @@ export const SettingsSchema = z.object({
     reviewPromptAnswered: z.boolean().describe('Whether the review prompt has been answered'),
     reviewPromptLikedApp: z.boolean().nullish().describe('Whether user liked the app when asked'),
     voiceAssistantLanguage: z.string().nullable().describe('Preferred language for voice assistant (null for auto-detect)'),
-    voiceCustomAgentId: z.string().nullable().describe('Custom ElevenLabs agent ID (null to use Happy default)'),
-    voiceBypassToken: z.boolean().describe('Bypass Happy server token and connect directly to ElevenLabs (requires custom agent ID)'),
+    voiceCustomAgentId: z.string().nullable().describe('Custom ElevenLabs agent ID (null to use AgentRejoin default)'),
+    voiceBypassToken: z.boolean().describe('Bypass AgentRejoin server token and connect directly to ElevenLabs (requires custom agent ID)'),
     preferredLanguage: z.string().nullable().describe('Preferred UI language (null for auto-detect from device locale)'),
     recentMachinePaths: z.array(z.object({
         machineId: z.string(),

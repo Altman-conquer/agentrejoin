@@ -10,7 +10,7 @@ import { t } from '@/text';
 import { MobileGlassBackdrop } from '@/components/MobileGlass';
 
 export const unstable_settings = {
-    initialRouteName: 'index',
+    initialRouteName: 'app',
 };
 
 export default function RootLayout() {
@@ -31,7 +31,7 @@ export default function RootLayout() {
         >
             <MobileGlassBackdrop enabled={!isDesktop} />
         <Stack
-            initialRouteName='index'
+            initialRouteName='app'
             screenOptions={{
                 header: shouldUseCustomHeader ? createHeader : undefined,
                 headerBackTitle: t('common.back'),
@@ -54,7 +54,7 @@ export default function RootLayout() {
             }}
         >
             <Stack.Screen
-                name="index"
+                name="app"
                 options={{
                     headerShown: false,
                     headerTitle: ''

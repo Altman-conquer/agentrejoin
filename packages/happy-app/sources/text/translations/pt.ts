@@ -11,14 +11,14 @@ function plural({ count, singular, plural }: { count: number; singular: string; 
 }
 
 /**
- * Portuguese (Brazilian) translations for the Happy app
+ * Portuguese (Brazilian) translations for the AgentRejoin app
  * Must match the exact structure of the English translations
  */
 export const pt: TranslationStructure = {
     tabs: {
         // Tab navigation labels
         inbox: 'Caixa de entrada',
-        sessions: 'Terminais',
+        sessions: 'Conversas',
         settings: 'Configurações',
     },
 
@@ -121,7 +121,7 @@ export const pt: TranslationStructure = {
         developer: 'Desenvolvedor',
         developerTools: 'Ferramentas de desenvolvedor',
         about: 'Sobre',
-        aboutFooter: 'Happy Coder é um cliente móvel para Codex e Claude Code. É totalmente criptografado ponta a ponta e sua conta é armazenada apenas no seu dispositivo. Não é afiliado à Anthropic.',
+        aboutFooter: 'AgentRejoin é um cliente móvel para Codex e Claude Code. É totalmente criptografado ponta a ponta e sua conta é armazenada apenas no seu dispositivo. Não é afiliado à Anthropic.',
         whatsNew: 'Novidades',
         whatsNewSubtitle: 'Veja as atualizações e melhorias mais recentes',
         reportIssue: 'Relatar um problema',
@@ -295,7 +295,7 @@ export const pt: TranslationStructure = {
     },
 
     newSession: {
-        title: 'Iniciar nova sessão',
+        title: 'Conversas nos servidores',
         machineOffline: 'A máquina está offline',
         switchMachinesHint: '• Troque de máquina clicando na máquina acima',
     },
@@ -334,6 +334,18 @@ export const pt: TranslationStructure = {
         forkErrorMissingMetadata: 'Faltam metadados da sessão necessários para bifurcar.',
         forkErrorGeneric: 'Não foi possível bifurcar a sessão.',
         forkClaudeOnly: 'A bifurcação atualmente só é suportada para sessões Claude.',
+        codexSync: 'Sincronizar conversa do Codex',
+        codexSyncComplete: ({ count }: { count: number }) => `Foram sincronizados ${count} novos turnos.`,
+        codexSyncUpToDate: 'Esta conversa já está atualizada.',
+        codexSyncBusy: 'Aguarde o turno ativo terminar e sincronize novamente.',
+        codexSyncFailed: 'Falha ao sincronizar a conversa do Codex.',
+        codexSyncRequiresRestart: 'Esta sessão usa uma versão anterior do AgentRejoin. Encerre e retome a sessão uma vez antes de sincronizar novamente.',
+        resumeLoading: 'Resuming conversation…',
+        resumeLoadingDescription: 'Loading the Codex conversation and its message history.',
+        resumeFailed: 'Could not resume this conversation',
+        resumeActiveWriter: 'This conversation is still open in another Codex process. Exit it on the server, then try again.',
+        resumeFailedDescription: 'The server rejected the resume request. Return to the conversation list and try again.',
+        resumeRetry: 'Retry resume',
     },
 
     commandPalette: {
@@ -344,7 +356,7 @@ export const pt: TranslationStructure = {
         // Used by Server Configuration screen (app/(app)/server.tsx)
         serverConfiguration: 'Configuração do servidor',
         enterServerUrl: 'Por favor, insira uma URL do servidor',
-        notValidHappyServer: 'Não é um servidor Happy válido',
+        notValidAgentRejoinServer: 'Não é um servidor AgentRejoin válido',
         changeServer: 'Alterar servidor',
         continueWithServer: 'Continuar com este servidor?',
         resetToDefault: 'Redefinir para padrão',
@@ -364,9 +376,9 @@ export const pt: TranslationStructure = {
         killSessionConfirm: 'Tem certeza de que deseja encerrar esta sessão?',
         archiveSession: 'Arquivar sessão',
         archiveSessionConfirm: 'Tem certeza de que deseja arquivar esta sessão?',
-        happySessionIdCopied: 'ID da sessão Happy copiado para a área de transferência',
-        failedToCopySessionId: 'Falha ao copiar ID da sessão Happy',
-        happySessionId: 'ID da sessão Happy',
+        happySessionIdCopied: 'ID da sessão AgentRejoin copiado para a área de transferência',
+        failedToCopySessionId: 'Falha ao copiar ID da sessão AgentRejoin',
+        happySessionId: 'ID da sessão AgentRejoin',
         claudeCodeSessionId: 'ID da sessão Claude Code',
         claudeCodeSessionIdCopied: 'ID da sessão Claude Code copiado para a área de transferência',
         codexThreadId: 'ID da thread do Codex',
@@ -389,7 +401,7 @@ export const pt: TranslationStructure = {
         resumeSessionSubtitle: 'Resume this session on the same machine',
         resumeSessionSameMachineOnly: 'This session can only be resumed on the same machine it started on.',
         resumeSessionMachineOffline: 'This machine is offline. Resume is only available while it is online.',
-        resumeSessionNeedsHappyAgent: 'Resume is unavailable on this machine. Run `happy-agent auth login` to enable it.',
+        resumeSessionNeedsAgentRejoinAgent: 'Resume is unavailable on this machine. Run `happy-agent auth login` to enable it.',
         resumeSessionMissingMachine: 'This session is missing its machine metadata, so it cannot be resumed.',
         resumeSessionMissingBackendId: 'This session does not have a resumable Claude or Codex identifier.',
         resumeSessionUnexpectedDirectoryPrompt: 'Resume cannot create directories. Start the session manually from its original path.',
@@ -400,7 +412,7 @@ export const pt: TranslationStructure = {
         path: 'Caminho',
         operatingSystem: 'Sistema operacional',
         processId: 'ID do processo',
-        happyHome: 'Diretório Happy',
+        happyHome: 'Diretório AgentRejoin',
         copyMetadata: 'Copiar metadados',
         agentState: 'Estado do agente',
         controlledByUser: 'Controlado pelo usuário',
@@ -430,7 +442,7 @@ export const pt: TranslationStructure = {
         emptyMainScreen: {
             // Used by EmptyMainScreen component
             readyToCode: 'Pronto para programar?',
-            installCli: 'Instale o Happy CLI',
+            installCli: 'Instale o AgentRejoin CLI',
             runIt: 'Execute',
             scanQrCode: 'Escaneie o código QR',
             openCamera: 'Abrir câmera',
@@ -537,16 +549,16 @@ export const pt: TranslationStructure = {
         submitFailed: "Não foi possível enviar sua resposta",
         dismiss: "Dispensar",
         unsupportedTitle: "Solicitação não suportada",
-        unsupportedDescription: ({ kind }: { kind: string }) => `Esta versão do Happy não pode exibir uma solicitação «${kind}». Atualize o app para responder.`,
+        unsupportedDescription: ({ kind }: { kind: string }) => `Esta versão do AgentRejoin não pode exibir uma solicitação «${kind}». Atualize o app para responder.`,
         moreQuestions: ({ count }: { count: number }) =>
             count === 1 ? "mais 1 pergunta" : `${count} perguntas a mais`,
     },
 
     sidebar: {
-        sessionsTitle: 'Happy',
+        sessionsTitle: 'AgentRejoin',
         showArchived: 'Mostrar arquivadas',
         hideArchived: 'Ocultar arquivadas',
-        newSession: 'Nova sessão',
+        newSession: 'Conversas nos servidores',
         projects: "Projetos",
     },
 
@@ -704,13 +716,13 @@ export const pt: TranslationStructure = {
         },
         // Bring your own agent
         byoTitle: 'Traga seu próprio agente',
-        byoDescription: 'Use seu próprio agente ElevenLabs em vez do padrão do Happy. Nenhuma assinatura necessária — conecte-se diretamente com sua própria conta ElevenLabs. Seu agente deve definir duas ferramentas de cliente: messageClaudeCode (envia texto ao agente de código) e processPermissionRequest (permite ou nega o uso de ferramentas). Recebe o contexto da sessão através da variável dinâmica {{initialConversationContext}}.',
+        byoDescription: 'Use seu próprio agente ElevenLabs em vez do padrão do AgentRejoin. Nenhuma assinatura necessária — conecte-se diretamente com sua própria conta ElevenLabs. Seu agente deve definir duas ferramentas de cliente: messageClaudeCode (envia texto ao agente de código) e processPermissionRequest (permite ou nega o uso de ferramentas). Recebe o contexto da sessão através da variável dinâmica {{initialConversationContext}}.',
         customAgentId: 'ElevenLabs Agent ID',
         customAgentIdNotSet: 'Não configurado',
-        customAgentIdDescription: 'Insira seu ElevenLabs Agent ID. Deixe vazio para usar o padrão do Happy.',
+        customAgentIdDescription: 'Insira seu ElevenLabs Agent ID. Deixe vazio para usar o padrão do AgentRejoin.',
         customAgentIdPlaceholder: 'e.g. abc123def456',
         bypassToken: 'Conexão direta',
-        bypassTokenSubtitle: 'Pule o servidor do Happy, conecte-se diretamente ao ElevenLabs',
+        bypassTokenSubtitle: 'Pule o servidor do AgentRejoin, conecte-se diretamente ao ElevenLabs',
         promptGuideTitle: 'Guia de prompt do agente',
         promptGuideDescription: 'Seu agente ElevenLabs precisa de:\n\n• Ferramenta: messageClaudeCode — parâmetro: message (string). Envia uma mensagem para a sessão de código ativa.\n• Ferramenta: processPermissionRequest — parâmetro: decision ("allow" ou "deny"). Aprova ou nega uma permissão de ferramenta pendente.\n• Variável dinâmica: {{initialConversationContext}} — recebe o histórico e contexto da sessão ao iniciar.\n\nO agente atua como ponte de voz entre o usuário e os agentes de código. Deve ser conciso, responder apenas quando abordado e informar quando um agente de código terminar o trabalho.',
         usageTitle: 'Uso (últimos 30 dias)',
@@ -799,7 +811,7 @@ export const pt: TranslationStructure = {
         invalidConnectionLink: 'Link de conexão inválido',
         invalidConnectionLinkDescription: 'O link de conexão está ausente ou inválido. Verifique a URL e tente novamente.',
         connectTerminal: 'Conectar terminal',
-        terminalRequestDescription: 'Um terminal está solicitando conexão à sua conta Happy Coder. Isso permitirá que o terminal envie e receba mensagens com segurança.',
+        terminalRequestDescription: 'Um terminal está solicitando conexão à sua conta AgentRejoin. Isso permitirá que o terminal envie e receba mensagens com segurança.',
         connectionDetails: 'Detalhes da conexão',
         publicKey: 'Chave pública',
         encryption: 'Criptografia',

@@ -38,7 +38,7 @@ export function parseResumableMetadata(sessionId: string, metadata: unknown): Me
     try {
         return ResumableMetadataSchema.parse(metadata) as Metadata;
     } catch {
-        throw new Error(`Happy session ${sessionId} is missing resumable metadata.`);
+        throw new Error(`AgentRejoin session ${sessionId} is missing resumable metadata.`);
     }
 }
 
@@ -59,15 +59,15 @@ export type ReconnectableHappySession = ResumableHappySession & {
 export function resolveSessionRecordByPrefix<T extends { id: string }>(records: T[], sessionId: string): T {
     const trimmed = sessionId.trim();
     if (!trimmed) {
-        throw new Error('Happy session ID is required: happy resume <session-id>');
+        throw new Error('AgentRejoin session ID is required: happy resume <session-id>');
     }
 
     const matches = records.filter((record) => record.id.startsWith(trimmed));
     if (matches.length === 0) {
-        throw new Error(`No Happy session found matching "${trimmed}"`);
+        throw new Error(`No AgentRejoin session found matching "${trimmed}"`);
     }
     if (matches.length > 1) {
-        throw new Error(`Ambiguous Happy session "${trimmed}" matches ${matches.length} sessions. Be more specific.`);
+        throw new Error(`Ambiguous AgentRejoin session "${trimmed}" matches ${matches.length} sessions. Be more specific.`);
     }
     return matches[0];
 }
@@ -90,7 +90,7 @@ function readAgentCredentials() {
     const credentials = readLocalHappyAgentCredentials();
     if (!credentials) {
         throw new Error(
-            `Cannot resume historical Happy sessions through legacy account credentials because ${credentialPath} is missing.`,
+            `Cannot resume historical AgentRejoin sessions through legacy account credentials because ${credentialPath} is missing.`,
         );
     }
     return credentials;
@@ -101,7 +101,7 @@ function resolveSessionEncryption(session: RawSession, credentials: LocalHappyAg
         const encrypted = decodeBase64(session.dataEncryptionKey);
         const sessionKey = decryptBoxBundle(encrypted.slice(1), credentials.contentKeyPair.secretKey);
         if (!sessionKey) {
-            throw new Error(`Failed to decrypt data key for Happy session ${session.id}`);
+            throw new Error(`Failed to decrypt data key for AgentRejoin session ${session.id}`);
         }
         return {
             key: sessionKey,
@@ -123,7 +123,7 @@ function decryptSessionMetadata(session: RawSession, credentials: LocalHappyAgen
         : decryptLegacy(encryptedMetadata, encryption.key);
 
     if (!metadata) {
-        throw new Error(`Failed to decrypt metadata for Happy session ${session.id}`);
+        throw new Error(`Failed to decrypt metadata for AgentRejoin session ${session.id}`);
     }
 
     return parseResumableMetadata(session.id, metadata);
@@ -141,9 +141,9 @@ async function fetchSessions(credentials: LocalHappyAgentCredentials): Promise<R
     } catch (error) {
         if (error instanceof AxiosError) {
             if (error.response?.status === 401) {
-                throw new Error('Happy session lookup authentication expired for legacy account credentials.');
+                throw new Error('AgentRejoin session lookup authentication expired for legacy account credentials.');
             }
-            throw new Error(`Failed to load Happy sessions: ${error.message}`);
+            throw new Error(`Failed to load AgentRejoin sessions: ${error.message}`);
         }
         throw error;
     }

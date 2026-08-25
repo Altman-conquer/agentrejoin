@@ -57,7 +57,7 @@ export default function RigPreviewScreen() {
                         Live metadata preview
                     </Text>
                     <Text style={{ marginTop: 5, fontSize: 28, color: theme.colors.text, ...Typography.default('semiBold') }}>
-                        Rig in Happy
+                        Rig in AgentRejoin
                     </Text>
                 </View>
 

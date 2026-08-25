@@ -217,7 +217,7 @@ export function getCurrentPushDeviceMetadata(): CurrentPushDeviceMetadata {
     ].filter((value): value is string => !!value && value.trim().length > 0);
 
     const appParts = [
-        Application.nativeApplicationVersion ? `Happy ${Application.nativeApplicationVersion}` : null,
+        Application.nativeApplicationVersion ? `AgentRejoin ${Application.nativeApplicationVersion}` : null,
         Application.nativeBuildVersion ? `build ${Application.nativeBuildVersion}` : null,
         Device.isDevice === false ? 'simulator' : null,
     ].filter((value): value is string => !!value);

@@ -63,12 +63,14 @@ describe('codex fork ops', () => {
                 updatedAt: 1_700_000_000_000,
                 archived: false,
             }],
+            hasMore: true,
         });
 
         const { listCodexThreads } = await import('./ops');
-        await expect(listCodexThreads('machine-1')).resolves.toEqual([
-            expect.objectContaining({ id: 'thread-1', cwd: '/tmp/project' }),
-        ]);
+        await expect(listCodexThreads('machine-1')).resolves.toEqual({
+            threads: [expect.objectContaining({ id: 'thread-1', cwd: '/tmp/project' })],
+            hasMore: true,
+        });
         expect(machineRPC).toHaveBeenCalledWith('machine-1', 'codex-list-threads', {});
     });
 

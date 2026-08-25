@@ -101,7 +101,7 @@ export async function runDoctorDaemon(): Promise<void> {
  * Full doctor diagnostics — verbose sections first, concise useful info last
  */
 export async function runDoctorCommand(): Promise<void> {
-    console.log(chalk.bold.cyan('\n🩺 Happy CLI Doctor\n'));
+    console.log(chalk.bold.cyan('\n🩺 AgentRejoin CLI Doctor\n'));
 
     // ── Verbose sections first (scroll off the top) ──
 
@@ -109,7 +109,7 @@ export async function runDoctorCommand(): Promise<void> {
     try {
         const allProcesses = await findAllHappyProcesses();
         if (allProcesses.length > 0) {
-            console.log(chalk.bold('🔍 All Happy CLI Processes'));
+            console.log(chalk.bold('🔍 All AgentRejoin CLI Processes'));
 
             const grouped = allProcesses.reduce((groups, process) => {
                 if (!groups[process.type]) groups[process.type] = [];
@@ -221,20 +221,20 @@ export async function runDoctorCommand(): Promise<void> {
 
     // Support and bug reports
     console.log(chalk.bold('\n🐛 Support & Bug Reports'));
-    console.log(`Report issues: ${chalk.blue('https://github.com/slopus/happy-cli/issues')}`);
-    console.log(`Documentation: ${chalk.blue('https://happy.engineering/')}`);
+    console.log(`Report issues: ${chalk.blue('https://github.com/Altman-conquer/agentrejoin/issues')}`);
+    console.log(`Website: ${chalk.blue('https://agentrejoin.zhandj.com/')}`);
 
     // ── Concise useful info last (visible without scrolling) ──
 
     // Basic info
     console.log(chalk.bold('\n📋 Basic Information'));
-    console.log(`Happy CLI Version: ${chalk.green(packageJson.version)}`);
+    console.log(`AgentRejoin CLI Version: ${chalk.green(packageJson.version)}`);
     console.log(`Platform: ${chalk.green(process.platform)} ${process.arch}`);
     console.log(`Node.js Version: ${chalk.green(process.version)}`);
 
     // Configuration
     console.log(chalk.bold('\n⚙️  Configuration'));
-    console.log(`Happy Home: ${chalk.blue(configuration.happyHomeDir)}`);
+    console.log(`AgentRejoin Home: ${chalk.blue(configuration.happyHomeDir)}`);
     console.log(`Server URL: ${chalk.blue(configuration.serverUrl)}`);
     console.log(`Logs Dir: ${chalk.blue(configuration.logsDir)}`);
 

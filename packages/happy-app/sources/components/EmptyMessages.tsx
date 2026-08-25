@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { ActivityIndicator, Pressable, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '@/constants/Typography';
 import { Session } from '@/sync/storageTypes';
 import { useSessionStatus, formatPathRelativeToHome } from '@/utils/sessionUtils';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { t } from '@/text';
+import { machineSpawnNewSession } from '@/sync/ops';
+import { sync } from '@/sync/sync';
+import { Modal } from '@/modal';
+import { useNavigateToSession } from '@/hooks/useNavigateToSession';
 
 const stylesheet = StyleSheet.create((theme) => ({
     container: {
@@ -44,6 +48,22 @@ const stylesheet = StyleSheet.create((theme) => ({
         textAlign: 'center',
         lineHeight: 24,
         ...Typography.default(),
+    },
+    retryButton: {
+        minHeight: 44,
+        marginTop: 24,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: theme.colors.button.primary.background,
+    },
+    retryButtonText: {
+        color: theme.colors.button.primary.tint,
+        fontSize: 15,
+        ...Typography.default('semiBold'),
     },
 }));
 
@@ -89,15 +109,60 @@ export function EmptyMessages({ session }: EmptyMessagesProps) {
     const osIcon = getOSIcon(session.metadata?.os);
     const sessionStatus = useSessionStatus(session);
     const startedTime = formatRelativeTime(session.createdAt);
+    const resumeStatus = session.metadata?.resumeStatus;
+    const resumeFailed = resumeStatus === 'active-writer' || resumeStatus === 'failed';
+    const resumeThreadId = session.metadata?.resumeCodexThreadId ?? session.metadata?.codexThreadId;
+    const navigateToSession = useNavigateToSession();
+    const [retrying, setRetrying] = React.useState(false);
+
+    const retryResume = React.useCallback(async () => {
+        const machineId = session.metadata?.machineId;
+        const directory = session.metadata?.path;
+        if (!machineId || !directory || !resumeThreadId || retrying) return;
+
+        setRetrying(true);
+        try {
+            const result = await machineSpawnNewSession({
+                machineId,
+                directory,
+                agent: 'codex',
+                resumeCodexThreadId: resumeThreadId,
+            });
+            if (result.type === 'success') {
+                await sync.refreshSessions();
+                navigateToSession(result.sessionId);
+                return;
+            }
+            Modal.alert(
+                t('common.error'),
+                result.type === 'error' ? result.errorMessage : t('errors.fileNotFound'),
+            );
+        } catch (error) {
+            Modal.alert(
+                t('common.error'),
+                error instanceof Error ? error.message : t('errors.operationFailed'),
+            );
+        } finally {
+            setRetrying(false);
+        }
+    }, [navigateToSession, resumeThreadId, retrying, session.metadata?.machineId, session.metadata?.path]);
     
     return (
         <View style={styles.container}>
-            <Ionicons 
-                name={osIcon}
-                size={72} 
-                color={theme.colors.textSecondary}
-                style={styles.iconContainer}
-            />
+            {resumeStatus === 'loading' ? (
+                <ActivityIndicator
+                    size="large"
+                    color={theme.colors.textSecondary}
+                    style={styles.iconContainer}
+                />
+            ) : (
+                <Ionicons
+                    name={resumeFailed ? 'alert-circle-outline' : osIcon}
+                    size={72}
+                    color={resumeFailed ? theme.colors.status.error : theme.colors.textSecondary}
+                    style={styles.iconContainer}
+                />
+            )}
             
             {session.metadata?.host && (
                 <Text style={styles.hostText}>
@@ -112,12 +177,36 @@ export function EmptyMessages({ session }: EmptyMessagesProps) {
             )}
             
             <Text style={styles.noMessagesText}>
-                No messages yet
+                {resumeStatus === 'loading'
+                    ? t('session.resumeLoading')
+                    : resumeFailed
+                        ? t('session.resumeFailed')
+                        : 'No messages yet'}
             </Text>
-            
+
             <Text style={styles.createdText}>
-                Created {startedTime}
+                {resumeStatus === 'loading'
+                    ? t('session.resumeLoadingDescription')
+                    : resumeStatus === 'active-writer'
+                        ? t('session.resumeActiveWriter')
+                        : resumeStatus === 'failed'
+                            ? t('session.resumeFailedDescription')
+                            : `Created ${startedTime}`}
             </Text>
+
+            {resumeFailed && resumeThreadId && session.metadata?.machineId && (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('session.resumeRetry')}
+                    accessibilityState={{ disabled: retrying, busy: retrying }}
+                    disabled={retrying}
+                    onPress={retryResume}
+                    style={({ pressed }) => [styles.retryButton, { opacity: retrying ? 0.6 : pressed ? 0.8 : 1 }]}
+                >
+                    {retrying && <ActivityIndicator size="small" color={theme.colors.button.primary.tint} />}
+                    <Text style={styles.retryButtonText}>{t('session.resumeRetry')}</Text>
+                </Pressable>
+            )}
         </View>
     );
 }

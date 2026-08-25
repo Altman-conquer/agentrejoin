@@ -1,5 +1,5 @@
 /**
- * English translations for the Happy app
+ * English translations for the AgentRejoin app
  * Values can be:
  * - String constants for static text
  * - Functions with typed object parameters for dynamic text
@@ -18,7 +18,7 @@ export const en = {
     tabs: {
         // Tab navigation labels
         inbox: 'Inbox',
-        sessions: 'Terminals',
+        sessions: 'Conversations',
         settings: 'Settings',
     },
 
@@ -120,7 +120,7 @@ export const en = {
         developer: 'Developer',
         developerTools: 'Developer Tools',
         about: 'About',
-        aboutFooter: 'Happy Coder is a Codex and Claude Code mobile client. It\'s fully end-to-end encrypted and your account is stored only on your device. Not affiliated with Anthropic.',
+        aboutFooter: 'AgentRejoin is a Codex and Claude Code mobile client. It\'s fully end-to-end encrypted and your account is stored only on your device. Not affiliated with Anthropic.',
         whatsNew: 'What\'s New',
         whatsNewSubtitle: 'See the latest updates and improvements',
         reportIssue: 'Report an Issue',
@@ -309,7 +309,7 @@ export const en = {
     },
 
     newSession: {
-        title: 'Start New Session',
+        title: 'Server conversations',
         machineOffline: 'Machine is offline',
         switchMachinesHint: '• Switch machines by clicking on the machine above',
     },
@@ -349,6 +349,18 @@ export const en = {
         forkErrorMissingMetadata: 'Missing session metadata required to fork.',
         forkErrorGeneric: 'Failed to fork the session.',
         forkClaudeOnly: 'Fork is currently only supported for Claude sessions.',
+        codexSync: 'Sync Codex thread',
+        codexSyncComplete: ({ count }: { count: number }) => `Synced ${count} new ${count === 1 ? 'turn' : 'turns'}.`,
+        codexSyncUpToDate: 'This conversation is already up to date.',
+        codexSyncBusy: 'Wait for the active turn to finish, then sync again.',
+        codexSyncFailed: 'Failed to sync the Codex conversation.',
+        codexSyncRequiresRestart: 'This session is using an older AgentRejoin runtime. End it and Resume the session once, then sync again.',
+        resumeLoading: 'Resuming conversation…',
+        resumeLoadingDescription: 'Loading the Codex conversation and its message history.',
+        resumeFailed: 'Could not resume this conversation',
+        resumeActiveWriter: 'This conversation is still open in another Codex process. Exit it on the server, then try again.',
+        resumeFailedDescription: 'The server rejected the resume request. Return to the conversation list and try again.',
+        resumeRetry: 'Retry resume',
     },
 
     commandPalette: {
@@ -359,7 +371,7 @@ export const en = {
         // Used by Server Configuration screen (app/(app)/server.tsx)
         serverConfiguration: 'Server Configuration',
         enterServerUrl: 'Please enter a server URL',
-        notValidHappyServer: 'Not a valid Happy Server',
+        notValidAgentRejoinServer: 'Not a valid AgentRejoin Server',
         changeServer: 'Change Server',
         continueWithServer: 'Continue with this server?',
         resetToDefault: 'Reset to Default',
@@ -379,9 +391,9 @@ export const en = {
         killSessionConfirm: 'Are you sure you want to terminate this session?',
         archiveSession: 'Archive Session',
         archiveSessionConfirm: 'Are you sure you want to archive this session?',
-        happySessionIdCopied: 'Happy Session ID copied to clipboard',
-        failedToCopySessionId: 'Failed to copy Happy Session ID',
-        happySessionId: 'Happy Session ID',
+        happySessionIdCopied: 'AgentRejoin Session ID copied to clipboard',
+        failedToCopySessionId: 'Failed to copy AgentRejoin Session ID',
+        happySessionId: 'AgentRejoin Session ID',
         claudeCodeSessionId: 'Claude Code Session ID',
         claudeCodeSessionIdCopied: 'Claude Code Session ID copied to clipboard',
         codexThreadId: 'Codex Thread ID',
@@ -404,7 +416,7 @@ export const en = {
         resumeSessionSubtitle: 'Resume this session on the same machine',
         resumeSessionSameMachineOnly: 'This session can only be resumed on the same machine it started on.',
         resumeSessionMachineOffline: 'This machine is offline. Resume is only available while it is online.',
-        resumeSessionNeedsHappyAgent: 'Resume is unavailable on this machine. Run `happy-agent auth login` to enable it.',
+        resumeSessionNeedsAgentRejoinAgent: 'Resume is unavailable on this machine. Run `happy-agent auth login` to enable it.',
         resumeSessionMissingMachine: 'This session is missing its machine metadata, so it cannot be resumed.',
         resumeSessionMissingBackendId: 'This session does not have a resumable Claude or Codex identifier.',
         resumeSessionUnexpectedDirectoryPrompt: 'Resume cannot create directories. Start the session manually from its original path.',
@@ -415,7 +427,7 @@ export const en = {
         path: 'Path',
         operatingSystem: 'Operating System',
         processId: 'Process ID',
-        happyHome: 'Happy Home',
+        happyHome: 'AgentRejoin Home',
         copyMetadata: 'Copy session metadata',
         agentState: 'Agent State',
         controlledByUser: 'Controlled by User',
@@ -445,7 +457,7 @@ export const en = {
         emptyMainScreen: {
             // Used by EmptyMainScreen component
             readyToCode: 'Ready to code?',
-            installCli: 'Install the Happy CLI',
+            installCli: 'Install the AgentRejoin CLI',
             runIt: 'Run it',
             scanQrCode: 'Scan the QR code',
             openCamera: 'Open Camera',
@@ -553,16 +565,16 @@ export const en = {
         dismiss: 'Dismiss',
         unsupportedTitle: 'Unsupported request',
         unsupportedDescription: ({ kind }: { kind: string }) =>
-            `This version of Happy cannot show a "${kind}" request. Update the app to respond.`,
+            `This version of AgentRejoin cannot show a "${kind}" request. Update the app to respond.`,
         moreQuestions: ({ count }: { count: number }) =>
             count === 1 ? '1 more question' : `${count} more questions`,
     },
 
     sidebar: {
-        sessionsTitle: 'Happy',
+        sessionsTitle: 'AgentRejoin',
         showArchived: 'Show archived',
         hideArchived: 'Hide archived',
-        newSession: 'New session',
+        newSession: 'Server conversations',
         projects: 'Projects',
     },
 
@@ -720,13 +732,13 @@ export const en = {
         },
         // Bring your own agent
         byoTitle: 'Bring Your Own Agent',
-        byoDescription: 'Use your own ElevenLabs agent instead of the Happy default. No subscription required — connect directly with your own ElevenLabs account. Your agent must define two client tools: messageClaudeCode (sends text to the coding agent) and processPermissionRequest (allows or denies tool use). It receives session context via the {{initialConversationContext}} dynamic variable.',
+        byoDescription: 'Use your own ElevenLabs agent instead of the AgentRejoin default. No subscription required — connect directly with your own ElevenLabs account. Your agent must define two client tools: messageClaudeCode (sends text to the coding agent) and processPermissionRequest (allows or denies tool use). It receives session context via the {{initialConversationContext}} dynamic variable.',
         customAgentId: 'ElevenLabs Agent ID',
         customAgentIdNotSet: 'Not configured',
-        customAgentIdDescription: 'Enter your ElevenLabs agent ID. Leave empty to use the Happy default.',
+        customAgentIdDescription: 'Enter your ElevenLabs agent ID. Leave empty to use the AgentRejoin default.',
         customAgentIdPlaceholder: 'e.g. abc123def456',
         bypassToken: 'Direct Connection',
-        bypassTokenSubtitle: 'Skip Happy server, connect straight to ElevenLabs',
+        bypassTokenSubtitle: 'Skip AgentRejoin server, connect straight to ElevenLabs',
         promptGuideTitle: 'Agent Prompt Guide',
         promptGuideDescription: 'Your ElevenLabs agent needs:\n\n• Tool: messageClaudeCode — parameter: message (string). Sends a message to the active coding session.\n• Tool: processPermissionRequest — parameter: decision ("allow" or "deny"). Approves or denies a pending tool permission.\n• Dynamic variable: {{initialConversationContext}} — receives session history and context on start.\n\nThe agent acts as a voice bridge between the user and coding agents. It should be concise, only respond when addressed, and report when a coding agent finishes work.',
         // Voice usage
@@ -816,7 +828,7 @@ export const en = {
         invalidConnectionLink: 'Invalid Connection Link',
         invalidConnectionLinkDescription: 'The connection link is missing or invalid. Please check the URL and try again.',
         connectTerminal: 'Connect Terminal',
-        terminalRequestDescription: 'A terminal is requesting to connect to your Happy Coder account. This will allow the terminal to send and receive messages securely.',
+        terminalRequestDescription: 'A terminal is requesting to connect to your AgentRejoin account. This will allow the terminal to send and receive messages securely.',
         connectionDetails: 'Connection Details',
         publicKey: 'Public Key',
         encryption: 'Encryption',

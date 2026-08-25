@@ -1,0 +1,26 @@
+services:
+  agentrejoin:
+    image: agentrejoin:latest
+    container_name: agentrejoin
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:3006:3005"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3005
+      DATA_DIR: /data
+      PGLITE_DIR: /data/pglite
+      HANDY_MASTER_SECRET: ${HANDY_MASTER_SECRET:?required}
+      HAPPY_INJECT_HTML_CONFIG: '{"serverUrl":"https://agentrejoin.zhandj.com","disableAnalytics":true}'
+    volumes:
+      - agentrejoin-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3005/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  agentrejoin-data:

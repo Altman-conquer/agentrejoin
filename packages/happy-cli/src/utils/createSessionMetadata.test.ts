@@ -84,6 +84,20 @@ describe('createSessionMetadata', () => {
         expect(metadata.dangerouslySkipPermissions).toBe(true);
     });
 
+    it('advertises Codex thread sync only after the runtime registers it', () => {
+        const codex = createSessionMetadata({
+            flavor: 'codex',
+            machineId: 'machine-codex-sync',
+        });
+        const claude = createSessionMetadata({
+            flavor: 'claude',
+            machineId: 'machine-claude-sync',
+        });
+
+        expect(codex.metadata.codexThreadSyncAvailable).toBe(false);
+        expect(claude.metadata.codexThreadSyncAvailable).toBeUndefined();
+    });
+
     it('sets fork lineage metadata when provided', () => {
         const { metadata } = createSessionMetadata({
             flavor: 'codex',

@@ -40,7 +40,11 @@ import { enqueueCodexUserText, isCodexClearText } from './codexClearCommand';
 import { downloadCodexFileEventAttachment } from './utils/attachmentEvents';
 import { prepareCodexImageInputItems } from './utils/imageInput';
 import { createSerialAsyncHandler } from './utils/serialAsyncHandler';
-import { replayCodexThreadHistory } from './utils/threadImageBackfill';
+import {
+    codexThreadHistoryLocalId,
+    prepareCodexThreadSync,
+    replayCodexThreadHistory,
+} from './utils/threadImageBackfill';
 import { codexThreadDisplayTitle, codexThreadName, provisionalCodexThreadTitle } from './utils/threadTitle';
 import { createGlobalCodexEnvironment } from './globalCodexEnvironment';
 import {
@@ -56,6 +60,7 @@ import {
     parseCodexGoalCommand,
     type CodexGoalCommand,
 } from './codexGoalStatus';
+import type { SessionEnvelope } from '@slopus/happy-wire';
 
 /**
  * Extracts a human-readable error from a codex task_complete/turn_aborted event.
@@ -85,6 +90,23 @@ function hasCodexSubagentReference(message: Record<string, unknown>): boolean {
 const DEFAULT_CODEX_MODEL = 'gpt-5.5';
 const DEFAULT_CODEX_EFFORT: ReasoningEffort = 'medium';
 const DEFAULT_CODEX_PERMISSION_MODE: PermissionMode = 'yolo';
+
+type SyncCodexThreadResult =
+    | {
+        type: 'success';
+        addedEnvelopeCount: number;
+        addedTurnCount: number;
+        latestTurnId?: string;
+        threadUpdatedAt?: number;
+    }
+    | {
+        type: 'busy';
+        reason: 'happy-turn-active' | 'remote-turn-active' | 'sync-in-progress';
+    }
+    | {
+        type: 'error';
+        errorMessage: string;
+    };
 
 /**
  * Main entry point for the codex command with ink UI
@@ -142,7 +164,7 @@ export async function runCodex(opts: {
     let machineId = settings?.machineId;
     const sandboxConfig = opts.noSandbox ? undefined : settings?.sandboxConfig;
     if (!machineId) {
-        console.error(`[START] No machine ID found in settings, which is unexpected since authAndSetupMachineIfNeeded should have created it. Please report this issue on https://github.com/slopus/happy-cli/issues`);
+        console.error(`[START] No machine ID found in settings, which is unexpected since authAndSetupMachineIfNeeded should have created it. Please report this issue on https://github.com/Altman-conquer/agentrejoin/issues`);
         process.exit(1);
     }
     logger.debug(`Using machineId: ${machineId}`);
@@ -171,6 +193,9 @@ export async function runCodex(opts: {
         ...(forkedFromMessageId ? { forkedFromMessageId } : {}),
         ...(isSideChat ? { isSideChat: true } : {}),
     });
+    if (opts.resumeThreadId) {
+        metadata.resumeStatus = 'loading';
+    }
 
     const skillCommands = await discoverCodexSkillCommands();
     if (skillCommands.length > 0) {
@@ -426,6 +451,9 @@ export async function runCodex(opts: {
     session.onUserMessage(handleUserMessage);
     let thinking = false;
     let currentTurnId: string | null = null;
+    let handlingQueuedMessage = false;
+    let codexThreadSyncInProgress: Promise<SyncCodexThreadResult> | null = null;
+    const knownCompletedCodexTurnIds = new Set<string>();
     let codexStartedSubagents = new Set<string>();
     let codexActiveSubagents = new Set<string>();
     let codexProviderSubagentToSessionSubagent = new Map<string, string>();
@@ -631,6 +659,13 @@ export async function runCodex(opts: {
 
     client = new CodexAppServerClient(sandboxConfig);
 
+    const sendCodexEnvelope = (envelope: SessionEnvelope, localId?: string) => {
+        session.sendSessionProtocolMessage(envelope, localId ? { localId } : undefined);
+        if (envelope.ev.t === 'turn-end' && envelope.turn) {
+            knownCompletedCodexTurnIds.add(envelope.turn);
+        }
+    };
+
     permissionHandler = new CodexPermissionHandler(session);
     // Drop any permission requests left in agent state from a previous CLI
     // process that died while a tool prompt was open — see the matching
@@ -639,13 +674,13 @@ export async function runCodex(opts: {
     reasoningProcessor = new ReasoningProcessor((message) => {
         const envelopes = mapCodexProcessorMessageToSessionEnvelopes(message, { currentTurnId });
         for (const envelope of envelopes) {
-            session.sendSessionProtocolMessage(envelope);
+            sendCodexEnvelope(envelope);
         }
     });
     const diffProcessor = new DiffProcessor((message) => {
         const envelopes = mapCodexProcessorMessageToSessionEnvelopes(message, { currentTurnId });
         for (const envelope of envelopes) {
-            session.sendSessionProtocolMessage(envelope);
+            sendCodexEnvelope(envelope);
         }
     });
     const updateCodexGoalState = (message: Record<string, unknown>) => {
@@ -876,7 +911,7 @@ export async function runCodex(opts: {
             codexCollabReceiverThreadIdsByCall = mapped.collabReceiverThreadIdsByCall;
             codexCollabToolByCall = mapped.collabToolByCall;
             for (const envelope of mapped.envelopes) {
-                session.sendSessionProtocolMessage(envelope);
+                sendCodexEnvelope(envelope);
             }
         }
     });
@@ -907,7 +942,12 @@ export async function runCodex(opts: {
                 const result = await replayCodexThreadHistory({
                     threadId,
                     readThread: (params) => client.readThread(params),
-                    sendEnvelope: (envelope) => session.sendSessionProtocolMessage(envelope),
+                    sendEnvelope: (envelope) => {
+                        sendCodexEnvelope(
+                            envelope,
+                            codexThreadHistoryLocalId(threadId, envelope),
+                        );
+                    },
                     uploadLocalImage: (attachment, imageOpts) => (
                         session.uploadLocalImageAttachmentEnvelope(attachment, imageOpts)
                     ),
@@ -919,6 +959,87 @@ export async function runCodex(opts: {
                 return null;
             }
         };
+
+        session.rpcHandlerManager.registerHandler<Record<string, never>, SyncCodexThreadResult>(
+            'sync-codex-thread',
+            async () => {
+                if (codexThreadSyncInProgress) {
+                    return { type: 'busy', reason: 'sync-in-progress' };
+                }
+                if (
+                    thinking
+                    || handlingQueuedMessage
+                    || client.turnId !== null
+                    || messageQueue.size() > 0
+                    || abortInProgress !== null
+                ) {
+                    return { type: 'busy', reason: 'happy-turn-active' };
+                }
+
+                const threadId = client.threadId ?? session.getMetadata()?.codexThreadId;
+                if (!threadId) {
+                    return { type: 'error', errorMessage: 'No active Codex thread' };
+                }
+
+                codexThreadSyncInProgress = (async (): Promise<SyncCodexThreadResult> => {
+                    try {
+                        const prepared = await prepareCodexThreadSync({
+                            threadId,
+                            knownCompletedTurnIds: knownCompletedCodexTurnIds,
+                            readThread: (params) => client.readThread(params),
+                            uploadLocalImage: (attachment, imageOpts) => (
+                                session.uploadLocalImageAttachmentEnvelope(attachment, imageOpts)
+                            ),
+                        });
+                        if (prepared.remoteInProgress) {
+                            return { type: 'busy', reason: 'remote-turn-active' };
+                        }
+
+                        // Reload the app-server's execution context before exposing
+                        // the imported turns in Happy.
+                        await client.resumeThread({ threadId });
+                        for (const { envelope, localId } of prepared.envelopes) {
+                            sendCodexEnvelope(envelope, localId);
+                        }
+                        for (const completedTurnId of prepared.completedTurnIds) {
+                            knownCompletedCodexTurnIds.add(completedTurnId);
+                        }
+                        await session.flush();
+
+                        logger.debug('[CODEX THREAD SYNC] Completed', {
+                            threadId,
+                            addedTurnCount: prepared.completedTurnIds.length,
+                            addedEnvelopeCount: prepared.envelopes.length,
+                        });
+                        return {
+                            type: 'success',
+                            addedEnvelopeCount: prepared.envelopes.length,
+                            addedTurnCount: prepared.completedTurnIds.length,
+                            ...(prepared.latestTurnId ? { latestTurnId: prepared.latestTurnId } : {}),
+                            ...(prepared.threadUpdatedAt !== undefined
+                                ? { threadUpdatedAt: prepared.threadUpdatedAt }
+                                : {}),
+                        };
+                    } catch (error) {
+                        logger.debug('[CODEX THREAD SYNC] Failed', error);
+                        return {
+                            type: 'error',
+                            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+                        };
+                    }
+                })();
+
+                try {
+                    return await codexThreadSyncInProgress;
+                } finally {
+                    codexThreadSyncInProgress = null;
+                }
+            },
+        );
+        session.updateMetadata((currentMetadata) => ({
+            ...currentMetadata,
+            codexThreadSyncAvailable: true,
+        }));
 
         const syncNewCodexThreadTitle = async (threadId: string) => {
             if (!shouldSyncNewCodexTitle || codexTitleSet) {
@@ -949,11 +1070,24 @@ export async function runCodex(opts: {
             });
             if (!isSideChat) {
                 const thread = await backfillCodexThread(opts.resumeThreadId, 'resume');
+                if (!thread) {
+                    await session.updateMetadata((currentMetadata) => ({
+                        ...currentMetadata,
+                        resumeStatus: 'failed',
+                    }));
+                    throw new Error(`Failed to load history for Codex thread ${opts.resumeThreadId}`);
+                }
                 const title = thread ? codexThreadDisplayTitle(thread) : null;
                 if (title) {
                     setSessionTitle(title);
                 }
+                await session.flush();
             }
+            await session.updateMetadata((currentMetadata) => {
+                const nextMetadata = { ...currentMetadata };
+                delete nextMetadata.resumeStatus;
+                return nextMetadata;
+            });
             first = false;
             appendSystemPromptInjected = true;
         }
@@ -1000,10 +1134,16 @@ export async function runCodex(opts: {
                 break;
             }
 
+            if (codexThreadSyncInProgress) {
+                await codexThreadSyncInProgress;
+            }
+            handlingQueuedMessage = true;
+
             if (isCodexClearText(message.message)) {
                 logger.debug('[Codex] Handling /clear command - resetting Codex thread state');
                 client.clearThreadState();
                 currentTurnId = null;
+                knownCompletedCodexTurnIds.clear();
                 codexStartedSubagents = new Set<string>();
                 codexActiveSubagents = new Set<string>();
                 codexProviderSubagentToSessionSubagent = new Map<string, string>();
@@ -1029,6 +1169,7 @@ export async function runCodex(opts: {
                     shouldExit,
                     sendReady,
                 });
+                handlingQueuedMessage = false;
                 continue;
             }
 
@@ -1125,6 +1266,7 @@ export async function runCodex(opts: {
                 reasoningProcessor.abort();  // Use abort to properly finish any in-progress tool calls
                 diffProcessor.reset();
                 activeTurnPermissionMode = undefined;
+                handlingQueuedMessage = false;
                 thinking = false;
                 session.keepAlive(thinking, 'remote');
                 emitReadyIfIdle({

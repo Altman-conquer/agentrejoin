@@ -116,11 +116,11 @@ export const SettingsView = React.memo(function SettingsView({
     const { connectTerminal, connectWithUrl, isLoading } = useConnectTerminal();
 
     const handleGitHub = async () => {
-        await openExternalUrl('https://github.com/slopus/happy');
+        await openExternalUrl('https://github.com/Altman-conquer/agentrejoin');
     };
 
     const handleReportIssue = async () => {
-        await openExternalUrl('https://github.com/slopus/happy/issues');
+        await openExternalUrl('https://github.com/Altman-conquer/agentrejoin/issues');
     };
 
     const handleSubscribe = async () => {
@@ -452,7 +452,7 @@ export const SettingsView = React.memo(function SettingsView({
                 <Item
                     title={t('settings.github')}
                     icon={<Ionicons name="logo-github" size={29} color={theme.colors.text} />}
-                    detail="slopus/happy"
+                    detail="Altman-conquer/agentrejoin"
                     onPress={handleGitHub}
                 />
                 <Item
@@ -463,12 +463,12 @@ export const SettingsView = React.memo(function SettingsView({
                 <Item
                     title={t('settings.privacyPolicy')}
                     icon={<Ionicons name="shield-checkmark-outline" size={29} color="#007AFF" />}
-                    onPress={() => openExternalUrl('https://happy.engineering/privacy/')}
+                    onPress={() => openExternalUrl('https://agentrejoin.zhandj.com/privacy/')}
                 />
                 <Item
                     title={t('settings.termsOfService')}
                     icon={<Ionicons name="document-text-outline" size={29} color="#007AFF" />}
-                    onPress={() => openExternalUrl('https://github.com/slopus/happy/blob/main/TERMS.md')}
+                    onPress={() => openExternalUrl('https://github.com/Altman-conquer/agentrejoin/blob/main/LICENSE')}
                 />
                 {Platform.OS === 'ios' && (
                     <Item

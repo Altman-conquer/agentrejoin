@@ -28,7 +28,7 @@ export function parseResumeCommandArgs(args: string[]): { showHelp: boolean; ses
     }
 
     if (args.length === 0) {
-        throw new Error('Happy session ID is required: happy resume <session-id>');
+        throw new Error('AgentRejoin session ID is required: happy resume <session-id>');
     }
     if (args.length > 1) {
         throw new Error(`Unexpected arguments for happy resume: ${args.slice(1).join(' ')}`);
@@ -56,7 +56,7 @@ export function buildResumeLaunch(session: ResumableHappySession, options: Resum
 
     if (flavor === 'codex') {
         if (!metadata.codexThreadId) {
-            throw new Error(`Happy session ${session.id} is missing its Codex thread ID.`);
+            throw new Error(`AgentRejoin session ${session.id} is missing its Codex thread ID.`);
         }
         const args = ['codex', '--resume', metadata.codexThreadId];
         if (options.startedBy) {
@@ -70,7 +70,7 @@ export function buildResumeLaunch(session: ResumableHappySession, options: Resum
 
     if (flavor === 'claude') {
         if (!metadata.claudeSessionId) {
-            throw new Error(`Happy session ${session.id} is missing its Claude session ID.`);
+            throw new Error(`AgentRejoin session ${session.id} is missing its Claude session ID.`);
         }
         const args = ['claude'];
         if (options.claudeStartingMode) {
@@ -86,12 +86,12 @@ export function buildResumeLaunch(session: ResumableHappySession, options: Resum
         };
     }
 
-    throw new Error(`Happy session ${session.id} uses unsupported flavor "${metadata.flavor ?? 'unknown'}".`);
+    throw new Error(`AgentRejoin session ${session.id} uses unsupported flavor "${metadata.flavor ?? 'unknown'}".`);
 }
 
 export function formatResumeHelp(): string {
     return [
-        'happy resume - Resume a previous Happy session',
+        'happy resume - Resume a previous AgentRejoin session',
         '',
         'Usage:',
         '  happy resume <happy-session-id>',

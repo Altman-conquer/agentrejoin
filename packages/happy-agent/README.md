@@ -1,6 +1,6 @@
-# Happy Agent
+# AgentRejoin control CLI
 
-CLI client for controlling Happy Coder agents remotely.
+CLI client for controlling AgentRejoin sessions remotely.
 
 Unlike `happy-cli` which both runs and controls agents, `happy-agent` only controls them — listing machines, spawning sessions on a machine, creating sessions, sending messages, reading history, monitoring state, and stopping sessions.
 
@@ -20,10 +20,10 @@ cd packages/happy-agent && npm link
 
 ## Authentication
 
-Happy Agent uses account authentication via QR code, the same flow as linking a device in the Happy mobile app.
+The control CLI uses account authentication via QR code, the same flow as linking a device in the AgentRejoin app.
 
 ```bash
-# Authenticate by scanning QR code with the Happy mobile app
+# Authenticate by scanning the QR code with AgentRejoin
 happy-agent auth login
 
 # Check authentication status
@@ -151,7 +151,7 @@ Exit code 0 when agent becomes idle, 1 on timeout.
 
 ## Environment Variables
 
-- `HAPPY_SERVER_URL` - API server URL (default: `https://api.cluster-fluster.com`)
+- `HAPPY_SERVER_URL` - API server URL (default: `https://agentrejoin.zhandj.com`)
 - `HAPPY_HOME_DIR` - Home directory for credential storage (default: `~/.happy`)
 
 ## Session ID Matching
@@ -167,7 +167,7 @@ All machine and session data is end-to-end encrypted. New records use AES-256-GC
 ## Requirements
 
 - Node.js >= 20.0.0
-- A Happy mobile app account for authentication
+- An AgentRejoin account for authentication
 
 ## Publishing to npm
 
@@ -187,4 +187,4 @@ This flow:
 
 ## License
 
-MIT
+GNU AGPL v3 - see the repository root [LICENSE](../../LICENSE).

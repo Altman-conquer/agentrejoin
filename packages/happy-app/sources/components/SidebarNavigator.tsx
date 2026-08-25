@@ -6,7 +6,7 @@ import { SidebarView } from './SidebarView';
 import { useWindowDimensions, View, Pressable, Platform } from 'react-native';
 import { useLocalSetting, useLocalSettingMutable } from '@/sync/storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useUnistyles } from 'react-native-unistyles';
@@ -23,7 +23,8 @@ export const SidebarNavigator = React.memo(() => {
     const auth = useAuth();
     const isTablet = useIsTablet();
     const zenMode = useLocalSetting('zenMode');
-    const isDesktopLayout = auth.isAuthenticated && isTablet;
+    const pathname = usePathname();
+    const isDesktopLayout = auth.isAuthenticated && isTablet && pathname !== '/';
     const showSidebar = isDesktopLayout && !zenMode;
     const { width: windowWidth } = useWindowDimensions();
 

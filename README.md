@@ -1,86 +1,100 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="/.github/logotype-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="/.github/logotype-light.png">
-    <img src="/.github/logotype-dark.png" width="400" alt="Happy">
+    <source media="(prefers-color-scheme: dark)" srcset="/.github/logotype-light.png">
+    <source media="(prefers-color-scheme: light)" srcset="/.github/logotype-dark.png">
+    <img src="/.github/logotype-dark.png" width="440" alt="AgentRejoin">
   </picture>
+
+  <h1>Rejoin your coding-agent sessions from anywhere</h1>
+
+  <p>
+    Find existing Claude Code and Codex conversations on your servers,<br>
+    resume them from web or mobile, and keep working without starting over.
+  </p>
+
+  <p>
+    <a href="https://agentrejoin.zhandj.com/app"><strong>Open Web App</strong></a>
+    · <a href="https://agentrejoin.zhandj.com">Website</a>
+    · <a href="README.zh-CN.md">简体中文</a>
+  </p>
 </div>
 
-<h1 align="center">
-  Mobile and Web Client for Claude Code & Codex
-</h1>
+<img width="1600" height="900" alt="AgentRejoin running on desktop and mobile" src="/.github/header.png" />
 
-<h4 align="center">
-Use Claude Code or Codex from anywhere with end-to-end encryption.
-</h4>
+## What AgentRejoin does
 
-<div align="center">
-  
-[📱 **iOS App**](https://apps.apple.com/us/app/happy-claude-code-client/id6748571505) • [🤖 **Android App**](https://play.google.com/store/apps/details?id=com.ex3ndr.happy) • [🌐 **Web App**](https://app.happy.engineering) • [🎥 **See a Demo**](https://youtu.be/GCS0OG9QMSE) • [📚 **Documentation**](https://happy.engineering/docs/) • [💬 **Discord**](https://discord.gg/fX9WBAhyfD)
+- **Find existing sessions** - browse coding-agent conversations already stored on connected servers.
+- **Resume in context** - reopen a Claude Code session or Codex thread with its original working directory and history.
+- **Continue from any device** - read progress, reply, approve tools, and switch between web, mobile, and terminal.
+- **Stay informed** - receive notifications when an agent needs permission or finishes a task.
+- **Keep conversations private** - messages are end-to-end encrypted before they reach the relay.
+- **Self-host when needed** - run the relay and web app on your own infrastructure.
 
-</div>
+## Quick start
 
-<img width="5178" height="2364" alt="github" src="/.github/header.png" />
-
-
-<h3 align="center">
-Step 1: Download App
-</h3>
-
-<div align="center">
-<a href="https://apps.apple.com/us/app/happy-claude-code-client/id6748571505"><img width="135" height="39" alt="appstore" src="https://github.com/user-attachments/assets/45e31a11-cf6b-40a2-a083-6dc8d1f01291" /></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://play.google.com/store/apps/details?id=com.ex3ndr.happy"><img width="135" height="39" alt="googleplay" src="https://github.com/user-attachments/assets/acbba639-858f-4c74-85c7-92a4096efbf5" /></a>
-</div>
-
-<h3 align="center">
-Step 2: Install CLI on your computer
-</h3>
+The product name is AgentRejoin. The published CLI commands remain `happy` and
+`happy-agent` for compatibility while the package and protocol migration is
+deferred.
 
 ```bash
 npm install -g happy
+happy auth login
+happy daemon start
 ```
 
-> Migrated from the `happy-coder` package. Thanks to [@franciscop](https://github.com/franciscop) for donating the `happy` package name!
-
-<h3 align="center">
-Step 3: Start using `happy` instead of `claude` or `codex`
-</h3>
+Run an agent through the connected CLI:
 
 ```bash
-# Instead of claude, use:
 happy claude
-# or
 happy codex
 ```
 
-## How does it work?
+Resume a known AgentRejoin session from the terminal:
 
-On your computer, run `happy` instead of `claude` or `happy codex` instead of `codex` to start your AI through our wrapper. When you want to control your coding agent from your phone, it restarts the session in remote mode. To switch back to your computer, just press any key on your keyboard.
+```bash
+happy resume <session-id>
+```
 
-## 🔥 Why Happy Coder?
+For the remote control CLI:
 
-- 📱 **Mobile access to Claude Code and Codex** - Check what your AI is building while away from your desk
-- 🔔 **Push notifications** - Get alerted when Claude Code and Codex needs permission or encounters errors  
-- ⚡ **Switch devices instantly** - Take control from phone or desktop with one keypress
-- 🔐 **End-to-end encrypted** - Your code never leaves your devices unencrypted
-- 🛠️ **Open source** - Audit the code yourself. No telemetry, no tracking
+```bash
+happy-agent auth login
+happy-agent machines
+happy-agent list
+happy-agent resume <session-id>
+```
 
-## 📦 Project Components
+## How it works
 
-- **[Happy App](https://github.com/slopus/happy/tree/main/packages/happy-app)** - Web UI + mobile client (Expo)
-- **[Happy CLI](https://github.com/slopus/happy/tree/main/packages/happy-cli)** - Command-line interface for Claude Code and Codex
-- **[Happy Agent](https://github.com/slopus/happy/tree/main/packages/happy-agent)** - Remote agent control CLI (create, send, monitor sessions)
-- **[Happy Server](https://github.com/slopus/happy/tree/main/packages/happy-server)** - Backend server for encrypted sync
+The server daemon indexes supported coding-agent sessions on that machine. The
+web or mobile client requests a resume through the encrypted relay; the daemon
+then reattaches the underlying Claude Code session or Codex thread and streams
+new messages back to the client. The relay handles encrypted synchronization
+but cannot read conversation content.
 
-## 🏠 Who We Are
+## Repository
 
-We're engineers scattered across Bay Area coffee shops and hacker houses, constantly checking how our AI coding agents are progressing on our pet projects during lunch breaks. Happy Coder was born from the frustration of not being able to peek at our AI coding tools building our side hustles while we're away from our keyboards. We believe the best tools come from scratching your own itch and sharing with the community.
+- `packages/happy-app` - Expo web and mobile client, plus the Tauri desktop shell
+- `packages/happy-cli` - coding-agent runtime and machine daemon
+- `packages/happy-agent` - remote session control CLI
+- `packages/happy-server` - encrypted synchronization relay
+- `packages/happy-server-self-host` - self-hosted relay and bundled web app
 
-## 📚 Documentation & Contributing
+## Development
 
-- **[Documentation Website](https://happy.engineering/docs/)** - Learn how to use Happy Coder effectively
-- **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute, PR guidelines, and development setup
-- **[Edit docs at github.com/slopus/slopus.github.io](https://github.com/slopus/slopus.github.io)** - Help improve our documentation and guides
+```bash
+pnpm install
+pnpm --filter happy-app web
+```
+
+Run focused checks before submitting changes:
+
+```bash
+pnpm --filter happy-app typecheck
+pnpm --filter happy-cli typecheck
+pnpm --filter happy-agent typecheck
+```
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+[GNU AGPL v3](LICENSE). The original Happy MIT notice is preserved in [NOTICE](NOTICE).

@@ -6,6 +6,10 @@ import { useConnectTerminal } from '@/hooks/useConnectTerminal';
 import { Modal } from '@/modal';
 import { t } from '@/text';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useAllMachines } from '@/sync/storage';
+import { isMachineOnline } from '@/utils/machineUtils';
 
 const stylesheet = StyleSheet.create((theme) => ({
     container: {
@@ -90,7 +94,25 @@ const stylesheet = StyleSheet.create((theme) => ({
 export function EmptyMainScreen() {
     const { connectTerminal, connectWithUrl, isLoading } = useConnectTerminal();
     const { theme } = useUnistyles();
+    const router = useRouter();
+    const machines = useAllMachines();
     const styles = stylesheet;
+
+    if (machines.some((machine) => isMachineOnline(machine))) {
+        return (
+            <View style={styles.container}>
+                <Ionicons name="chatbubbles-outline" size={48} color={theme.colors.textSecondary} />
+                <Text style={[styles.title, { marginTop: 18 }]}>{t('sessionHistory.empty')}</Text>
+                <View style={styles.buttonWrapper}>
+                    <RoundButton
+                        title={t('newSession.title')}
+                        size="large"
+                        onPress={() => router.navigate('/new')}
+                    />
+                </View>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>

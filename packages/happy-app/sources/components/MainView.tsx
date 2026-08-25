@@ -20,7 +20,6 @@ import { EmptySessionsTablet } from './EmptySessionsTablet';
 import { SessionsList } from './SessionsList';
 import { TabBar, TabType } from './TabBar';
 import { InboxView } from './InboxView';
-import { HomeDock, MOBILE_HOME_DOCK_CONTENT_INSET } from './HomeDock';
 import { SettingsViewWrapper } from './SettingsViewWrapper';
 import { SessionsListWrapper } from './SessionsListWrapper';
 import { Header } from './navigation/Header';
@@ -33,8 +32,8 @@ import { t } from '@/text';
 import { isUsingCustomServer } from '@/sync/serverConfig';
 import { trackFriendsSearch } from '@/track';
 import { MOBILE_GLASS_HEADER_HEIGHT } from './navigation/headerMetrics';
-import { useNewSessionDraft } from '@/hooks/useNewSessionDraft';
-import { useStartSessionFromDraft } from '@/hooks/useStartSessionFromDraft';
+
+const MOBILE_CONVERSATION_BROWSER_INSET = 82;
 
 interface MainViewProps {
     variant: 'phone' | 'sidebar';
@@ -74,6 +73,31 @@ const styles = StyleSheet.create((theme) => ({
         right: 0,
         bottom: 0,
         zIndex: 30,
+    },
+    conversationBrowserDock: {
+        width: '100%',
+        paddingHorizontal: 16,
+        paddingTop: 8,
+    },
+    conversationBrowserButton: {
+        width: '100%',
+        maxWidth: 720,
+        minHeight: 50,
+        alignSelf: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        borderRadius: 8,
+        backgroundColor: theme.colors.button.primary.background,
+    },
+    conversationBrowserButtonPressed: {
+        opacity: 0.8,
+    },
+    conversationBrowserText: {
+        color: theme.colors.button.primary.tint,
+        fontSize: 15,
+        ...Typography.default('semiBold'),
     },
     sidebarContentContainer: {
         flex: 1,
@@ -313,7 +337,7 @@ const HeaderRight = React.memo(({
                 hitSlop={15}
                 style={styles.headerButton}
             >
-                <Ionicons name="add-outline" size={28} color={theme.colors.header.tint} />
+                <Ionicons name="server-outline" size={23} color={theme.colors.header.tint} />
             </Pressable>
         );
     }
@@ -359,14 +383,12 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
     const friendRequests = useFriendRequests();
     const realtimeStatus = useRealtimeStatus();
     const safeArea = useSafeAreaInsets();
-    const { isStarting: isStartingHomeSession, startSession: startHomeSession } = useStartSessionFromDraft();
 
     // Tab state management
     // NOTE: Zen tab removed - the feature never got to a useful state
     const [activeTab, setActiveTab] = React.useState<ActiveTabType>('sessions');
     const [searchQuery, setSearchQuery] = React.useState('');
     const [searchActive, setSearchActive] = React.useState(false);
-    const [homePrompt, setHomePrompt] = React.useState('');
     const [headerBackdropVisible, setHeaderBackdropVisible] = React.useState(false);
     const headerBackdropVisibleRef = React.useRef(false);
     const showHeaderRight = activeTab !== 'settings' || isUsingCustomServer();
@@ -378,20 +400,7 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
             + 12;
     const bottomContentInset = Platform.OS === 'web'
         ? 0
-        : searchActive ? 16 : MOBILE_HOME_DOCK_CONTENT_INSET;
-
-    const handleHomePromptSubmit = React.useCallback(async (): Promise<boolean> => {
-        const prompt = homePrompt.trim();
-        const attachments = useNewSessionDraft.getState().attachments;
-        if (!prompt && attachments.length === 0) {
-            return false;
-        }
-        useNewSessionDraft.getState().setInput(prompt);
-        Keyboard.dismiss();
-        const started = await startHomeSession();
-        if (started) setHomePrompt('');
-        return started;
-    }, [homePrompt, startHomeSession]);
+        : searchActive ? 16 : MOBILE_CONVERSATION_BROWSER_INSET;
 
     const handleSearchPress = React.useCallback(() => {
         setSearchActive((currentValue) => {
@@ -527,12 +536,18 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
             ) : (
                 <View pointerEvents="box-none" style={styles.phoneBottomDockOverlay}>
                     {!searchActive && (
-                        <HomeDock
-                            prompt={homePrompt}
-                            onPromptChange={setHomePrompt}
-                            onSubmit={handleHomePromptSubmit}
-                            isSubmitting={isStartingHomeSession}
-                        />
+                        <View style={[styles.conversationBrowserDock, { paddingBottom: safeArea.bottom + 8 }]}>
+                            <Pressable
+                                onPress={() => router.navigate('/new')}
+                                style={({ pressed }) => [
+                                    styles.conversationBrowserButton,
+                                    pressed && styles.conversationBrowserButtonPressed,
+                                ]}
+                            >
+                                <Ionicons name="server-outline" size={19} color={theme.colors.button.primary.tint} />
+                                <Text style={styles.conversationBrowserText}>{t('newSession.title')}</Text>
+                            </Pressable>
+                        </View>
                     )}
                 </View>
             )}

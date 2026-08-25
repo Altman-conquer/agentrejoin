@@ -12,6 +12,26 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>AgentRejoin</title>
+        <meta
+          name="description"
+          content="Find existing Claude Code and Codex conversations on your servers, resume their original context, and continue from web or mobile."
+        />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <meta name="theme-color" content="#111318" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="AgentRejoin" />
+        <meta property="og:title" content="AgentRejoin - Resume coding-agent sessions from anywhere" />
+        <meta
+          property="og:description"
+          content="Find existing Claude Code and Codex conversations on your servers, resume their original context, and continue from web or mobile."
+        />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="AgentRejoin - Resume coding-agent sessions from anywhere" />
+        <meta
+          name="twitter:description"
+          content="Find existing Claude Code and Codex conversations on your servers, resume their original context, and continue from web or mobile."
+        />
 
         {/* 
           Disable body scrolling on web. This makes ScrollView components work closer to how they do on native. 

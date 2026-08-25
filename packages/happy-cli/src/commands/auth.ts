@@ -38,7 +38,7 @@ function showAuthHelp(): void {
 ${chalk.bold('happy auth')} - Authentication management
 
 ${chalk.bold('Usage:')}
-  happy auth login [--force]    Authenticate with Happy
+  happy auth login [--force]    Authenticate with AgentRejoin
   happy auth logout             Remove authentication and machine data
   happy auth status             Show authentication status
   happy auth help               Show this help message
@@ -125,8 +125,8 @@ async function handleAuthLogout(): Promise<void> {
     return;
   }
 
-  console.log(chalk.blue('This will log you out of Happy'));
-  console.log(chalk.yellow('⚠️  You will need to re-authenticate to use Happy again'));
+  console.log(chalk.blue('This will log you out of AgentRejoin'));
+  console.log(chalk.yellow('⚠️  You will need to re-authenticate to use AgentRejoin again'));
 
   // Ask for confirmation
   const rl = createInterface({

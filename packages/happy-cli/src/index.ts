@@ -680,7 +680,7 @@ ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('happy doctor c
       } else if (arg === '--settings') {
         // Intercept --settings flag - Happy uses this internally for session hooks
         const settingsValue = args[++i] // consume the value
-        console.warn(chalk.yellow(`⚠️  Warning: --settings is used internally by Happy for session tracking.`))
+        console.warn(chalk.yellow(`⚠️  Warning: --settings is used internally by AgentRejoin for session tracking.`))
         console.warn(chalk.yellow(`   Your settings file "${settingsValue}" will be ignored.`))
         console.warn(chalk.yellow(`   To configure Claude, edit ~/.claude/settings.json instead.`))
         // Don't pass through to claudeArgs
@@ -714,7 +714,7 @@ ${chalk.bold('happy')} - Claude Code On the Go
 ${chalk.bold('Usage:')}
   happy [options]         Start Claude with mobile control
   happy auth              Manage authentication
-  happy resume            Resume a previous Happy session by Happy session ID
+  happy resume            Resume a previous AgentRejoin session by AgentRejoin session ID
   happy codex             Start Codex mode
   happy gemini            Start Gemini mode (ACP) [deprecated — use agy]
   happy agy               Start agy (Antigravity CLI) mode
@@ -728,12 +728,12 @@ ${chalk.bold('Usage:')}
 
 ${chalk.bold('Examples:')}
   happy                    Start session
-  happy resume cmmij8      Resume a previous session by Happy session ID
+  happy resume cmmij8      Resume a previous session by AgentRejoin session ID
   happy --yolo             Start with bypassing permissions
                             happy sugar for --dangerously-skip-permissions
   happy --chrome           Enable Chrome browser access for this session
   happy --no-chrome        Disable Chrome even if default is on
-  happy --no-sandbox       Disable Happy sandbox for this session
+  happy --no-sandbox       Disable the AgentRejoin sandbox for this session
   happy --js-runtime bun   Use bun instead of node to spawn Claude Code
   happy --claude-env ANTHROPIC_BASE_URL=http://127.0.0.1:3456
                            Use a custom API endpoint (e.g., claude-code-router)
@@ -745,7 +745,7 @@ ${chalk.bold('Examples:')}
   happy auth login --force Authenticate
   happy doctor             Run diagnostics
 
-${chalk.bold('Happy supports ALL Claude options!')}
+${chalk.bold('AgentRejoin supports ALL Claude options!')}
   Use any claude flag with happy as you would with claude. Our favorite:
 
   happy --resume
@@ -826,7 +826,7 @@ ${chalk.bold('Usage:')}
 
 ${chalk.bold('Options:')}
   -p <message>    Notification message (required)
-  -t <title>      Notification title (optional, defaults to "Happy")
+  -t <title>      Notification title (optional, defaults to "AgentRejoin")
 
 ${chalk.bold('Examples:')}
   happy notify -p "Deployment complete!"
@@ -855,8 +855,8 @@ ${chalk.bold('Examples:')}
     // Create API client and send push notification
     const api = await ApiClient.create(credentials);
 
-    // Use custom title or default to "Happy"
-    const notificationTitle = title || 'Happy'
+    // Use custom title or default to the product name
+    const notificationTitle = title || 'AgentRejoin'
 
     // Send the push notification
     api.push().sendToAllDevices(

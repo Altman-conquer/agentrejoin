@@ -39,6 +39,7 @@ import { getProjectPath } from './utils/path';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { RawJSONLinesSchema, type RawJSONLines } from './types';
+import { claudeSessionEntryPreview } from './utils/listClaudeSessions';
 
 /** JavaScript runtime to use for spawning Claude Code */
 export type JsRuntime = 'node' | 'bun'
@@ -76,7 +77,7 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
     const sessionTag = randomUUID();
 
     // Log environment info at startup
-    logger.debugLargeJson('[START] Happy process started', getEnvironmentInfo());
+    logger.debugLargeJson('[START] AgentRejoin process started', getEnvironmentInfo());
     logger.debug(`[START] Options: startedBy=${options.startedBy}, startingMode=${options.startingMode}`);
 
     // Validate daemon spawn requirements - fail fast on invalid config
@@ -108,7 +109,7 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
         sandboxEnabled ||
         Boolean(options.claudeArgs?.includes('--dangerously-skip-permissions'));
     if (!machineId) {
-        console.error(`[START] No machine ID found in settings, which is unexpected since authAndSetupMachineIfNeeded should have created it. Please report this issue on https://github.com/slopus/happy-cli/issues`);
+        console.error(`[START] No machine ID found in settings, which is unexpected since authAndSetupMachineIfNeeded should have created it. Please report this issue on https://github.com/Altman-conquer/agentrejoin/issues`);
         process.exit(1);
     }
     logger.debug(`Using machineId: ${machineId}`);
@@ -317,14 +318,22 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
                 const file = await readFile(jsonlPath, 'utf-8');
                 const lines = file.split('\n');
                 let backfilled = 0;
+                let title: string | null = null;
                 for (const line of lines) {
                     if (line.trim().length === 0) continue;
                     let parsed: unknown;
                     try { parsed = JSON.parse(line); } catch { continue; }
+                    if (!title) title = claudeSessionEntryPreview(parsed);
                     const result = RawJSONLinesSchema.safeParse(parsed);
                     if (!result.success) continue;
                     await session.sendClaudeSessionMessageFromLocalTranscript(result.data as RawJSONLines);
                     backfilled += 1;
+                }
+                if (title) {
+                    session.updateMetadata((meta) => ({
+                        ...meta,
+                        summary: { text: title, updatedAt: Date.now() },
+                    }));
                 }
                 logger.debug(`[FORK BACKFILL] Replayed ${backfilled} historical messages from ${jsonlPath}`);
             } catch (error) {
@@ -460,7 +469,7 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
 
     // Start Happy MCP server
     const happyServer = await startHappyServer(session);
-    logger.debug(`[START] Happy MCP server started at ${happyServer.url}`);
+    logger.debug(`[START] AgentRejoin MCP server started at ${happyServer.url}`);
 
     // Variable to track current session instance (updated via onSessionReady callback)
     // Used by hook server to notify Session when Claude changes session ID
@@ -978,7 +987,7 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
 
     // Stop Happy MCP server
     happyServer.stop();
-    logger.debug('Stopped Happy MCP server');
+    logger.debug('Stopped AgentRejoin MCP server');
 
     // Stop Hook server and cleanup settings file
     hookServer.stop();

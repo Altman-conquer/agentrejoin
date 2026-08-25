@@ -64,7 +64,7 @@ async function fetchServerMetadata(
     } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 401) {
             throw new LocalResumeSessionError(
-                'Happy session lookup authentication expired. Run `happy auth login --force` in this environment.',
+                'AgentRejoin session lookup authentication expired. Run `happy auth login --force` in this environment.',
                 'unavailable',
             );
         }
@@ -80,7 +80,7 @@ export async function resolveLocalReconnectableSession(sessionId: string): Promi
 
     if (records.length === 0) {
         throw new LocalResumeSessionError(
-            `Cannot resume Happy session "${sessionId}" on this machine: no local session encryption data found at ${configuration.sessionsFile}. Start a new Happy session on this machine to enable future resumes.`,
+            `Cannot resume AgentRejoin session "${sessionId}" on this machine: no local session encryption data found at ${configuration.sessionsFile}. Start a new AgentRejoin session on this machine to enable future resumes.`,
             'not_found',
         );
     }
@@ -89,7 +89,7 @@ export async function resolveLocalReconnectableSession(sessionId: string): Promi
     try {
         matched = resolveSessionRecordByPrefix(records, sessionId);
     } catch (error) {
-        const message = error instanceof Error ? error.message : `No Happy session found matching "${sessionId}"`;
+        const message = error instanceof Error ? error.message : `No AgentRejoin session found matching "${sessionId}"`;
         throw new LocalResumeSessionError(
             `${message}. Only sessions stored in ${configuration.sessionsFile} can be resumed without legacy account credentials.`,
             message.startsWith('Ambiguous') ? 'ambiguous' : 'not_found',

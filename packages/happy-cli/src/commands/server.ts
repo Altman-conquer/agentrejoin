@@ -142,7 +142,7 @@ export async function handleServerCommand(args: string[]): Promise<void> {
 
     if (opts.persistServerUrl) {
         // The bundled server serves the webapp at its own origin, so webappUrl === serverUrl.
-        // Without this the CLI's auth flow would open the prod webapp (app.happy.engineering).
+        // Without this the CLI's auth flow would open the hosted AgentRejoin web app.
         await updateSettings(current => ({ ...current, serverUrl, webappUrl: serverUrl }));
         console.log(chalk.gray(`Wrote serverUrl + webappUrl=${serverUrl} to ${configuration.settingsFile}`));
     }
@@ -217,7 +217,7 @@ function parseArgs(args: string[]): ServerOptions | null {
 
 function showHelp() {
     console.log(`
-${chalk.bold('happy server')} - Run Happy sync server + web app locally (self-host)
+${chalk.bold('happy server')} - Run AgentRejoin relay + web app locally (self-host)
 
 ${chalk.bold('Usage:')}
   happy server [--port 3005] [--host 127.0.0.1] [--reset] [--no-persist]
@@ -235,7 +235,7 @@ ${chalk.bold('Notes:')}
   - Stores data in ${chalk.cyan('$HAPPY_HOME_DIR/server-data/')}
   - Packaged installs require ${chalk.cyan(SERVER_PACKAGE_NAME)} for the local server binary
   - By default, asks before writing ${chalk.cyan('settings.serverUrl')} and ${chalk.cyan('settings.webappUrl')}
-  - Use ${chalk.cyan('--no-persist')} to run without modifying default Happy settings
+  - Use ${chalk.cyan('--no-persist')} to run without modifying default AgentRejoin settings
   - Open ${chalk.cyan('http://127.0.0.1:<port>')} for the web app (if bundled)
 `);
 }
@@ -250,7 +250,7 @@ async function ensureSettingsWriteAllowed(opts: ServerOptions, serverUrl: string
         `in ${configuration.settingsFile}.`;
 
     if (!process.stdin.isTTY || !process.stderr.isTTY) {
-        console.error(chalk.red('Refusing to modify default Happy settings from a non-interactive run.'));
+        console.error(chalk.red('Refusing to modify default AgentRejoin settings from a non-interactive run.'));
         console.error(chalk.gray(message));
         console.error(chalk.gray(`Re-run with --no-persist, or pass ${SETTINGS_WRITE_CONFIRM_FLAG}.`));
         process.exit(1);

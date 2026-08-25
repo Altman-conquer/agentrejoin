@@ -45,9 +45,8 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
             // Navigation commands
             {
                 id: 'new-session',
-                title: 'New Session',
-                subtitle: 'Start a new chat session',
-                icon: 'add-circle-outline',
+                title: t('newSession.title'),
+                icon: 'server-outline',
                 category: 'Sessions',
                 shortcut: formatShortcut(preferredModifier, 'N', browserSafeShortcuts),
                 action: () => {
@@ -61,7 +60,7 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
                 icon: 'chatbubbles-outline',
                 category: 'Sessions',
                 action: () => {
-                    router.push('/');
+                    router.push('/app');
                 }
             },
             {

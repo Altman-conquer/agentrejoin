@@ -130,4 +130,4 @@ you want a TTL story.
 
 ## License
 
-MIT - Use it, modify it, deploy it anywhere.
+GNU AGPL v3 - see the repository root [LICENSE](../../LICENSE).

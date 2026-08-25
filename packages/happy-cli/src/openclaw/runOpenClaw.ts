@@ -164,7 +164,7 @@ export async function runOpenClaw(opts: RunOpenClawOptions): Promise<void> {
   });
   const response = await api.getOrCreateSession({ tag: sessionTag, metadata, state });
   if (response) {
-    log(`Happy Session ID: ${response.id}`);
+    log(`AgentRejoin Session ID: ${response.id}`);
   }
 
   let session: ApiSessionClient;

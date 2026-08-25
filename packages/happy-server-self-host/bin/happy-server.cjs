@@ -6,7 +6,7 @@ const { resolveServerArtifact } = require('../index.cjs');
 
 const artifact = resolveServerArtifact();
 if (!artifact) {
-  console.error('Could not locate the Happy server package runtime.');
+  console.error('Could not locate the AgentRejoin server package runtime.');
   process.exit(1);
 }
 

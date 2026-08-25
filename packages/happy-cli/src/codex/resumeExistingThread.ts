@@ -9,7 +9,7 @@ type ResumeThreadClient = {
 };
 
 type ResumeThreadSession = {
-    updateMetadata: (handler: (currentMetadata: any) => any) => void;
+    updateMetadata: (handler: (currentMetadata: any) => any) => void | Promise<void>;
     sendSessionEvent: (event: { type: 'message'; message: string }) => void;
 };
 
@@ -38,7 +38,7 @@ export async function resumeExistingThread(opts: {
             mcpServers: opts.mcpServers,
         });
 
-        opts.session.updateMetadata((currentMetadata) => ({
+        await opts.session.updateMetadata((currentMetadata) => ({
             ...currentMetadata,
             codexThreadId: resumedThread.threadId,
         }));
@@ -53,6 +53,11 @@ export async function resumeExistingThread(opts: {
         return resumedThread;
     } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
+        await opts.session.updateMetadata((currentMetadata) => ({
+            ...currentMetadata,
+            resumeCodexThreadId: opts.threadId,
+            resumeStatus: reason.includes('already has an active writer') ? 'active-writer' : 'failed',
+        }));
         throw new Error(`Failed to resume Codex thread ${opts.threadId}: ${reason}`);
     }
 }

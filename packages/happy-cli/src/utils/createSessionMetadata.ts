@@ -111,6 +111,7 @@ export function createSessionMetadata(opts: CreateSessionMetadataOptions): Sessi
         lifecycleState: 'running',
         lifecycleStateSince: Date.now(),
         flavor: opts.flavor,
+        ...(opts.flavor === 'codex' ? { codexThreadSyncAvailable: false } : {}),
         sandbox: opts.sandbox?.enabled ? opts.sandbox : null,
         dangerouslySkipPermissions: opts.dangerouslySkipPermissions ?? null,
         ...(gitBranch ? { gitBranch } : {}),

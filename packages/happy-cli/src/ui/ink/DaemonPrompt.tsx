@@ -35,18 +35,18 @@ export const DaemonPrompt: React.FC<DaemonPromptProps> = ({ onSelect }) => {
     return (
         <Box flexDirection="column">
             <Box marginBottom={1}>
-                <Text bold color="cyan">🚀 Happy Daemon Setup</Text>
+                <Text bold color="cyan">🚀 AgentRejoin Daemon Setup</Text>
             </Box>
             
             <Box flexDirection="column" marginBottom={1}>
-                <Text>📱 Happy can run a background service that allows you to:</Text>
+                <Text>📱 AgentRejoin can run a background service that allows you to:</Text>
                 <Text color="cyan">  • Spawn new conversations from your phone</Text>
                 <Text color="cyan">  • Continue closed conversations remotely</Text>
                 <Text color="cyan">  • Work with Claude while your computer has internet</Text>
             </Box>
             
             <Box marginBottom={1}>
-                <Text>Would you like Happy to start this service automatically?</Text>
+                <Text>Would you like AgentRejoin to start this service automatically?</Text>
             </Box>
 
             <Box flexDirection="column">

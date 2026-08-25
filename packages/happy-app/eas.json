@@ -28,6 +28,9 @@
       "autoIncrement": true,
       "distribution": "internal",
       "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "APP_ENV": "preview",
         "SHARP_IGNORE_GLOBAL_LIBVIPS": "1"
@@ -45,32 +48,12 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "APP_ENV": "production",
         "SHARP_IGNORE_GLOBAL_LIBVIPS": "1"
-      }
-    }
-  },
-  "submit": {
-    "development-store": {
-      "ios": {
-        "appleId": "steve@bulkovo.com",
-        "ascAppId": "6748984254",
-        "appleTeamId": "466DQWDR8C"
-      }
-    },
-    "preview-store": {
-      "ios": {
-        "appleId": "steve@bulkovo.com",
-        "ascAppId": "6749025570",
-        "appleTeamId": "466DQWDR8C"
-      }
-    },
-    "production": {
-      "ios": {
-        "appleId": "steve@bulkovo.com",
-        "ascAppId": "6748571505",
-        "appleTeamId": "466DQWDR8C"
       }
     }
   }

@@ -41,7 +41,7 @@ export async function authLogin(config: Config): Promise<void> {
         console.log(code);
     });
     console.log('## Authentication');
-    console.log('- Action: Scan this QR code with the Happy app');
+    console.log('- Action: Scan this QR code with the AgentRejoin app');
     console.log('- Path: Settings -> Account -> Link New Device');
     console.log(`- Public Key: \`${publicKeyBase64}\``);
     console.log(`- URL: \`${qrData}\``);

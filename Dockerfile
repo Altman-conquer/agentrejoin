@@ -34,28 +34,30 @@ FROM deps AS builder
 
 COPY packages/happy-wire ./packages/happy-wire
 COPY packages/happy-server ./packages/happy-server
+COPY packages/happy-app ./packages/happy-app
 
 RUN pnpm --filter @slopus/happy-wire --fail-if-no-match build
 RUN pnpm --filter happy-server --fail-if-no-match build
+RUN APP_ENV=production NODE_ENV=production pnpm --filter happy-app exec expo export --platform web --output-dir dist
+RUN pnpm --filter happy-server deploy --prod --legacy /repo/runtime
+RUN cd /repo/runtime && node_modules/.bin/prisma generate --schema=prisma/schema.prisma --generator client
 
 # Stage 3: runtime
 FROM node:20-slim AS runner
 
 WORKDIR /repo
 
-RUN apt-get update && apt-get install -y ffmpeg curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 ENV DATA_DIR=/data
 ENV PGLITE_DIR=/data/pglite
+ENV HAPPY_STATIC_DIR=/repo/webapp
 
-COPY --from=builder /repo/node_modules /repo/node_modules
-COPY --from=builder /repo/packages/happy-wire /repo/packages/happy-wire
-COPY --from=builder /repo/packages/happy-server /repo/packages/happy-server
+COPY --from=builder /repo/runtime /repo
+COPY --from=builder /repo/packages/happy-app/dist /repo/webapp
 
 VOLUME /data
 EXPOSE 3005
 
-WORKDIR /repo/packages/happy-server
-
-CMD ["sh", "-c", "../../node_modules/.bin/tsx sources/standalone.ts migrate && exec ../../node_modules/.bin/tsx sources/standalone.ts serve"]
+CMD ["sh", "-c", "node_modules/.bin/tsx sources/standalone.ts migrate && exec node_modules/.bin/tsx sources/standalone.ts serve"]
