@@ -53,7 +53,7 @@ ElevenLabs is the source of truth. No local DB.
 
 - `participant_name` on token mint → sets `user_id` on conversation record
 - Usage: `GET /conversations?user_id=Y&created_after=<30d>&page_size=100` → sum durations
-- `user_id` = HMAC-SHA256 of Happy user ID (deterministic, one-way)
+- `user_id` = HMAC-SHA256 of AgentRejoin user ID (deterministic, one-way)
 - Max page_size is 100 → at 100 conversations we block (can't track more without pagination)
 
 **TODO:** Remove `VoiceConversation` model from Prisma schema (no longer used, DB table can be dropped).

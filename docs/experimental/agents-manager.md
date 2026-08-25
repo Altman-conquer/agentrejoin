@@ -3,14 +3,14 @@
 Purpose: operate the control plane for delegated work.
 
 The manager does not need engineers to talk to each other. Each engineer has a
-Happy session. The manager inspects and steers that session with `happy-agent`.
+Happy session. The manager inspects and steers that session with `agentrejoin-agent`.
 
 ## Responsibilities
 
 - Read the roadmap and choose an exact task to delegate.
 - Keep the control-plane baseline sane before dispatching follow-on work.
-- Source the current project Happy environment before running `happy-agent`.
-- Spawn engineer sessions with `happy-agent`.
+- Source the current project Happy environment before running `agentrejoin-agent`.
+- Spawn engineer sessions with `agentrejoin-agent`.
 - Point each spawned session at `.agents/agents/engineer.md`.
 - Give the engineer the exact roadmap item or exact scoped excerpt.
 - Monitor progress, ask follow-up questions, and challenge weak claims through
@@ -22,7 +22,7 @@ Happy session. The manager inspects and steers that session with `happy-agent`.
 There are three separate planes. Do not collapse them.
 
 1. Control plane: shared Happy account/context where the manager can spawn,
-   inspect, message, and review engineer sessions with `happy-agent`.
+   inspect, message, and review engineer sessions with `agentrejoin-agent`.
 2. Code plane: the engineer's assigned git worktree where code changes happen.
 3. Validation plane: the engineer's worktree-local Happy environment created
    from that worktree with `yarn env:up`.
@@ -34,7 +34,7 @@ Shared visibility does not mean shared runtime-under-test.
 - Spawn one engineer per task or tightly related task bundle.
 - Use a dedicated worktree for each engineer task.
 - For a new task, create a fresh worktree from a clean local `main` baseline.
-- `happy-agent` is orchestrator-only. Engineers do not need to know about it or
+- `agentrejoin-agent` is orchestrator-only. Engineers do not need to know about it or
   use it.
 - Do not ask the engineer to validate in the manager's current shared env.
 - Before any new work, require the engineer to audit branch state in their own

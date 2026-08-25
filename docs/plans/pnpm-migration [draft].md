@@ -26,7 +26,7 @@ The `expo doctor` duplicate dependency warnings are a Yarn 1 monorepo hoisting i
 
 ## Quick fixes (current plan)
 
-1. Remove `@expo/config-plugins` from happy-app/package.json
+1. Remove `@expo/config-plugins` from agentrejoin-app/package.json
 2. Run `npx expo install --check` for version mismatches
 3. Expand `nohoist` in root package.json for duplicating expo packages
 4. Add `resolutions` to pin `react` and `react-native` to single versions

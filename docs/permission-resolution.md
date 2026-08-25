@@ -10,7 +10,7 @@ This document explains how permission mode is resolved for session messages, dep
 ## Permission Modes
 - Shared mode type: `default | acceptEdits | bypassPermissions | plan | read-only | safe-yolo | yolo`
 - Claude SDK supports: `default | acceptEdits | bypassPermissions | plan`
-- Mapping to Claude happens in `packages/happy-cli/src/claude/utils/permissionMode.ts`:
+- Mapping to Claude happens in `packages/agentrejoin-cli/src/claude/utils/permissionMode.ts`:
   - `yolo -> bypassPermissions`
   - `safe-yolo -> default`
   - `read-only -> default`
@@ -18,7 +18,7 @@ This document explains how permission mode is resolved for session messages, dep
 ## App-Side Resolution
 
 ### 1) Session state load/merge
-`packages/happy-app/sources/sync/storage.ts`
+`packages/agentrejoin-app/sources/sync/storage.ts`
 
 When sessions are merged, the app resolves `session.permissionMode` using this order:
 1. Existing in-memory session mode (if non-`default`)
@@ -29,14 +29,14 @@ When sessions are merged, the app resolves `session.permissionMode` using this o
    - Otherwise: `default`
 
 ### 2) New-session draft fallback
-`packages/happy-app/sources/sync/persistence.ts`
+`packages/agentrejoin-app/sources/sync/persistence.ts`
 
 If draft permission mode is missing:
 - Draft default: `default`
 
 ### 3) New session UI defaults
-`packages/happy-app/sources/app/(app)/new/index.tsx`
-`packages/happy-app/sources/components/NewSessionWizard.tsx`
+`packages/agentrejoin-app/sources/app/(app)/new/index.tsx`
+`packages/agentrejoin-app/sources/components/NewSessionWizard.tsx`
 
 Default selection:
 - `default`
@@ -44,7 +44,7 @@ Default selection:
 If selected mode is invalid for the currently selected agent, UI resets to agent default above.
 
 ### 4) Outbound message mode
-`packages/happy-app/sources/sync/sync.ts`
+`packages/agentrejoin-app/sources/sync/sync.ts`
 
 On send:
 - If `session.permissionMode` is non-`default`, send it.
@@ -59,8 +59,8 @@ This value is sent in:
 ## Claude CLI Resolution
 
 ### 1) Startup resolution
-`packages/happy-cli/src/claude/runClaude.ts`
-`packages/happy-cli/src/claude/utils/permissionMode.ts`
+`packages/agentrejoin-cli/src/claude/runClaude.ts`
+`packages/agentrejoin-cli/src/claude/utils/permissionMode.ts`
 
 Initial mode comes from:
 1. `--dangerously-skip-permissions` (highest priority) -> `bypassPermissions`
@@ -72,14 +72,14 @@ Then sandbox policy is applied:
 - If sandbox disabled: keep resolved mode
 
 ### 2) Per-message updates in remote flow
-`packages/happy-cli/src/claude/runClaude.ts`
+`packages/agentrejoin-cli/src/claude/runClaude.ts`
 
 When a user message includes `meta.permissionMode`:
 - If sandbox enabled: forced to `bypassPermissions`
 - If sandbox disabled: use incoming mode
 
 ### 3) Local Claude process
-`packages/happy-cli/src/claude/claudeLocal.ts`
+`packages/agentrejoin-cli/src/claude/claudeLocal.ts`
 
 If sandbox is enabled, launcher appends `--dangerously-skip-permissions` before spawn.
 

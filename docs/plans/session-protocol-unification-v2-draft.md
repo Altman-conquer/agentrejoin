@@ -341,7 +341,7 @@ The CLI already emits only the modern `role: 'session'` envelope for user text. 
 
 Also remove the hyphenated content normalization transforms (`normalizeToToolUse()` / `normalizeToToolResult()`) once no active clients send those formats.
 
-### happy-wire schema updates
+### agentrejoin-wire schema updates
 
 - Rename `start`/`stop` → `subagent-start`/`subagent-stop` with `agentId` field
 - Add `usage` to `turn-end` schema

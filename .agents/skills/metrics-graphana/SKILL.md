@@ -214,7 +214,7 @@ topk(10, sum by(method, route) (rate(http_requests_total[5m])))
 
 ### Happy Server Application Metrics
 - **ID:** `470da978-91f7-4721-be2c-cc451bf074a2`
-- **Tags:** happy-server, application, websocket, http, database
+- **Tags:** agentrejoin-server, application, websocket, http, database
 - **Panels:** WebSocket connections, session cache, alive events, HTTP metrics, database stats, RPC metrics
 
 ### Adding a panel

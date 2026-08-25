@@ -2,9 +2,9 @@
     "version": "0.0.1",
     "configurations": [
         {
-            "name": "happy-app-web",
+            "name": "agentrejoin-app-web",
             "runtimeExecutable": "pnpm",
-            "runtimeArgs": ["--dir", "packages/happy-app", "web"],
+            "runtimeArgs": ["--dir", "packages/agentrejoin-app", "web"],
             "port": 8081
         }
     ]

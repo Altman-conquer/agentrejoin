@@ -1,4 +1,4 @@
-# Happy User Deep Dive — Full Analysis
+# AgentRejoin User Deep Dive — Full Analysis
 
 *Generated 2026-04-12. Data: 502 unique contributors, 497 issues, 296 PRs, 17,782 stars.*
 
@@ -6,11 +6,11 @@
 
 ## Executive Summary
 
-Happy has 502 unique external contributors across 793 issues+PRs. The userbase is **truly global** — roughly 35% East Asian (China, Japan, Korea, HK), 40% Western (US, Europe, AU), 15% South/Southeast Asian, 10% other. Activity peaked in mid-February 2026 (43 new users/week) and has stabilized at ~27 new users/week.
+AgentRejoin has 502 unique external contributors across 793 issues+PRs. The userbase is **truly global** — roughly 35% East Asian (China, Japan, Korea, HK), 40% Western (US, Europe, AU), 15% South/Southeast Asian, 10% other. Activity peaked in mid-February 2026 (43 new users/week) and has stabilized at ~27 new users/week.
 
 **Founders:** Kirill Dubovitskiy (bra1nDump), Steve Korshakov (ex3ndr / ex3ndr-bot), and the GrocerPublishAgent system (PeoplesGrocers LLC). All three are excluded from "external contributor" counts below unless otherwise noted.
 
-**The most striking finding:** Happy's contributor list reads like a who's-who of developer tools. Instagram's first engineer, OpenAI's ChatGPT team, Meta EMs, CMU robotics professors, the Kubeflow co-founder, Meteor/Apollo core engineers, the ReactiveUI creator, LAION/img2dataset builders, and the KernelSU creator (16K stars) all use or contribute to Happy.
+**The most striking finding:** AgentRejoin's contributor list reads like a who's-who of developer tools. Instagram's first engineer, OpenAI's ChatGPT team, Meta EMs, CMU robotics professors, the Kubeflow co-founder, Meteor/Apollo core engineers, the ReactiveUI creator, LAION/img2dataset builders, and the KernelSU creator (16K stars) all use or contribute to AgentRejoin.
 
 ---
 
@@ -132,15 +132,15 @@ Beyond filing issues/PRs, these people are the actual *community* — they discu
 - Created **Tact** smart contract language for TON blockchain (694 stars)
 - Building VALL-E 2 and VoiceBox neural network reproductions
 - Also runs **ex3ndr-bot** submitting automated PRs
-- Happy activity: 2 PRs + 9 bot PRs + 90 comments.
+- AgentRejoin activity: 2 PRs + 9 bot PRs + 90 comments.
 
 **bra1nDump (Kirill Dubovitskiy)** — Bay Area — Co-founder
 - Previously at Robinhood (AI) and Meta
-- Happy activity: 104 comments, core maintainer.
+- AgentRejoin activity: 104 comments, core maintainer.
 
 **GrocerPublishAgent** — PeoplesGrocers LLC — Co-founder (automated agent)
 - Agentic CI/CD system operated by PeoplesGrocers LLC
-- Happy activity: 4 merged PRs + 71 comments. Handles mono repo refactoring, win32 bundling, e2e testing.
+- AgentRejoin activity: 4 merged PRs + 71 comments. Handles mono repo refactoring, win32 bundling, e2e testing.
 
 ---
 
@@ -151,38 +151,38 @@ Beyond filing issues/PRs, these people are the actual *community* — they discu
 - Created **Akavache** (2,543 stars) and **ModernHttpClient** (656 stars)
 - Former GitHub engineer, worked on **Electron** (246 commits) and **GitHub Desktop**
 - Now building MCP tools: **mcp-installer** (1,519 stars), **mcp-youtube** (514 stars)
-- Happy activity: 1 issue (Nov 2025). Early user.
+- AgentRejoin activity: 1 issue (Nov 2025). Early user.
 
 **rom1504 (Romain Beaumont)** — Palo Alto — 2,228 followers
 - ML Engineer at **Google**
 - Created **img2dataset** (4,407 stars) — THE tool for building AI training datasets
 - Created **clip-retrieval** (2,749 stars)
 - Key figure in **LAION** ecosystem (Open-Assistant: 37,419 stars)
-- Happy activity: 1 issue (Jan 2026).
+- AgentRejoin activity: 1 issue (Jan 2026).
 
 **shayne (Shayne Sweeney)** — NYC — 360 followers
 - **ChatGPT team at OpenAI**
 - Ex-**Tailscale** Product
 - **First Engineer at Instagram**
 - Created **go-wsl2-host** (1,679 stars), **wsl2-hacks** (1,312 stars)
-- Happy activity: 4 issue comments. Lurker-engager.
+- AgentRejoin activity: 4 issue comments. Lurker-engager.
 
 **glasser (David Glasser)** — Berkeley — 519 followers
 - Core engineer at **Apollo GraphQL** (apollo-server: 13,937 stars)
 - **3,978 commits to Meteor** (44,781 stars) — one of its most prolific contributors ever
-- Happy activity: 1 issue (Jan 2026).
+- AgentRejoin activity: 1 issue (Jan 2026).
 
 **aronchick (David Aronchick)** — Seattle — 182 followers
 - Co-founder of **Kubeflow** (15,568 stars) — THE ML toolkit for Kubernetes
 - Previously led Kubernetes/ML at Google
 - Now CEO of **Expanso** (Bacalhau, 854 stars)
-- Happy activity: 2 contributions (Jan 2026), including a PR.
+- AgentRejoin activity: 2 contributions (Jan 2026), including a PR.
 
 **tiann (weishu)** — Hong Kong — 8,218 followers
 - Creator of **KernelSU** (15,979 stars) — kernel-based Android root solution
 - Also runs **hapi** (3,451 stars) — a competing/parallel mobile AI coding client!
 - Created **Leoric** (1,918 stars), **eadb** (555 stars)
-- Happy activity: 5 PRs (3 merged, Dec 2025). Android fixes. Also 10 comments.
+- AgentRejoin activity: 5 PRs (3 merged, Dec 2025). Android fixes. Also 10 comments.
 
 ---
 
@@ -192,37 +192,37 @@ Beyond filing issues/PRs, these people are the actual *community* — they discu
 - OG iOS developer legend
 - Created **DACircularProgress** (2,348 stars), **DAKeyboardControl** (1,551 stars), **iHasApp** (1,431 stars)
 - 6,500+ cumulative stars across iOS libraries
-- Happy activity: 1 merged PR (Jan 2026) — swipe to archive/delete sessions.
+- AgentRejoin activity: 1 merged PR (Jan 2026) — swipe to archive/delete sessions.
 
 **rsanheim (Rob Sanheim)** — Madison, WI — 250 followers
 - **Former GitHub engineer**
 - Former **Cognitect** (the company behind Clojure/Datomic)
 - Now at Doximity. Ruby/Rails community veteran since 2008.
-- Happy activity: 1 PR (Feb 2026) — removing credential logging.
+- AgentRejoin activity: 1 PR (Feb 2026) — removing credential logging.
 
 **rrnewton (Ryan Newton)** — Indiana — 287 followers
 - Computer Scientist at **Meta** and **Purdue University** (and Indiana University)
 - Specializes in Containers, Compilers, Deterministic Parallelism
-- Created **happy-devbox** (30 stars) — dev environment for Happy
-- Happy activity: 1 PR + 10 comments.
+- Created **agentrejoin-devbox** (30 stars) — dev environment for AgentRejoin
+- AgentRejoin activity: 1 PR + 10 comments.
 
 **anaclumos (Sunghyun Cho)** — 0 followers (deliberately hidden)
 - Created **bing-chat-for-all-browsers** (1,444 stars)
 - Created **heimdall** (130 stars), **extracranial** (146 stars)
 - Deliberately anonymous profile ("not interested in becoming famous")
-- Happy activity: 1 issue (Nov 2025). Very early.
+- AgentRejoin activity: 1 issue (Nov 2025). Very early.
 
 **denysvitali (Denys Vitali)** — Zurich — 520 followers
 - Prolific hacker/reverse engineer. 484 repos.
 - Created **thebestmotherfuckingwebsite** (675 stars), **nginx-error-pages** (425 stars)
 - Tesla firmware decryption, Apple FindMy key ops, COVID cert analysis
-- Happy activity: 4 contributions spanning Sep 2025-Feb 2026. Very early, very persistent.
+- AgentRejoin activity: 4 contributions spanning Sep 2025-Feb 2026. Very early, very persistent.
 
 **krzemienski (Nick Krzemienski)** — NYC — 228 followers
 - Video Engineer, formerly Engineering Lead at **fuboTV**
 - Created **awesome-video** (1,845 stars) — definitive streaming video resource
 - 1,325 repos. Also building Claude Code iOS tools obsessively.
-- Happy activity: 3 PRs (Sep-Oct 2025). VERY early. First external feature contributor.
+- AgentRejoin activity: 3 PRs (Sep-Oct 2025). VERY early. First external feature contributor.
 
 ---
 
@@ -230,44 +230,44 @@ Beyond filing issues/PRs, these people are the actual *community* — they discu
 
 **dzlobin (Danny Zlobinsky)** — NYC — 113 followers
 - **Engineering Manager at Meta/Facebook**
-- Happy activity: 5 contributions (Feb 2026). PRs: camera dismiss, Ink rendering, tmux detach.
+- AgentRejoin activity: 5 contributions (Feb 2026). PRs: camera dismiss, Ink rendering, tmux detach.
 
 **omachala (Ondrej Machala)** — London — 11 followers
 - **Engineering Lead at JPMorgan Chase**
 - Created **ha-treemap-card** (57 stars), **heroshot** (35 stars)
-- Happy activity: 6 issues (Feb 2026). Thoughtful UX-focused bug reports.
+- AgentRejoin activity: 6 issues (Feb 2026). Thoughtful UX-focused bug reports.
 
 **mfazekas (Miklos Fazekas)** — Hungary — 142 followers
 - Freelance React Native expert
 - **Lead maintainer of rnmapbox/maps** (2,810 stars)
 - Also maintains net-ssh (Ruby SSH library)
-- Happy activity: 1 PR (Feb 2026) — PTY proxy stdin corruption fix.
+- AgentRejoin activity: 1 PR (Feb 2026) — PTY proxy stdin corruption fix.
 
 **lucharo (Luis Chaves Rodriguez)** — London — 35 followers
 - Data scientist/bioinformatician at **GSK (GlaxoSmithKline)**
 - MSc Health Data Analytics & Machine Learning
-- Happy activity: 7 contributions (Feb 2026). UX bug reports.
+- AgentRejoin activity: 7 contributions (Feb 2026). UX bug reports.
 
 **brtkwr (Bharat)** — Bristol, UK — 52 followers
 - Security engineer at **Two Inc** (B2B payments fintech)
-- Happy activity: 7 security issues in ONE DAY (Feb 19). Full security audit: QR auth expiry, wildcard CORS, debug logs, Docker root, RevenueCat bypass.
+- AgentRejoin activity: 7 security issues in ONE DAY (Feb 19). Full security audit: QR auth expiry, wildcard CORS, debug logs, Docker root, RevenueCat bypass.
 
 **arthurgervais (Arthur Gervais)** — 97 followers
 - Blockchain security researcher
 - Created **Bitcoin-Simulator** (196 stars), **MAPTA** (99 stars)
 - Building AI-driven automated security testing (XBOW)
-- Happy activity: 1 issue (Jan 2026).
+- AgentRejoin activity: 1 issue (Jan 2026).
 
 **ahundt (Andrew Hundt)** — Pittsburgh — 505 followers
 - **Carnegie Mellon University** CIFellow, PhD Johns Hopkins
 - Previously at CMU's National Robotics Engineering Center
 - Created **awesome-robotics** (1,365 stars)
-- Happy activity: 5 contributions spanning Nov 2025-Mar 2026. 13 comments.
+- AgentRejoin activity: 5 contributions spanning Nov 2025-Mar 2026. 13 comments.
 
 **jonocodes (Jono)** — San Francisco — 41 followers
 - Works at **Terradot** (climate tech / carbon removal)
 - Created **savr** (113 stars), GtkSourceSchemer, GeditSplitView
-- Happy activity: 6 contributions (Mar 2026). Server status, web errors, UX.
+- AgentRejoin activity: 6 contributions (Mar 2026). Server status, web errors, UX.
 
 ---
 
@@ -275,7 +275,7 @@ Beyond filing issues/PRs, these people are the actual *community* — they discu
 
 **leeroybrun (Leeroy Brun)** — Lausanne, Switzerland — 69 followers
 - Full-stack engineer at **Batiplus**
-- **Built the entire Happy self-hosted ecosystem:** happy-stacks, happy-server-light, happy-cli, slopus.github.io (docs)
+- **Built the entire AgentRejoin self-hosted ecosystem:** agentrejoin-stacks, agentrejoin-server-light, agentrejoin-cli, slopus.github.io (docs)
 - 5 merged PRs + 40 issue comments. THE community champion.
 - Also built tools for Codex and OpenCode.
 
@@ -284,7 +284,7 @@ Beyond filing issues/PRs, these people are the actual *community* — they discu
 **cruzanstx** — Possibly US Virgin Islands — 9 followers
 - The LONGEST-TENURED active user: Nov 2025 to Apr 2026 (5+ months!)
 - Built **cclimits** (15 stars) — check quota for Claude Code, Codex, Gemini CLI
-- Also built own **hapi** fork and **happy-cli** fork
+- Also built own **hapi** fork and **agentrejoin-cli** fork
 - 6 issues spanning 5 months. The most persistent power user.
 
 **theflysurfer** — ??? — 0 followers, 0 repos
@@ -324,7 +324,7 @@ Beyond filing issues/PRs, these people are the actual *community* — they discu
 
 ## The Pioneers (Pre-November 2025)
 
-These 12 people were using Happy before it had any real traction:
+These 12 people were using AgentRejoin before it had any real traction:
 
 | User | First Activity | What They Did |
 |------|---------------|---------------|
@@ -409,7 +409,7 @@ Some people go absolutely ham in a single day:
 1. **The Power User** (cruzanstx, theflysurfer, omachala) — Files many issues over time, deeply knows the product, shapes UX
 2. **The Code Contributor** (leeroybrun, Scoteezy, tiann) — Submits PRs that get merged, ships features
 3. **The Security Auditor** (brtkwr) — Does a comprehensive security sweep in one session
-4. **The Ecosystem Builder** (leeroybrun, chris-yyau, EricSeastrand) — Builds tools, docs, and infrastructure around Happy
+4. **The Ecosystem Builder** (leeroybrun, chris-yyau, EricSeastrand) — Builds tools, docs, and infrastructure around AgentRejoin
 5. **The Sprint Contributor** (davidrimshnick, seibe, EricSeastrand) — Burst of activity in 1-2 days
 6. **The Silent VIP** (shayne, glasser, anaisbetts, rom1504) — Famous people who lurk, comment, or file 1 issue
 7. **The Student Builder** (hztBUAA, chaehyun2) — Early career devs contributing to build their portfolio
@@ -419,9 +419,9 @@ Some people go absolutely ham in a single day:
 
 ## Key Takeaways
 
-1. **You have genuine industry credibility.** Instagram's first engineer, OpenAI, Meta EMs, CMU professors, Apollo/Meteor core engineers, ReactiveUI creators, and Google ML researchers all use Happy. This is not a toy project.
+1. **You have genuine industry credibility.** Instagram's first engineer, OpenAI, Meta EMs, CMU professors, Apollo/Meteor core engineers, ReactiveUI creators, and Google ML researchers all use AgentRejoin. This is not a toy project.
 
-2. **Steve Korshakov (ex3ndr) is your #1 community asset.** 90 comments, 11 PRs (via bot), plugin architecture work. He's basically volunteering as a co-maintainer. The llama-coder creator (2K stars) clearly believes in Happy.
+2. **Steve Korshakov (ex3ndr) is your #1 community asset.** 90 comments, 11 PRs (via bot), plugin architecture work. He's basically volunteering as a co-maintainer. The llama-coder creator (2K stars) clearly believes in AgentRejoin.
 
 3. **Leeroybrun is your community champion.** Built the entire self-hosted ecosystem, 40 comments, 5 merged PRs. If you ever want to recognize a community contributor, it's him.
 
@@ -431,10 +431,10 @@ Some people go absolutely ham in a single day:
 
 6. **Chinese developer community is massive and growing.** ~35% of contributors. Beijing (Beihang University), Wuhan, HK. i18n and Windows support are high-priority for this segment.
 
-7. **tiann (weishu) is both an ally and a competitor.** His hapi project (3.4K stars) does the same thing. His early Android fixes for Happy were likely cross-pollination. Worth watching.
+7. **tiann (weishu) is both an ally and a competitor.** His hapi project (3.4K stars) does the same thing. His early Android fixes for AgentRejoin were likely cross-pollination. Worth watching.
 
-8. **The "burst contributor" pattern** (12 PRs in 1 day, 18 issues in 1 day) suggests people discover Happy and immediately deep-dive. First impressions matter enormously.
+8. **The "burst contributor" pattern** (12 PRs in 1 day, 18 issues in 1 day) suggests people discover AgentRejoin and immediately deep-dive. First impressions matter enormously.
 
 9. **Session management is the #1 pain point** (158 contributions). Daemon lifecycle, tmux, session state — this is where the product needs the most polish.
 
-10. **The product has genuine "vibe coding" PMF.** The fact that Claude Code, Codex, Gemini, Kimi, and OpenCode integrations are all being contributed by users suggests Happy is becoming the universal mobile frontend for AI coding agents.
+10. **The product has genuine "vibe coding" PMF.** The fact that Claude Code, Codex, Gemini, Kimi, and OpenCode integrations are all being contributed by users suggests AgentRejoin is becoming the universal mobile frontend for AI coding agents.

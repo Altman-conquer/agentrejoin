@@ -12,7 +12,7 @@ const path = require('path');
 
 const pkgDirs = [
     path.resolve(__dirname, '..', 'node_modules/@pierre/diffs'),
-    path.resolve(__dirname, '..', 'packages/happy-app/node_modules/@pierre/diffs'),
+    path.resolve(__dirname, '..', 'packages/agentrejoin-app/node_modules/@pierre/diffs'),
 ];
 
 let patched = 0;

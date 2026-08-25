@@ -27,19 +27,19 @@ This file is the cross-product execution plan for the current Happy push.
 
 ## P0. Happy-agent orchestration and task fan-out
 
-Goal: make `happy-agent` the reliable control plane for dispatching and monitoring the rest of this roadmap.
+Goal: make `agentrejoin-agent` the reliable control plane for dispatching and monitoring the rest of this roadmap.
 
 ### Required outcomes
 
-- Verify the current `happy-agent` implementation on the real stack from this current environment before using it to spawn work for the rest of the roadmap.
-- Fix any blocking issues in the current branch first, rather than assuming `happy-agent` is ready and immediately branching into many worktrees.
+- Verify the current `agentrejoin-agent` implementation on the real stack from this current environment before using it to spawn work for the rest of the roadmap.
+- Fix any blocking issues in the current branch first, rather than assuming `agentrejoin-agent` is ready and immediately branching into many worktrees.
 - Ensure that a spawned agent session appears in the same authenticated Happy environment as the current session, so the user can see those chats later without switching accounts or contexts.
-- Use `happy-agent` to create worktrees and spawn new agent sessions only after the base flow is proven locally.
+- Use `agentrejoin-agent` to create worktrees and spawn new agent sessions only after the base flow is proven locally.
 - After the base flow is stable, scale to parallel task fan-out, with a target of roughly 10 concurrent agents only if monitoring and reporting are already reliable.
 
 ### Concrete requirements
 
-- Finish and validate `happy-agent spawn`, mirroring the app's `spawn-happy-session` flow.
+- Finish and validate `agentrejoin-agent spawn`, mirroring the app's `spawn-agentrejoin-session` flow.
 - Spawn must create or choose a worktree for the task rather than reusing the current working tree.
 - Spawned session metadata must clearly retain:
   - machine
@@ -81,7 +81,7 @@ Goal: make `happy-agent` the reliable control plane for dispatching and monitori
   5. monitor it to idle
   6. collect a real verification link
   7. write the report back into this roadmap
-- Only after this passes should the other roadmap items be delegated through `happy-agent`.
+- Only after this passes should the other roadmap items be delegated through `agentrejoin-agent`.
 
 ## P1. Control-flow, permissions, and protocol bugs
 
@@ -366,18 +366,18 @@ Goal: right-click a session to fork it — clone the session in Happy + use the 
 
 ## Session Protocol (UNDER REVIEW — FROZEN)
 
-The session protocol (`role: 'session'` envelopes in `happy-wire/src/sessionProtocol.ts`) is **not used in production** and should not be used in dev environments either until we revisit the design. The legacy protocol (`role: 'user'` / `role: 'agent'`) is the active code path everywhere.
+The session protocol (`role: 'session'` envelopes in `agentrejoin-wire/src/sessionProtocol.ts`) is **not used in production** and should not be used in dev environments either until we revisit the design. The legacy protocol (`role: 'user'` / `role: 'agent'`) is the active code path everywhere.
 
 ### Status
 
-- Types are frozen in `happy-wire` — no new consumers
+- Types are frozen in `agentrejoin-wire` — no new consumers
 - Dev env was using it but should stop
 - Production has never shipped it
 
 ### Before resuming
 
 - Look at how pi.dev standardizes their agent protocol — we may want to align with or build on that instead of rolling our own envelope format
-- Consider whether `happy-wire` should even own this, or if protocol definition belongs closer to the CLI / agent layer
+- Consider whether `agentrejoin-wire` should even own this, or if protocol definition belongs closer to the CLI / agent layer
 - The current design may be over-engineered for what we actually need
 
 ## Deferred / later
@@ -391,7 +391,7 @@ The session protocol (`role: 'session'` envelopes in `happy-wire/src/sessionProt
   - Linear integration
   - more agents (`opencode`, `openclaw`, `conductor`)
   - Claude Code team of agents
-  - software factory / `happy-agent`
+  - software factory / `agentrejoin-agent`
 
 ## Native guardrail when native validation is needed later
 
@@ -401,7 +401,7 @@ The session protocol (`role: 'session'` envelopes in `happy-wire/src/sessionProt
 - Native app test flow:
   1. Start an authenticated env with `yarn env:up:authenticated` or reuse the current env from `yarn env:current`.
   2. Source the env so Expo picks up the right server and dev auth vars: `source environments/data/envs/<env-name>/env.sh`.
-  3. For JS-only work, start Metro without recompiling native: `APP_ENV=development yarn --cwd packages/happy-app start --dev-client --port 8081`.
+  3. For JS-only work, start Metro without recompiling native: `APP_ENV=development yarn --cwd packages/agentrejoin-app start --dev-client --port 8081`.
   4. Open the installed simulator or device build from Metro with `i` or `a`, or reopen the dev client onto the Metro URL.
   5. Confirm native auth is correct in Metro logs:
      - `credentials ...`

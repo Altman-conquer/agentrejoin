@@ -1,6 +1,6 @@
 # Session Protocol
 
-This document defines the unified message protocol for Happy sessions. It replaces the existing mix of `output`, `codex`, and custom `acp` formats with a single, flat event stream. Old sessions continue using legacy formats; new sessions use this protocol exclusively.
+This document defines the unified message protocol for AgentRejoin sessions. It replaces the existing mix of `output`, `codex`, and custom `acp` formats with a single, flat event stream. Old sessions continue using legacy formats; new sessions use this protocol exclusively.
 
 For context on the existing wire protocol (WebSocket transport, encryption, sequencing), see `protocol.md`.
 

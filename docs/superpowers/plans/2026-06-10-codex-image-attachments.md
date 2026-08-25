@@ -12,58 +12,58 @@
 
 ## File Structure
 
-- Create `packages/happy-app/sources/sync/attachmentSupport.ts`: pure app helper for image attachment support decisions.
-- Create `packages/happy-app/sources/sync/attachmentSupport.test.ts`: focused tests for Claude/Codex support and unsupported image-only sends.
-- Modify `packages/happy-app/sources/sync/sync.ts`: use the support helper and avoid empty text messages for unsupported image-only sends.
-- Modify `packages/happy-app/sources/text/_default.ts`: change image upload feature subtitle from Claude-only wording to supported-agent wording.
-- Modify `packages/happy-app/sources/text/translations/en.ts`: keep English translation aligned with `_default.ts`.
-- Modify `packages/happy-app/sources/text/translations/ru.ts`: update Russian subtitle wording.
-- Modify `packages/happy-app/sources/text/translations/ca.ts`: replace Claude-only subtitle with neutral supported-agent wording.
-- Modify `packages/happy-app/sources/text/translations/es.ts`: replace Claude-only subtitle with neutral supported-agent wording.
-- Modify `packages/happy-app/sources/text/translations/it.ts`: replace Claude-only subtitle with neutral supported-agent wording.
-- Modify `packages/happy-app/sources/text/translations/ja.ts`: replace Claude-only subtitle with neutral supported-agent wording.
-- Modify `packages/happy-app/sources/text/translations/pl.ts`: replace Claude-only subtitle with neutral supported-agent wording.
-- Modify `packages/happy-app/sources/text/translations/pt.ts`: replace Claude-only subtitle with neutral supported-agent wording.
-- Modify `packages/happy-app/sources/text/translations/zh-Hans.ts`: replace Claude-only subtitle with neutral supported-agent wording.
-- Modify `packages/happy-app/sources/text/translations/zh-Hant.ts`: replace Claude-only subtitle with neutral supported-agent wording.
-- Modify `packages/happy-cli/src/codex/codexClearCommand.ts`: carry attachments when queueing normal Codex messages and isolated `/clear` messages.
-- Modify `packages/happy-cli/src/codex/codexClearCommand.test.ts`: prove attachments are forwarded into queue calls.
-- Modify `packages/happy-cli/src/codex/codexAppServerTypes.ts`: align image input items with generated Codex 0.137 wire shape by allowing optional `detail`.
-- Modify `packages/happy-cli/src/codex/codexAppServerClient.ts`: allow callers to pass extra `InputItem`s and omit empty text items for image-only turns.
-- Modify `packages/happy-cli/src/codex/codexAppServerClient.test.ts`: assert text-only input stays unchanged and image-only input is sent without `text: ""`.
-- Create `packages/happy-cli/src/codex/utils/imageInput.ts`: detect supported image bytes, write generated cache files, and build Codex `localImage` input items.
-- Create `packages/happy-cli/src/codex/utils/imageInput.test.ts`: cover byte detection, generated names, unsupported formats, and cache root selection.
-- Create `packages/happy-cli/src/codex/utils/attachmentEvents.ts`: convert Happy `file` events into decrypted `PendingAttachment` promises for Codex.
-- Create `packages/happy-cli/src/codex/utils/attachmentEvents.test.ts`: cover successful download/decrypt and failure isolation.
-- Modify `packages/happy-cli/src/api/apiSession.ts`: expose a generic encrypted local image upload helper that can tag envelopes with `claudeUuid` or `codexItemId`.
-- Modify `packages/happy-cli/src/api/apiSession.test.ts`: preserve Claude transcript image upload coverage and add Codex-tagged local image upload coverage.
-- Modify `packages/happy-cli/src/codex/utils/sessionProtocolMapper.ts`: extract pure per-turn/per-item mapping helpers without adding upload or filesystem side effects.
-- Modify `packages/happy-cli/src/codex/__tests__/sessionProtocolMapper.test.ts`: keep existing mapping behavior stable after extraction.
-- Create `packages/happy-cli/src/codex/utils/threadImageBackfill.ts`: build ordered Codex fork-backfill envelopes, inserting uploaded local image file envelopes before the matching user text envelope.
-- Create `packages/happy-cli/src/codex/utils/threadImageBackfill.test.ts`: cover image-before-text ordering, image-only user items, missing paths, and URL-image skip behavior.
-- Modify `packages/happy-cli/src/codex/runCodex.ts`: register file-event handling, drain attachments per message, prepare Codex image input items, handle image-only turns, and use ordered image backfill for Codex fork sessions.
+- Create `packages/agentrejoin-app/sources/sync/attachmentSupport.ts`: pure app helper for image attachment support decisions.
+- Create `packages/agentrejoin-app/sources/sync/attachmentSupport.test.ts`: focused tests for Claude/Codex support and unsupported image-only sends.
+- Modify `packages/agentrejoin-app/sources/sync/sync.ts`: use the support helper and avoid empty text messages for unsupported image-only sends.
+- Modify `packages/agentrejoin-app/sources/text/_default.ts`: change image upload feature subtitle from Claude-only wording to supported-agent wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/en.ts`: keep English translation aligned with `_default.ts`.
+- Modify `packages/agentrejoin-app/sources/text/translations/ru.ts`: update Russian subtitle wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/ca.ts`: replace Claude-only subtitle with neutral supported-agent wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/es.ts`: replace Claude-only subtitle with neutral supported-agent wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/it.ts`: replace Claude-only subtitle with neutral supported-agent wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/ja.ts`: replace Claude-only subtitle with neutral supported-agent wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/pl.ts`: replace Claude-only subtitle with neutral supported-agent wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/pt.ts`: replace Claude-only subtitle with neutral supported-agent wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/zh-Hans.ts`: replace Claude-only subtitle with neutral supported-agent wording.
+- Modify `packages/agentrejoin-app/sources/text/translations/zh-Hant.ts`: replace Claude-only subtitle with neutral supported-agent wording.
+- Modify `packages/agentrejoin-cli/src/codex/codexClearCommand.ts`: carry attachments when queueing normal Codex messages and isolated `/clear` messages.
+- Modify `packages/agentrejoin-cli/src/codex/codexClearCommand.test.ts`: prove attachments are forwarded into queue calls.
+- Modify `packages/agentrejoin-cli/src/codex/codexAppServerTypes.ts`: align image input items with generated Codex 0.137 wire shape by allowing optional `detail`.
+- Modify `packages/agentrejoin-cli/src/codex/codexAppServerClient.ts`: allow callers to pass extra `InputItem`s and omit empty text items for image-only turns.
+- Modify `packages/agentrejoin-cli/src/codex/codexAppServerClient.test.ts`: assert text-only input stays unchanged and image-only input is sent without `text: ""`.
+- Create `packages/agentrejoin-cli/src/codex/utils/imageInput.ts`: detect supported image bytes, write generated cache files, and build Codex `localImage` input items.
+- Create `packages/agentrejoin-cli/src/codex/utils/imageInput.test.ts`: cover byte detection, generated names, unsupported formats, and cache root selection.
+- Create `packages/agentrejoin-cli/src/codex/utils/attachmentEvents.ts`: convert Happy `file` events into decrypted `PendingAttachment` promises for Codex.
+- Create `packages/agentrejoin-cli/src/codex/utils/attachmentEvents.test.ts`: cover successful download/decrypt and failure isolation.
+- Modify `packages/agentrejoin-cli/src/api/apiSession.ts`: expose a generic encrypted local image upload helper that can tag envelopes with `claudeUuid` or `codexItemId`.
+- Modify `packages/agentrejoin-cli/src/api/apiSession.test.ts`: preserve Claude transcript image upload coverage and add Codex-tagged local image upload coverage.
+- Modify `packages/agentrejoin-cli/src/codex/utils/sessionProtocolMapper.ts`: extract pure per-turn/per-item mapping helpers without adding upload or filesystem side effects.
+- Modify `packages/agentrejoin-cli/src/codex/__tests__/sessionProtocolMapper.test.ts`: keep existing mapping behavior stable after extraction.
+- Create `packages/agentrejoin-cli/src/codex/utils/threadImageBackfill.ts`: build ordered Codex fork-backfill envelopes, inserting uploaded local image file envelopes before the matching user text envelope.
+- Create `packages/agentrejoin-cli/src/codex/utils/threadImageBackfill.test.ts`: cover image-before-text ordering, image-only user items, missing paths, and URL-image skip behavior.
+- Modify `packages/agentrejoin-cli/src/codex/runCodex.ts`: register file-event handling, drain attachments per message, prepare Codex image input items, handle image-only turns, and use ordered image backfill for Codex fork sessions.
 
 ### Task 1: App Attachment Support Gate
 
 **Files:**
-- Create: `packages/happy-app/sources/sync/attachmentSupport.ts`
-- Create: `packages/happy-app/sources/sync/attachmentSupport.test.ts`
-- Modify: `packages/happy-app/sources/sync/sync.ts`
-- Modify: `packages/happy-app/sources/text/_default.ts`
-- Modify: `packages/happy-app/sources/text/translations/en.ts`
-- Modify: `packages/happy-app/sources/text/translations/ru.ts`
-- Modify: `packages/happy-app/sources/text/translations/ca.ts`
-- Modify: `packages/happy-app/sources/text/translations/es.ts`
-- Modify: `packages/happy-app/sources/text/translations/it.ts`
-- Modify: `packages/happy-app/sources/text/translations/ja.ts`
-- Modify: `packages/happy-app/sources/text/translations/pl.ts`
-- Modify: `packages/happy-app/sources/text/translations/pt.ts`
-- Modify: `packages/happy-app/sources/text/translations/zh-Hans.ts`
-- Modify: `packages/happy-app/sources/text/translations/zh-Hant.ts`
+- Create: `packages/agentrejoin-app/sources/sync/attachmentSupport.ts`
+- Create: `packages/agentrejoin-app/sources/sync/attachmentSupport.test.ts`
+- Modify: `packages/agentrejoin-app/sources/sync/sync.ts`
+- Modify: `packages/agentrejoin-app/sources/text/_default.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/en.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/ru.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/ca.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/es.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/it.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/ja.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/pl.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/pt.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/zh-Hans.ts`
+- Modify: `packages/agentrejoin-app/sources/text/translations/zh-Hant.ts`
 
 - [ ] **Step 1: Write the failing support helper test**
 
-Create `packages/happy-app/sources/sync/attachmentSupport.test.ts`:
+Create `packages/agentrejoin-app/sources/sync/attachmentSupport.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -135,14 +135,14 @@ describe('getImageAttachmentSendPlan', () => {
 Run:
 
 ```bash
-pnpm --dir packages/happy-app exec vitest run sources/sync/attachmentSupport.test.ts
+pnpm --dir packages/agentrejoin-app exec vitest run sources/sync/attachmentSupport.test.ts
 ```
 
 Expected: FAIL with an import error because `attachmentSupport.ts` does not exist.
 
 - [ ] **Step 3: Add the support helper**
 
-Create `packages/happy-app/sources/sync/attachmentSupport.ts`:
+Create `packages/agentrejoin-app/sources/sync/attachmentSupport.ts`:
 
 ```ts
 export type ImageAttachmentFlavor = string | null | undefined;
@@ -178,7 +178,7 @@ export function getImageAttachmentSendPlan(opts: {
 
 - [ ] **Step 4: Use the helper in `sync.sendMessage`**
 
-In `packages/happy-app/sources/sync/sync.ts`, add the import:
+In `packages/agentrejoin-app/sources/sync/sync.ts`, add the import:
 
 ```ts
 import { getImageAttachmentSendPlan } from './attachmentSupport';
@@ -209,80 +209,80 @@ Replace the current `supportsAttachments` block in `sendMessage` with:
 
 - [ ] **Step 5: Update image upload feature copy**
 
-Replace the English/default subtitle in `packages/happy-app/sources/text/_default.ts` and `packages/happy-app/sources/text/translations/en.ts`:
+Replace the English/default subtitle in `packages/agentrejoin-app/sources/text/_default.ts` and `packages/agentrejoin-app/sources/text/translations/en.ts`:
 
 ```ts
 imageUploadSubtitle: 'Attach images to messages for supported agents to analyze',
 ```
 
-Replace the English/default unsupported message in `packages/happy-app/sources/text/_default.ts` and `packages/happy-app/sources/text/translations/en.ts`:
+Replace the English/default unsupported message in `packages/agentrejoin-app/sources/text/_default.ts` and `packages/agentrejoin-app/sources/text/translations/en.ts`:
 
 ```ts
 notSupportedMessage: 'This agent does not support image attachments. Images were not sent.',
 ```
 
-Replace the Russian subtitle in `packages/happy-app/sources/text/translations/ru.ts`:
+Replace the Russian subtitle in `packages/agentrejoin-app/sources/text/translations/ru.ts`:
 
 ```ts
 imageUploadSubtitle: 'Прикрепляйте изображения к сообщениям для анализа поддерживаемыми агентами',
 ```
 
-Replace the Russian unsupported message in `packages/happy-app/sources/text/translations/ru.ts`:
+Replace the Russian unsupported message in `packages/agentrejoin-app/sources/text/translations/ru.ts`:
 
 ```ts
 notSupportedMessage: 'Этот агент не поддерживает вложения изображений. Изображения не были отправлены.',
 ```
 
-In `packages/happy-app/sources/text/translations/ca.ts`, replace both strings:
+In `packages/agentrejoin-app/sources/text/translations/ca.ts`, replace both strings:
 
 ```ts
 imageUploadSubtitle: 'Adjunta imatges als missatges perquè els agents compatibles les analitzin',
 notSupportedMessage: 'Aquest agent no admet fitxers adjunts d\'imatge. Les imatges no s\'han enviat.',
 ```
 
-In `packages/happy-app/sources/text/translations/es.ts`, replace both strings:
+In `packages/agentrejoin-app/sources/text/translations/es.ts`, replace both strings:
 
 ```ts
 imageUploadSubtitle: 'Adjunta imágenes a los mensajes para que los agentes compatibles las analicen',
 notSupportedMessage: 'Este agente no admite archivos adjuntos de imagen. Las imágenes no se enviaron.',
 ```
 
-In `packages/happy-app/sources/text/translations/it.ts`, replace both strings:
+In `packages/agentrejoin-app/sources/text/translations/it.ts`, replace both strings:
 
 ```ts
 imageUploadSubtitle: 'Allega immagini ai messaggi per farle analizzare dagli agenti supportati',
 notSupportedMessage: 'Questo agente non supporta gli allegati immagine. Le immagini non sono state inviate.',
 ```
 
-In `packages/happy-app/sources/text/translations/ja.ts`, replace both strings:
+In `packages/agentrejoin-app/sources/text/translations/ja.ts`, replace both strings:
 
 ```ts
 imageUploadSubtitle: '対応エージェントに分析させるため、メッセージに画像を添付する',
 notSupportedMessage: 'このエージェントは画像の添付に対応していません。画像は送信されませんでした。',
 ```
 
-In `packages/happy-app/sources/text/translations/pl.ts`, replace both strings:
+In `packages/agentrejoin-app/sources/text/translations/pl.ts`, replace both strings:
 
 ```ts
 imageUploadSubtitle: 'Dołączaj obrazy do wiadomości, aby obsługiwani agenci mogli je analizować',
 notSupportedMessage: 'Ten agent nie obsługuje załączników obrazów. Obrazy nie zostały wysłane.',
 ```
 
-In `packages/happy-app/sources/text/translations/pt.ts`, replace both strings:
+In `packages/agentrejoin-app/sources/text/translations/pt.ts`, replace both strings:
 
 ```ts
 imageUploadSubtitle: 'Anexe imagens às mensagens para que agentes compatíveis as analisem',
 notSupportedMessage: 'Este agente não suporta anexos de imagem. As imagens não foram enviadas.',
 ```
 
-In `packages/happy-app/sources/text/translations/zh-Hans.ts`, replace both strings:
+In `packages/agentrejoin-app/sources/text/translations/zh-Hans.ts`, replace both strings:
 
 ```ts
 imageUploadSubtitle: '将图片附加到消息中，以便受支持的代理进行分析',
 notSupportedMessage: '此代理不支持图片附件。图片未发送。',
 ```
 
-In `packages/happy-app/sources/text/translations/zh-Hant.ts`, replace both strings:
+In `packages/agentrejoin-app/sources/text/translations/zh-Hant.ts`, replace both strings:
 
 ```ts
 imageUploadSubtitle: '將圖片附加到訊息中，讓支援的代理分析',
@@ -294,8 +294,8 @@ notSupportedMessage: '此代理不支援圖片附件。圖片未傳送。',
 Run:
 
 ```bash
-pnpm --dir packages/happy-app exec vitest run sources/sync/attachmentSupport.test.ts
-pnpm --dir packages/happy-app typecheck
+pnpm --dir packages/agentrejoin-app exec vitest run sources/sync/attachmentSupport.test.ts
+pnpm --dir packages/agentrejoin-app typecheck
 ```
 
 Expected: PASS.
@@ -305,32 +305,32 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/happy-app/sources/sync/attachmentSupport.ts \
-  packages/happy-app/sources/sync/attachmentSupport.test.ts \
-  packages/happy-app/sources/sync/sync.ts \
-  packages/happy-app/sources/text/_default.ts \
-  packages/happy-app/sources/text/translations/en.ts \
-  packages/happy-app/sources/text/translations/ru.ts \
-  packages/happy-app/sources/text/translations/ca.ts \
-  packages/happy-app/sources/text/translations/es.ts \
-  packages/happy-app/sources/text/translations/it.ts \
-  packages/happy-app/sources/text/translations/ja.ts \
-  packages/happy-app/sources/text/translations/pl.ts \
-  packages/happy-app/sources/text/translations/pt.ts \
-  packages/happy-app/sources/text/translations/zh-Hans.ts \
-  packages/happy-app/sources/text/translations/zh-Hant.ts
+git add packages/agentrejoin-app/sources/sync/attachmentSupport.ts \
+  packages/agentrejoin-app/sources/sync/attachmentSupport.test.ts \
+  packages/agentrejoin-app/sources/sync/sync.ts \
+  packages/agentrejoin-app/sources/text/_default.ts \
+  packages/agentrejoin-app/sources/text/translations/en.ts \
+  packages/agentrejoin-app/sources/text/translations/ru.ts \
+  packages/agentrejoin-app/sources/text/translations/ca.ts \
+  packages/agentrejoin-app/sources/text/translations/es.ts \
+  packages/agentrejoin-app/sources/text/translations/it.ts \
+  packages/agentrejoin-app/sources/text/translations/ja.ts \
+  packages/agentrejoin-app/sources/text/translations/pl.ts \
+  packages/agentrejoin-app/sources/text/translations/pt.ts \
+  packages/agentrejoin-app/sources/text/translations/zh-Hans.ts \
+  packages/agentrejoin-app/sources/text/translations/zh-Hant.ts
 git commit -m "feat(app): enable image attachments for codex"
 ```
 
 ### Task 2: Preserve Attachments Through Codex Queueing
 
 **Files:**
-- Modify: `packages/happy-cli/src/codex/codexClearCommand.ts`
-- Modify: `packages/happy-cli/src/codex/codexClearCommand.test.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/codexClearCommand.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/codexClearCommand.test.ts`
 
 - [ ] **Step 1: Write failing queue attachment tests**
 
-Append these tests to `packages/happy-cli/src/codex/codexClearCommand.test.ts`:
+Append these tests to `packages/agentrejoin-cli/src/codex/codexClearCommand.test.ts`:
 
 ```ts
     it('passes attachments to normal queued messages', () => {
@@ -387,14 +387,14 @@ Append these tests to `packages/happy-cli/src/codex/codexClearCommand.test.ts`:
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/codexClearCommand.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/codexClearCommand.test.ts
 ```
 
 Expected: FAIL because `enqueueCodexUserText` does not accept or forward `attachments`.
 
 - [ ] **Step 3: Update `enqueueCodexUserText`**
 
-Replace `packages/happy-cli/src/codex/codexClearCommand.ts` with:
+Replace `packages/agentrejoin-cli/src/codex/codexClearCommand.ts` with:
 
 ```ts
 import { parseSpecialCommand } from '@/parsers/specialCommands';
@@ -430,7 +430,7 @@ export function enqueueCodexUserText<T>(opts: {
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/codexClearCommand.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/codexClearCommand.test.ts
 ```
 
 Expected: PASS.
@@ -440,21 +440,21 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/happy-cli/src/codex/codexClearCommand.ts \
-  packages/happy-cli/src/codex/codexClearCommand.test.ts
+git add packages/agentrejoin-cli/src/codex/codexClearCommand.ts \
+  packages/agentrejoin-cli/src/codex/codexClearCommand.test.ts
 git commit -m "feat(cli): preserve codex queued attachments"
 ```
 
 ### Task 3: Allow Codex App-Server Image Input Items
 
 **Files:**
-- Modify: `packages/happy-cli/src/codex/codexAppServerTypes.ts`
-- Modify: `packages/happy-cli/src/codex/codexAppServerClient.ts`
-- Modify: `packages/happy-cli/src/codex/codexAppServerClient.test.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/codexAppServerTypes.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/codexAppServerClient.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/codexAppServerClient.test.ts`
 
 - [ ] **Step 1: Write failing app-server input tests**
 
-Append this test case inside `describe('CodexAppServerClient sandbox integration', ...)` in `packages/happy-cli/src/codex/codexAppServerClient.test.ts`:
+Append this test case inside `describe('CodexAppServerClient sandbox integration', ...)` in `packages/agentrejoin-cli/src/codex/codexAppServerClient.test.ts`:
 
 ```ts
     it('sends extra localImage input items and omits empty text for image-only turns', async () => {
@@ -595,14 +595,14 @@ Append this test case inside `describe('CodexAppServerClient sandbox integration
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/codexAppServerClient.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/codexAppServerClient.test.ts
 ```
 
 Expected: FAIL because `sendTurnAndWait` options do not accept `extraInputItems`.
 
 - [ ] **Step 3: Update Codex input item types**
 
-In `packages/happy-cli/src/codex/codexAppServerTypes.ts`, replace the `InputItem` definition with:
+In `packages/agentrejoin-cli/src/codex/codexAppServerTypes.ts`, replace the `InputItem` definition with:
 
 ```ts
 export type ImageDetail = "auto" | "low" | "high";
@@ -615,7 +615,7 @@ export type InputItem =
 
 - [ ] **Step 4: Update `sendTurn` and `sendTurnAndWait` options**
 
-In `packages/happy-cli/src/codex/codexAppServerClient.ts`, add `extraInputItems?: InputItem[]` to both option objects:
+In `packages/agentrejoin-cli/src/codex/codexAppServerClient.ts`, add `extraInputItems?: InputItem[]` to both option objects:
 
 ```ts
     async sendTurn(prompt: string, opts?: {
@@ -664,7 +664,7 @@ This already forwards `extraInputItems` once the option type is widened. Do not 
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/codexAppServerClient.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/codexAppServerClient.test.ts
 ```
 
 Expected: PASS.
@@ -674,21 +674,21 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/happy-cli/src/codex/codexAppServerTypes.ts \
-  packages/happy-cli/src/codex/codexAppServerClient.ts \
-  packages/happy-cli/src/codex/codexAppServerClient.test.ts
+git add packages/agentrejoin-cli/src/codex/codexAppServerTypes.ts \
+  packages/agentrejoin-cli/src/codex/codexAppServerClient.ts \
+  packages/agentrejoin-cli/src/codex/codexAppServerClient.test.ts
 git commit -m "feat(cli): send codex image input items"
 ```
 
 ### Task 4: Build Codex Local Image Cache Helper
 
 **Files:**
-- Create: `packages/happy-cli/src/codex/utils/imageInput.ts`
-- Create: `packages/happy-cli/src/codex/utils/imageInput.test.ts`
+- Create: `packages/agentrejoin-cli/src/codex/utils/imageInput.ts`
+- Create: `packages/agentrejoin-cli/src/codex/utils/imageInput.test.ts`
 
 - [ ] **Step 1: Write failing image input helper tests**
 
-Create `packages/happy-cli/src/codex/utils/imageInput.test.ts`:
+Create `packages/agentrejoin-cli/src/codex/utils/imageInput.test.ts`:
 
 ```ts
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -702,7 +702,7 @@ vi.mock('@/ui/logger', () => ({
 }));
 
 vi.mock('@/configuration', () => ({
-    configuration: { happyHomeDir: '/home/test/.happy' },
+    configuration: { agentRejoinHomeDir: '/home/test/.agentrejoin' },
 }));
 
 import {
@@ -830,7 +830,7 @@ describe('resolveCodexImageCacheDir', () => {
     it('defaults to Happy local state instead of arbitrary OS temp', () => {
         expect(resolveCodexImageCacheDir({
             sessionId: 'session-4',
-        })).toBe('/home/test/.happy/codex-image-cache/session-4');
+        })).toBe('/home/test/.agentrejoin/codex-image-cache/session-4');
     });
 });
 ```
@@ -840,14 +840,14 @@ describe('resolveCodexImageCacheDir', () => {
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/utils/imageInput.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/utils/imageInput.test.ts
 ```
 
 Expected: FAIL because `imageInput.ts` does not exist.
 
 - [ ] **Step 3: Add the image input helper**
 
-Create `packages/happy-cli/src/codex/utils/imageInput.ts`:
+Create `packages/agentrejoin-cli/src/codex/utils/imageInput.ts`:
 
 ```ts
 import { randomUUID } from 'node:crypto';
@@ -917,7 +917,7 @@ export function resolveCodexImageCacheDir(opts: {
     sessionId: string;
     cacheRootDir?: string;
 }): string {
-    return join(opts.cacheRootDir ?? join(configuration.happyHomeDir, 'codex-image-cache'), opts.sessionId);
+    return join(opts.cacheRootDir ?? join(configuration.agentRejoinHomeDir, 'codex-image-cache'), opts.sessionId);
 }
 
 export async function prepareCodexImageInputItems(
@@ -972,7 +972,7 @@ export async function prepareCodexImageInputItems(
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/utils/imageInput.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/utils/imageInput.test.ts
 ```
 
 Expected: PASS.
@@ -982,21 +982,21 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/happy-cli/src/codex/utils/imageInput.ts \
-  packages/happy-cli/src/codex/utils/imageInput.test.ts
+git add packages/agentrejoin-cli/src/codex/utils/imageInput.ts \
+  packages/agentrejoin-cli/src/codex/utils/imageInput.test.ts
 git commit -m "feat(cli): prepare codex local image inputs"
 ```
 
 ### Task 5: Convert Codex File Events Into Queue Attachments
 
 **Files:**
-- Create: `packages/happy-cli/src/codex/utils/attachmentEvents.ts`
-- Create: `packages/happy-cli/src/codex/utils/attachmentEvents.test.ts`
-- Modify: `packages/happy-cli/src/codex/runCodex.ts`
+- Create: `packages/agentrejoin-cli/src/codex/utils/attachmentEvents.ts`
+- Create: `packages/agentrejoin-cli/src/codex/utils/attachmentEvents.test.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/runCodex.ts`
 
 - [ ] **Step 1: Write failing attachment event tests**
 
-Create `packages/happy-cli/src/codex/utils/attachmentEvents.test.ts`:
+Create `packages/agentrejoin-cli/src/codex/utils/attachmentEvents.test.ts`:
 
 ```ts
 import { describe, expect, it, vi } from 'vitest';
@@ -1079,14 +1079,14 @@ describe('downloadCodexFileEventAttachment', () => {
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/utils/attachmentEvents.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/utils/attachmentEvents.test.ts
 ```
 
 Expected: FAIL because `attachmentEvents.ts` does not exist.
 
 - [ ] **Step 3: Add the attachment event helper**
 
-Create `packages/happy-cli/src/codex/utils/attachmentEvents.ts`:
+Create `packages/agentrejoin-cli/src/codex/utils/attachmentEvents.ts`:
 
 ```ts
 import type { ApiSessionClient } from '@/api/apiSession';
@@ -1121,7 +1121,7 @@ export async function downloadCodexFileEventAttachment(
 
 - [ ] **Step 4: Register Codex file-event handling in `runCodex.ts`**
 
-In `packages/happy-cli/src/codex/runCodex.ts`, add imports:
+In `packages/agentrejoin-cli/src/codex/runCodex.ts`, add imports:
 
 ```ts
 import type { PendingAttachment } from '@/utils/MessageQueue2';
@@ -1169,7 +1169,7 @@ Update the `pending` and `message` loop types:
 
 - [ ] **Step 5: Convert queued attachments before `sendTurnAndWait`**
 
-In the main Codex loop in `packages/happy-cli/src/codex/runCodex.ts`, before `buildCodexTurnPrompt`, add:
+In the main Codex loop in `packages/agentrejoin-cli/src/codex/runCodex.ts`, before `buildCodexTurnPrompt`, add:
 
 ```ts
                 const imageInputs = await prepareCodexImageInputItems(message.attachments, {
@@ -1216,8 +1216,8 @@ Change user message display so image-only messages do not render an empty row:
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/utils/attachmentEvents.test.ts src/codex/codexClearCommand.test.ts
-pnpm --dir packages/happy-cli typecheck
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/utils/attachmentEvents.test.ts src/codex/codexClearCommand.test.ts
+pnpm --dir packages/agentrejoin-cli typecheck
 ```
 
 Expected: PASS.
@@ -1227,21 +1227,21 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/happy-cli/src/codex/utils/attachmentEvents.ts \
-  packages/happy-cli/src/codex/utils/attachmentEvents.test.ts \
-  packages/happy-cli/src/codex/runCodex.ts
+git add packages/agentrejoin-cli/src/codex/utils/attachmentEvents.ts \
+  packages/agentrejoin-cli/src/codex/utils/attachmentEvents.test.ts \
+  packages/agentrejoin-cli/src/codex/runCodex.ts
 git commit -m "feat(cli): deliver app images to codex"
 ```
 
 ### Task 6: Generalize Local Image Upload Envelopes
 
 **Files:**
-- Modify: `packages/happy-cli/src/api/apiSession.ts`
-- Modify: `packages/happy-cli/src/api/apiSession.test.ts`
+- Modify: `packages/agentrejoin-cli/src/api/apiSession.ts`
+- Modify: `packages/agentrejoin-cli/src/api/apiSession.test.ts`
 
 - [ ] **Step 1: Write failing Codex local image upload test**
 
-Append this test to `packages/happy-cli/src/api/apiSession.test.ts` near the existing Claude transcript image upload test:
+Append this test to `packages/agentrejoin-cli/src/api/apiSession.test.ts` near the existing Claude transcript image upload test:
 
 ```ts
     it('uploads local Codex image files with codex item ids', async () => {
@@ -1307,14 +1307,14 @@ Append this test to `packages/happy-cli/src/api/apiSession.test.ts` near the exi
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/api/apiSession.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/api/apiSession.test.ts
 ```
 
 Expected: FAIL because `uploadLocalImageAttachmentEnvelope` is not public.
 
 - [ ] **Step 3: Generalize the upload helper**
 
-In `packages/happy-cli/src/api/apiSession.ts`, rename `LocalTranscriptImageAttachment` to an exported type:
+In `packages/agentrejoin-cli/src/api/apiSession.ts`, rename `LocalTranscriptImageAttachment` to an exported type:
 
 ```ts
 export type LocalImageAttachment = {
@@ -1362,7 +1362,7 @@ In `sendClaudeSessionMessageFromLocalTranscript`, replace the old private helper
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/api/apiSession.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/api/apiSession.test.ts
 ```
 
 Expected: PASS, including the existing Claude image upload test.
@@ -1372,23 +1372,23 @@ Expected: PASS, including the existing Claude image upload test.
 Run:
 
 ```bash
-git add packages/happy-cli/src/api/apiSession.ts \
-  packages/happy-cli/src/api/apiSession.test.ts
+git add packages/agentrejoin-cli/src/api/apiSession.ts \
+  packages/agentrejoin-cli/src/api/apiSession.test.ts
 git commit -m "feat(cli): upload local codex image history"
 ```
 
 ### Task 7: Add Ordered Codex Fork Image Backfill
 
 **Files:**
-- Modify: `packages/happy-cli/src/codex/utils/sessionProtocolMapper.ts`
-- Modify: `packages/happy-cli/src/codex/__tests__/sessionProtocolMapper.test.ts`
-- Create: `packages/happy-cli/src/codex/utils/threadImageBackfill.ts`
-- Create: `packages/happy-cli/src/codex/utils/threadImageBackfill.test.ts`
-- Modify: `packages/happy-cli/src/codex/runCodex.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/utils/sessionProtocolMapper.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/__tests__/sessionProtocolMapper.test.ts`
+- Create: `packages/agentrejoin-cli/src/codex/utils/threadImageBackfill.ts`
+- Create: `packages/agentrejoin-cli/src/codex/utils/threadImageBackfill.test.ts`
+- Modify: `packages/agentrejoin-cli/src/codex/runCodex.ts`
 
 - [ ] **Step 1: Extract pure item mapping without behavior change**
 
-In `packages/happy-cli/src/codex/utils/sessionProtocolMapper.ts`, extract the body of each `switch (item.type)` branch in `mapCodexThreadToSessionEnvelopes` into:
+In `packages/agentrejoin-cli/src/codex/utils/sessionProtocolMapper.ts`, extract the body of each `switch (item.type)` branch in `mapCodexThreadToSessionEnvelopes` into:
 
 ```ts
 export function mapCodexThreadItemToSessionEnvelopes(
@@ -1498,14 +1498,14 @@ Then simplify the original loop:
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/__tests__/sessionProtocolMapper.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/__tests__/sessionProtocolMapper.test.ts
 ```
 
 Expected: PASS with no assertion changes. The extracted helper must preserve the existing branch-specific narrowing from the original `switch (item.type)` implementation.
 
 - [ ] **Step 3: Write failing thread image backfill tests**
 
-Create `packages/happy-cli/src/codex/utils/threadImageBackfill.test.ts`:
+Create `packages/agentrejoin-cli/src/codex/utils/threadImageBackfill.test.ts`:
 
 ```ts
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -1513,14 +1513,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createEnvelope } from '@slopus/happy-wire';
+import { createEnvelope } from 'agentrejoin-wire';
 
 vi.mock('@/ui/logger', () => ({
     logger: { debug: vi.fn() },
 }));
 
 vi.mock('@/configuration', () => ({
-    configuration: { happyHomeDir: '/home/test/.happy' },
+    configuration: { agentRejoinHomeDir: '/home/test/.agentrejoin' },
 }));
 
 import { buildCodexThreadBackfillEnvelopes } from './threadImageBackfill';
@@ -1667,20 +1667,20 @@ describe('buildCodexThreadBackfillEnvelopes', () => {
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/utils/threadImageBackfill.test.ts
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/utils/threadImageBackfill.test.ts
 ```
 
 Expected: FAIL because `threadImageBackfill.ts` does not exist.
 
 - [ ] **Step 5: Add ordered thread image backfill helper**
 
-Create `packages/happy-cli/src/codex/utils/threadImageBackfill.ts`:
+Create `packages/agentrejoin-cli/src/codex/utils/threadImageBackfill.ts`:
 
 ```ts
 import { readFile } from 'node:fs/promises';
 
-import type { SessionEnvelope } from '@slopus/happy-wire';
-import { createEnvelope } from '@slopus/happy-wire';
+import type { SessionEnvelope } from 'agentrejoin-wire';
+import { createEnvelope } from 'agentrejoin-wire';
 
 import type { Thread, ThreadItem, ThreadTurn } from '../codexAppServerTypes';
 import { detectSupportedImageType } from './imageInput';
@@ -1789,13 +1789,13 @@ export async function buildCodexThreadBackfillEnvelopes(opts: {
 
 - [ ] **Step 6: Use ordered backfill in `runCodex.ts`**
 
-In `packages/happy-cli/src/codex/runCodex.ts`, add:
+In `packages/agentrejoin-cli/src/codex/runCodex.ts`, add:
 
 ```ts
 import { buildCodexThreadBackfillEnvelopes } from './utils/threadImageBackfill';
 ```
 
-In the `HAPPY_FORK_CODEX_THREAD_ID` block, replace:
+In the `AGENTREJOIN_FORK_CODEX_THREAD_ID` block, replace:
 
 ```ts
                 const envelopes = mapCodexThreadToSessionEnvelopes(thread);
@@ -1819,8 +1819,8 @@ Remove `mapCodexThreadToSessionEnvelopes` from the `runCodex.ts` import list if 
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit src/codex/__tests__/sessionProtocolMapper.test.ts src/codex/utils/threadImageBackfill.test.ts src/api/apiSession.test.ts
-pnpm --dir packages/happy-cli typecheck
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit src/codex/__tests__/sessionProtocolMapper.test.ts src/codex/utils/threadImageBackfill.test.ts src/api/apiSession.test.ts
+pnpm --dir packages/agentrejoin-cli typecheck
 ```
 
 Expected: PASS.
@@ -1830,11 +1830,11 @@ Expected: PASS.
 Run:
 
 ```bash
-git add packages/happy-cli/src/codex/utils/sessionProtocolMapper.ts \
-  packages/happy-cli/src/codex/__tests__/sessionProtocolMapper.test.ts \
-  packages/happy-cli/src/codex/utils/threadImageBackfill.ts \
-  packages/happy-cli/src/codex/utils/threadImageBackfill.test.ts \
-  packages/happy-cli/src/codex/runCodex.ts
+git add packages/agentrejoin-cli/src/codex/utils/sessionProtocolMapper.ts \
+  packages/agentrejoin-cli/src/codex/__tests__/sessionProtocolMapper.test.ts \
+  packages/agentrejoin-cli/src/codex/utils/threadImageBackfill.ts \
+  packages/agentrejoin-cli/src/codex/utils/threadImageBackfill.test.ts \
+  packages/agentrejoin-cli/src/codex/runCodex.ts
 git commit -m "feat(cli): backfill codex image history"
 ```
 
@@ -1848,8 +1848,8 @@ git commit -m "feat(cli): backfill codex image history"
 Run:
 
 ```bash
-pnpm --dir packages/happy-app exec vitest run sources/sync/attachmentSupport.test.ts
-pnpm --dir packages/happy-app typecheck
+pnpm --dir packages/agentrejoin-app exec vitest run sources/sync/attachmentSupport.test.ts
+pnpm --dir packages/agentrejoin-app typecheck
 ```
 
 Expected: PASS.
@@ -1859,7 +1859,7 @@ Expected: PASS.
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli exec vitest run --project unit \
+pnpm --dir packages/agentrejoin-cli exec vitest run --project unit \
   src/codex/codexClearCommand.test.ts \
   src/codex/codexAppServerClient.test.ts \
   src/codex/utils/imageInput.test.ts \
@@ -1867,7 +1867,7 @@ pnpm --dir packages/happy-cli exec vitest run --project unit \
   src/codex/utils/threadImageBackfill.test.ts \
   src/codex/__tests__/sessionProtocolMapper.test.ts \
   src/api/apiSession.test.ts
-pnpm --dir packages/happy-cli typecheck
+pnpm --dir packages/agentrejoin-cli typecheck
 ```
 
 Expected: PASS.
@@ -1877,7 +1877,7 @@ Expected: PASS.
 Run:
 
 ```bash
-pnpm --dir packages/happy-cli test
+pnpm --dir packages/agentrejoin-cli test
 ```
 
 Expected: PASS. This command builds the CLI and runs the unit Vitest project.
@@ -1898,18 +1898,18 @@ Expected: `git diff --check` prints nothing. `git status --short` shows only int
 Start the local server, CLI daemon, and web app in separate terminals:
 
 ```bash
-pnpm --filter happy-server standalone:dev
+pnpm --filter agentrejoin-server standalone:dev
 ```
 
 ```bash
 pnpm --filter happy cli:install
-HAPPY_HOME_DIR=~/.happy-dev HAPPY_SERVER_URL=http://localhost:3005 happy daemon stop
-HAPPY_HOME_DIR=~/.happy-dev HAPPY_SERVER_URL=http://localhost:3005 happy daemon start
-HAPPY_HOME_DIR=~/.happy-dev HAPPY_SERVER_URL=http://localhost:3005 happy auth
+AGENTREJOIN_HOME_DIR=~/.agentrejoin-dev AGENTREJOIN_SERVER_URL=http://localhost:3005 happy daemon stop
+AGENTREJOIN_HOME_DIR=~/.agentrejoin-dev AGENTREJOIN_SERVER_URL=http://localhost:3005 happy daemon start
+AGENTREJOIN_HOME_DIR=~/.agentrejoin-dev AGENTREJOIN_SERVER_URL=http://localhost:3005 happy auth
 ```
 
 ```bash
-EXPO_PUBLIC_HAPPY_SERVER_URL=http://localhost:3005 pnpm --filter happy-app web
+EXPO_PUBLIC_AGENTREJOIN_SERVER_URL=http://localhost:3005 pnpm --filter agentrejoin-app web
 ```
 
 In the Happy web app, open or create a Codex session, attach a small PNG image with text, and send it.
@@ -1942,7 +1942,7 @@ Expected:
 If Task 8 revealed fixes, commit them:
 
 ```bash
-git add packages/happy-app packages/happy-cli
+git add packages/agentrejoin-app packages/agentrejoin-cli
 git commit -m "test: verify codex image attachments"
 ```
 

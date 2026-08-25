@@ -17,7 +17,7 @@ let patched = 0;
 
 const nodeModulesRoots = [
     path.resolve(__dirname, '..', 'node_modules'),
-    path.resolve(__dirname, '..', 'packages/happy-app/node_modules'),
+    path.resolve(__dirname, '..', 'packages/agentrejoin-app/node_modules'),
 ];
 
 // --- Revert prior token-in-deps patch on @livekit/components-react ---

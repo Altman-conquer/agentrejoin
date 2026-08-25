@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentrejoin-minio
+spec:
+  ports:
+  - port: 9000
+    name: api
+  - port: 9001
+    name: console
+  selector:
+    app: agentrejoin-minio
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentrejoin-minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agentrejoin-minio
+  template:
+    metadata:
+      labels:
+        app: agentrejoin-minio
+    spec:
+      initContainers:
+      - name: init-bucket
+        image: busybox
+        command: ["mkdir", "-p", "/data/agentrejoin"]
+        volumeMounts:
+        - name: minio-data
+          mountPath: /data
+      containers:
+      - name: minio
+        image: minio/minio
+        args: ["server", "/data", "--console-address", ":9001"]
+        ports:
+        - containerPort: 9000
+          name: api
+        - containerPort: 9001
+          name: console
+        env:
+        - name: MINIO_ROOT_USER
+          value: minioadmin
+        - name: MINIO_ROOT_PASSWORD
+          value: minioadmin
+        volumeMounts:
+        - name: minio-data
+          mountPath: /data
+      volumes:
+      - name: minio-data
+        emptyDir: {}

@@ -38,7 +38,7 @@ The installed `codex` on this machine is `codex-cli 0.137.0`. Generated app-serv
 
 The local `codexAppServerTypes.ts` file is a cherry-picked snapshot and still names this union `InputItem`. The current generated protocol names the same turn input union `UserInput`. The implementation should either refresh the local snapshot or keep the local alias while matching the current generated wire shape.
 
-Codex fork backfill currently happens only on the `HAPPY_FORK_CODEX_THREAD_ID` path in `runCodex.ts`, where the runner calls `readThread` and maps provider turns through `mapCodexThreadToSessionEnvelopes`. Direct `happy codex --resume <threadId>` currently resumes the provider thread but does not replay provider turns into a new Happy session.
+Codex fork backfill currently happens only on the `AGENTREJOIN_FORK_CODEX_THREAD_ID` path in `runCodex.ts`, where the runner calls `readThread` and maps provider turns through `mapCodexThreadToSessionEnvelopes`. Direct `happy codex --resume <threadId>` currently resumes the provider thread but does not replay provider turns into a new Happy session.
 
 ## Architecture
 

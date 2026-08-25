@@ -1,6 +1,6 @@
 # Voice Architecture
 
-How the ElevenLabs voice assistant integrates with the Happy app, routes messages to sessions, and manages context delivery.
+How the ElevenLabs voice assistant integrates with the AgentRejoin app, routes messages to sessions, and manages context delivery.
 
 ## Components
 

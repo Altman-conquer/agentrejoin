@@ -1,4 +1,4 @@
-import { happyClient } from '@/happy/client'
+import { agentRejoinClient } from '@/happy/client'
 import type {
     AuthState,
     Capability,
@@ -34,10 +34,10 @@ class HappyPlugin implements Plugin {
     private unsubscribe: (() => void) | null = null
 
     async activate(ctx: PluginContext) {
-        happyClient.start()
-        this.auth = mapAuth(happyClient.getSnapshot())
-        this.unsubscribe = happyClient.subscribe(() => {
-            this.auth = mapAuth(happyClient.getSnapshot())
+        agentRejoinClient.start()
+        this.auth = mapAuth(agentRejoinClient.getSnapshot())
+        this.unsubscribe = agentRejoinClient.subscribe(() => {
+            this.auth = mapAuth(agentRejoinClient.getSnapshot())
             ctx.onAuthChanged()
         })
     }
@@ -45,15 +45,15 @@ class HappyPlugin implements Plugin {
     async connect(_credential: string, ctx: PluginContext): Promise<AuthState> {
         this.auth = { status: 'connecting' }
         ctx.onAuthChanged()
-        const next = await happyClient.startLinkDevice()
+        const next = await agentRejoinClient.startLinkDevice()
         this.auth = mapAuth(next)
         ctx.onAuthChanged()
         return this.auth
     }
 
     async disconnect(ctx: PluginContext) {
-        await happyClient.logout()
-        this.auth = mapAuth(happyClient.getSnapshot())
+        await agentRejoinClient.logout()
+        this.auth = mapAuth(agentRejoinClient.getSnapshot())
         ctx.onAuthChanged()
     }
 

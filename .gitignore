@@ -10,8 +10,8 @@ web-build/
 expo-env.d.ts
 /ios
 /android
-/packages/happy-app/ios
-/packages/happy-app/android
+/packages/agentrejoin-app/ios
+/packages/agentrejoin-app/android
 
 # Native
 .kotlin/
@@ -68,11 +68,11 @@ docs/competition/opencode/traces/
 
 # scratch tooling
 .cdp-scripts/
-happy-workspaces/
+agentrejoin-workspaces/
 
-# local HAPPY_HOME_DIR for self-host testing
-.happy-fully-local/
-.happy-dev/
+# local AGENTREJOIN_HOME_DIR for self-host testing
+.agentrejoin-fully-local/
+.agentrejoin-dev/
 
 # third party tools
 .supervibe/

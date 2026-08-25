@@ -11,29 +11,29 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY scripts ./scripts
 COPY patches ./patches
 
-RUN mkdir -p packages/happy-app packages/happy-server packages/happy-cli packages/happy-wire
+RUN mkdir -p packages/agentrejoin-app packages/agentrejoin-server packages/agentrejoin-cli packages/agentrejoin-wire
 
-COPY packages/happy-app/package.json packages/happy-app/
-COPY packages/happy-server/package.json packages/happy-server/
-COPY packages/happy-cli/package.json packages/happy-cli/
-COPY packages/happy-wire/package.json packages/happy-wire/
+COPY packages/agentrejoin-app/package.json packages/agentrejoin-app/
+COPY packages/agentrejoin-server/package.json packages/agentrejoin-server/
+COPY packages/agentrejoin-cli/package.json packages/agentrejoin-cli/
+COPY packages/agentrejoin-wire/package.json packages/agentrejoin-wire/
 
 # Workspace postinstall requirements
-COPY packages/happy-app/patches packages/happy-app/patches
-COPY packages/happy-server/prisma packages/happy-server/prisma
-COPY packages/happy-cli/scripts packages/happy-cli/scripts
-COPY packages/happy-cli/tools packages/happy-cli/tools
+COPY packages/agentrejoin-app/patches packages/agentrejoin-app/patches
+COPY packages/agentrejoin-server/prisma packages/agentrejoin-server/prisma
+COPY packages/agentrejoin-cli/scripts packages/agentrejoin-cli/scripts
+COPY packages/agentrejoin-cli/tools packages/agentrejoin-cli/tools
 
-RUN SKIP_HAPPY_WIRE_BUILD=1 pnpm install --frozen-lockfile
+RUN SKIP_AGENTREJOIN_WIRE_BUILD=1 pnpm install --frozen-lockfile
 
 # Stage 2: build the server
 FROM deps AS builder
 
-COPY packages/happy-wire ./packages/happy-wire
-COPY packages/happy-server ./packages/happy-server
+COPY packages/agentrejoin-wire ./packages/agentrejoin-wire
+COPY packages/agentrejoin-server ./packages/agentrejoin-server
 
-RUN pnpm --filter @slopus/happy-wire --fail-if-no-match build
-RUN pnpm --filter happy-server --fail-if-no-match build
+RUN pnpm --filter agentrejoin-wire --fail-if-no-match build
+RUN pnpm --filter agentrejoin-server --fail-if-no-match build
 
 # Stage 3: runtime
 FROM node:20 AS runner
@@ -49,13 +49,13 @@ ENV NODE_ENV=production
 
 # Copy necessary files from the builder stage
 COPY --from=builder /repo/node_modules /repo/node_modules
-COPY --from=builder /repo/packages/happy-wire /repo/packages/happy-wire
-COPY --from=builder /repo/packages/happy-server /repo/packages/happy-server
+COPY --from=builder /repo/packages/agentrejoin-wire /repo/packages/agentrejoin-wire
+COPY --from=builder /repo/packages/agentrejoin-server /repo/packages/agentrejoin-server
 
 # Expose the port the app will run on
 EXPOSE 3000
 
 # Command to run the application
 COPY --from=builder /repo/package.json /repo/pnpm-workspace.yaml /repo/
-WORKDIR /repo/packages/happy-server
+WORKDIR /repo/packages/agentrejoin-server
 CMD ["pnpm", "run", "start"]

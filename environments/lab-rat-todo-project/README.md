@@ -6,7 +6,7 @@ A tiny frontend-only todo app. No build step, no dependencies. Opens via
 ## Purpose
 
 This project exists to **exercise coding agents**. It is the standard test
-fixture for Happy, OpenCode, Claude Code, Codex, and any other agent we want
+fixture for AgentRejoin, OpenCode, Claude Code, Codex, and any other agent we want
 to evaluate protocol behavior against.
 
 It is intentionally small (4 source files) but has real bugs, missing features,

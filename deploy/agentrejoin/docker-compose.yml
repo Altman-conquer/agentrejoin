@@ -11,8 +11,8 @@ services:
       PORT: 3005
       DATA_DIR: /data
       PGLITE_DIR: /data/pglite
-      HANDY_MASTER_SECRET: ${HANDY_MASTER_SECRET:?required}
-      HAPPY_INJECT_HTML_CONFIG: '{"serverUrl":"https://agentrejoin.zhandj.com","disableAnalytics":true}'
+      AGENTREJOIN_MASTER_SECRET: ${AGENTREJOIN_MASTER_SECRET:?required}
+      AGENTREJOIN_INJECT_HTML_CONFIG: '{"serverUrl":"https://agentrejoin.zhandj.com","disableAnalytics":true}'
     volumes:
       - agentrejoin-data:/data
     healthcheck:

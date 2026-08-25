@@ -8,7 +8,7 @@ const path = require('path');
 
 const nodeModulesRoots = [
     path.resolve(__dirname, '..', 'node_modules'),
-    path.resolve(__dirname, '..', 'packages/happy-app/node_modules'),
+    path.resolve(__dirname, '..', 'packages/agentrejoin-app/node_modules'),
 ];
 
 let patched = 0;

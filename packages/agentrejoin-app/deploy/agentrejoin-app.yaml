@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentrejoin-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: agentrejoin-app
+  template:
+    metadata:
+      labels:
+        app: agentrejoin-app
+    spec:
+      containers:
+      - name: agentrejoin-app
+        image: docker.korshakov.com/agentrejoin-app:{version}
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+        startupProbe:
+          httpGet:
+            path: /
+            port: 80
+          periodSeconds: 10
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentrejoin-app
+spec:
+  selector:
+    app: agentrejoin-app
+  ports:
+  - port: 3000
+    targetPort: 80
+  type: ClusterIP

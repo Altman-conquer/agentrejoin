@@ -4,7 +4,7 @@ Status: **DRAFT — under review**
 
 ## Context
 
-The current session protocol (`happy-wire/src/sessionProtocol.ts`) was designed to solve a real problem: three different message formats (`output`, `codex`, `acp`) hitting the app, each with different field names and tool call shapes. The v1 protocol unified them into a flat event stream with 7 event types, normalized once in the CLI.
+The current session protocol (`agentrejoin-wire/src/sessionProtocol.ts`) was designed to solve a real problem: three different message formats (`output`, `codex`, `acp`) hitting the app, each with different field names and tool call shapes. The v1 protocol unified them into a flat event stream with 7 event types, normalized once in the CLI.
 
 **What v1 got right:**
 - Flat event stream — no nesting, single `switch` in the client
@@ -720,7 +720,7 @@ type SessionMessage = AgentMessage | UserMessage;
 ### Phase 1: Define v2 types, delete v1
 - Replace `sessionProtocol.ts` with `sessionProtocolV2.ts` containing Zod schemas matching the types above
 - No need to keep v1 types — they were never shipped
-- Update `happy-wire/src/index.ts` to export v2
+- Update `agentrejoin-wire/src/index.ts` to export v2
 
 ### Phase 2: Update CLI mappers
 - Rewrite `claude/utils/sessionProtocolMapper.ts` to emit v2 format

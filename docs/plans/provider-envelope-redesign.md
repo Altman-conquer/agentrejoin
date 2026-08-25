@@ -21,7 +21,7 @@ Today the app must normalize multiple plaintext payload families after decryptio
 - modern `role: "session"` envelopes
 
 That fan-in is visible in
-[`packages/happy-app/sources/sync/typesRaw.ts`](../../packages/happy-app/sources/sync/typesRaw.ts),
+[`packages/agentrejoin-app/sources/sync/typesRaw.ts`](../../packages/agentrejoin-app/sources/sync/typesRaw.ts),
 and it is the real source of the complexity.
 
 The problem is not transport. Transport is fine (encrypted blobs, ordered

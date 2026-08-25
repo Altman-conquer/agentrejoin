@@ -62,11 +62,11 @@ pnpm install
 ### AgentRejoin App (Mobile + Web)
 
 ```bash
-pnpm --filter happy-app start          # Expo dev server
-pnpm --filter happy-app ios:dev        # iOS simulator
-pnpm --filter happy-app android:dev    # Android emulator
+pnpm --filter agentrejoin-app start          # Expo dev server
+pnpm --filter agentrejoin-app ios:dev        # iOS simulator
+pnpm --filter agentrejoin-app android:dev    # Android emulator
 pnpm web                                # Browser (shortcut)
-pnpm --filter happy-app typecheck      # Run after all changes
+pnpm --filter agentrejoin-app typecheck      # Run after all changes
 ```
 
 The app has three build variants — all can be installed simultaneously on the same device:
@@ -82,47 +82,47 @@ Swap `ios:dev` for `ios:preview` or `ios:production` (same for `android:`).
 #### macOS Desktop (Tauri)
 
 ```bash
-pnpm --filter happy-app tauri:dev      # Run with hot reload
-pnpm --filter happy-app tauri:build:dev
+pnpm --filter agentrejoin-app tauri:dev      # Run with hot reload
+pnpm --filter agentrejoin-app tauri:build:dev
 ```
 
 ### AgentRejoin CLI
 
 ```bash
-pnpm --filter happy build
-pnpm --filter happy test
-pnpm --filter happy cli:install   # Build + link this workspace as the global `happy` + restart daemon
+pnpm --filter agentrejoin build
+pnpm --filter agentrejoin test
+pnpm --filter agentrejoin cli:install   # Build + link this workspace as the global `agentrejoin` + restart daemon
 ```
 
-`cli:install` replaces the `happy` binary installed from npm with a symlink to this workspace.
-It reuses `~/.happy/` (auth, sessions) — no separate dev home. To undo:
+`cli:install` replaces the `agentrejoin` binary installed from npm with a symlink to this workspace.
+It reuses `~/.agentrejoin/` (auth, sessions) — no separate dev home. To undo:
 
 ```bash
-npm unlink -g happy && npm i -g happy@latest
+npm unlink -g agentrejoin && npm i -g agentrejoin@latest
 ```
 
-To sandbox dev data, set `HAPPY_HOME_DIR=~/.happy-dev` in your shell before running `happy`.
+To sandbox dev data, set `AGENTREJOIN_HOME_DIR=~/.agentrejoin-dev` in your shell before running `agentrejoin`.
 
 ### AgentRejoin Server
 
 ```bash
-pnpm --filter happy-server standalone:dev   # Local server (no Docker needed)
+pnpm --filter agentrejoin-server standalone:dev   # Local server (no Docker needed)
 ```
 
 Runs on `localhost:3005` with embedded PGlite. To point the app at your local server:
 
 ```bash
-EXPO_PUBLIC_HAPPY_SERVER_URL=http://localhost:3005 pnpm --filter happy-app start
+EXPO_PUBLIC_AGENTREJOIN_SERVER_URL=http://localhost:3005 pnpm --filter agentrejoin-app start
 ```
 
 ## Project Structure
 
 This is a monorepo with four packages:
 
-- **happy-app** — React Native + Expo mobile/web client
-- **happy-cli** — Node.js CLI that wraps Claude Code and Codex
-- **happy-agent** — Remote agent control
-- **happy-server** — Backend for encrypted sync
+- **agentrejoin-app** — React Native + Expo mobile/web client
+- **agentrejoin-cli** — Node.js CLI that wraps Claude Code and Codex
+- **agentrejoin-agent** — Remote agent control
+- **agentrejoin-server** — Backend for encrypted sync
 
 For architecture details, check the [docs/](.) folder or ask AgentRejoin itself - it knows how the project is set up.
 

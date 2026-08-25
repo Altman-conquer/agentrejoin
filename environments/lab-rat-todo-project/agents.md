@@ -1,7 +1,7 @@
 # Lab Rat Todo Project — Agent Instructions
 
 This is a **test fixture**, not a real product. It exists so we can exercise
-coding agents (Claude Code, OpenCode, Codex, Happy, etc.) against a small but
+coding agents (Claude Code, OpenCode, Codex, AgentRejoin, etc.) against a small but
 realistic codebase and observe their protocol behavior end to end.
 
 ## What this project is

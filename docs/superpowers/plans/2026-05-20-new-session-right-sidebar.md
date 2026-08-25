@@ -4,7 +4,7 @@
 
 **Goal:** Move `/new` session configuration into the right sidebar on supported desktop layouts while keeping fallback layouts unchanged.
 
-**Architecture:** Extract a testable sidebar layout helper in `sources/utils/newSessionSidebarLayout.ts` and a local config component in `packages/happy-app/sources/app/(app)/new/index.tsx`. Use the active-session sidebar width and support rules, then render the config either inline or in a right sidebar.
+**Architecture:** Extract a testable sidebar layout helper in `sources/utils/newSessionSidebarLayout.ts` and a local config component in `packages/agentrejoin-app/sources/app/(app)/new/index.tsx`. Use the active-session sidebar width and support rules, then render the config either inline or in a right sidebar.
 
 **Tech Stack:** Expo Router, React Native, React Native Web, Unistyles, Vitest, TypeScript.
 
@@ -12,19 +12,19 @@
 
 ## File Structure
 
-- Create `packages/happy-app/sources/utils/newSessionSidebarLayout.ts`: pure helper for right-sidebar gating and width.
-- Modify `packages/happy-app/sources/app/(app)/new/index.tsx`: import layout helper, extract config rendering into a local component, render right sidebar on supported layouts, and center the composer.
-- Create `packages/happy-app/sources/utils/newSessionSidebarLayout.test.ts`: focused unit tests for layout gating and width.
+- Create `packages/agentrejoin-app/sources/utils/newSessionSidebarLayout.ts`: pure helper for right-sidebar gating and width.
+- Modify `packages/agentrejoin-app/sources/app/(app)/new/index.tsx`: import layout helper, extract config rendering into a local component, render right sidebar on supported layouts, and center the composer.
+- Create `packages/agentrejoin-app/sources/utils/newSessionSidebarLayout.test.ts`: focused unit tests for layout gating and width.
 
 ### Task 1: Add Sidebar Layout Helper Test
 
 **Files:**
-- Create: `packages/happy-app/sources/utils/newSessionSidebarLayout.test.ts`
-- Create: `packages/happy-app/sources/utils/newSessionSidebarLayout.ts`
+- Create: `packages/agentrejoin-app/sources/utils/newSessionSidebarLayout.test.ts`
+- Create: `packages/agentrejoin-app/sources/utils/newSessionSidebarLayout.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create `packages/happy-app/sources/utils/newSessionSidebarLayout.test.ts`:
+Create `packages/agentrejoin-app/sources/utils/newSessionSidebarLayout.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -92,14 +92,14 @@ describe('getNewSessionSidebarLayout', () => {
 Run:
 
 ```bash
-pnpm --dir packages/happy-app test sources/utils/newSessionSidebarLayout.test.ts
+pnpm --dir packages/agentrejoin-app test sources/utils/newSessionSidebarLayout.test.ts
 ```
 
 Expected: FAIL because `newSessionSidebarLayout.ts` does not exist.
 
 - [ ] **Step 3: Add the helper**
 
-Create `packages/happy-app/sources/utils/newSessionSidebarLayout.ts`:
+Create `packages/agentrejoin-app/sources/utils/newSessionSidebarLayout.ts`:
 
 ```ts
 const RIGHT_SIDEBAR_MIN_WINDOW_WIDTH = 1100;
@@ -127,7 +127,7 @@ export function getNewSessionSidebarLayout(input: NewSessionSidebarLayoutInput) 
 Run:
 
 ```bash
-pnpm --dir packages/happy-app test sources/utils/newSessionSidebarLayout.test.ts
+pnpm --dir packages/agentrejoin-app test sources/utils/newSessionSidebarLayout.test.ts
 ```
 
 Expected: PASS.
@@ -135,7 +135,7 @@ Expected: PASS.
 ### Task 2: Move Config UI Into Reusable Component
 
 **Files:**
-- Modify: `packages/happy-app/sources/app/(app)/new/index.tsx`
+- Modify: `packages/agentrejoin-app/sources/app/(app)/new/index.tsx`
 
 - [ ] **Step 1: Extract a `NewSessionConfigPanel` component**
 
@@ -158,7 +158,7 @@ Expected: no visual behavior change before sidebar rendering is added.
 Run:
 
 ```bash
-pnpm --dir packages/happy-app typecheck
+pnpm --dir packages/agentrejoin-app typecheck
 ```
 
 Expected: PASS.
@@ -166,7 +166,7 @@ Expected: PASS.
 ### Task 3: Add Desktop Right Sidebar Layout
 
 **Files:**
-- Modify: `packages/happy-app/sources/app/(app)/new/index.tsx`
+- Modify: `packages/agentrejoin-app/sources/app/(app)/new/index.tsx`
 
 - [ ] **Step 1: Read layout settings**
 
@@ -216,8 +216,8 @@ When false, keep the existing inline config and bottom composer behavior.
 Run:
 
 ```bash
-pnpm --dir packages/happy-app test sources/utils/newSessionSidebarLayout.test.ts
-pnpm --dir packages/happy-app typecheck
+pnpm --dir packages/agentrejoin-app test sources/utils/newSessionSidebarLayout.test.ts
+pnpm --dir packages/agentrejoin-app typecheck
 ```
 
 Expected: PASS.
@@ -225,14 +225,14 @@ Expected: PASS.
 ### Task 4: Browser Verification
 
 **Files:**
-- Modify only if verification reveals a bug in `packages/happy-app/sources/app/(app)/new/index.tsx`.
+- Modify only if verification reveals a bug in `packages/agentrejoin-app/sources/app/(app)/new/index.tsx`.
 
 - [ ] **Step 1: Start web app**
 
 Run:
 
 ```bash
-pnpm --dir packages/happy-app web:test
+pnpm --dir packages/agentrejoin-app web:test
 ```
 
 Expected: Expo web server starts and prints a local URL.
@@ -270,7 +270,7 @@ Run:
 
 ```bash
 git diff --stat
-git diff -- packages/happy-app/sources/app/\\(app\\)/new/index.tsx packages/happy-app/sources/utils/newSessionSidebarLayout.ts packages/happy-app/sources/utils/newSessionSidebarLayout.test.ts
+git diff -- packages/agentrejoin-app/sources/app/\\(app\\)/new/index.tsx packages/agentrejoin-app/sources/utils/newSessionSidebarLayout.ts packages/agentrejoin-app/sources/utils/newSessionSidebarLayout.test.ts
 ```
 
 Expected: changes are limited to the approved `/new` right-sidebar work and docs.

@@ -1,6 +1,6 @@
 # Realtime Sync and RPC
 
-This is the high-level doc for how Happy uses Socket.IO for realtime sync and point-to-point RPC.
+This is the high-level doc for how AgentRejoin uses Socket.IO for realtime sync and point-to-point RPC.
 
 Related docs:
 - `protocol.md`: wire contract, event names, and payload shapes
@@ -10,7 +10,7 @@ Related docs:
 
 ## Core Pieces
 
-Happy uses one Socket.IO endpoint at `/v1/updates` and three connection scopes:
+AgentRejoin uses one Socket.IO endpoint at `/v1/updates` and three connection scopes:
 - `user-scoped`: app/web clients and account-wide listeners
 - `session-scoped`: one live session process
 - `machine-scoped`: one daemon for one machine
@@ -57,12 +57,12 @@ The server uses room membership as the source of truth for who currently owns an
 6. The target runs the handler through `RpcHandlerManager` and acks the result.
 7. If the target disappears mid-call, the server fails the call instead of waiting for the full timeout.
 
-This is how Happy does point-to-point control traffic on top of the same transport used for normal realtime sync.
+This is how AgentRejoin does point-to-point control traffic on top of the same transport used for normal realtime sync.
 
 ## Current Sharp Edges
 
-- `packages/happy-agent/src/machineRpc.ts` still creates one-off caller sockets for machine `spawn` and `resume` instead of reusing a long-lived caller connection.
-- `packages/happy-server/sources/app/api/socket/rpcHandler.ts` still mixes room lookup, reconnect grace, mid-call presence checking, and metric emission in one place.
+- `packages/agentrejoin-agent/src/machineRpc.ts` still creates one-off caller sockets for machine `spawn` and `resume` instead of reusing a long-lived caller connection.
+- `packages/agentrejoin-server/sources/app/api/socket/rpcHandler.ts` still mixes room lookup, reconnect grace, mid-call presence checking, and metric emission in one place.
 
 ## Debugging
 

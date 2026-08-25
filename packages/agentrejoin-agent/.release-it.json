@@ -1,0 +1,19 @@
+{
+  "git": {
+    "commitMessage": "Release agentrejoin-agent ${version}",
+    "tagName": "agentrejoin-agent-v${version}",
+    "push": true,
+    "requireCleanWorkingDir": true,
+    "requireBranch": "main",
+    "addUntrackedFiles": false
+  },
+  "github": {
+    "release": true,
+    "releaseName": "agentrejoin-agent-v${version}",
+    "releaseNotes": "node .release-it.notes.js ${version}"
+  },
+  "npm": {
+    "publish": true
+  },
+  "hooks": {}
+}

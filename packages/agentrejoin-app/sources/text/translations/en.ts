@@ -1,0 +1,1098 @@
+import type { TranslationStructure } from '../_default';
+
+/**
+ * English plural helper function
+ * English has 2 plural forms: singular, plural
+ * @param options - Object containing count, singular, and plural forms
+ * @returns The appropriate form based on English plural rules
+ */
+function plural({ count, singular, plural }: { count: number; singular: string; plural: string }): string {
+    return count === 1 ? singular : plural;
+}
+
+/**
+ * ENGLISH TRANSLATIONS - DEDICATED FILE
+ *
+ * This file represents the new translation architecture where each language
+ * has its own dedicated file instead of being embedded in _default.ts.
+ *
+ * STRUCTURE CHANGE:
+ * - Previously: All languages in _default.ts as objects
+ * - Now: Separate files for each language (en.ts, ru.ts, pl.ts, es.ts, etc.)
+ * - Benefit: Better maintainability, smaller files, easier language management
+ *
+ * This file contains the complete English translation structure and serves as
+ * the reference implementation for all other language files.
+ *
+ * ARCHITECTURE NOTES:
+ * - All translation keys must match across all language files
+ * - Type safety enforced by TranslationStructure interface
+ * - New translation keys must be added to ALL language files
+ */
+export const en: TranslationStructure = {
+    tabs: {
+        // Tab navigation labels
+        inbox: 'Inbox',
+        sessions: 'Conversations',
+        settings: 'Settings',
+    },
+
+    inbox: {
+        // Inbox screen
+        emptyTitle: 'Empty Inbox',
+        emptyDescription: 'Connect with friends to start sharing sessions',
+        updates: 'Updates',
+    },
+
+    common: {
+        // Simple string constants
+        cancel: 'Cancel',
+        authenticate: 'Authenticate',
+        save: 'Save',
+        saveAs: 'Save As',
+        error: 'Error',
+        success: 'Success',
+        ok: 'OK',
+        continue: 'Continue',
+        back: 'Back',
+        create: 'Create',
+        rename: 'Rename',
+        reset: 'Reset',
+        logout: 'Logout',
+        yes: 'Yes',
+        no: 'No',
+        discard: 'Discard',
+        version: 'Version',
+        copy: 'Copy',
+        copied: 'Copied',
+        scanning: 'Scanning...',
+        urlPlaceholder: 'https://example.com',
+        home: 'Home',
+        message: 'Message',
+        files: 'Files',
+        fileViewer: 'File Viewer',
+        loading: 'Loading...',
+        retry: 'Retry',
+        delete: 'Delete',
+        optional: 'optional',
+    },
+
+    profile: {
+        userProfile: 'User Profile',
+        details: 'Details',
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        username: 'Username',
+        status: 'Status',
+    },
+
+
+    status: {
+        connected: 'connected',
+        connecting: 'connecting',
+        disconnected: 'disconnected',
+        error: 'error',
+        online: 'online',
+        offline: 'offline',
+        lastSeen: ({ time }: { time: string }) => `last seen ${time}`,
+        permissionRequired: 'permission required',
+        activeNow: 'Active now',
+        unknown: 'unknown',
+        unread: 'new results',
+    },
+
+    time: {
+        justNow: 'just now',
+        minutesAgo: ({ count }: { count: number }) => `${count} minute${count !== 1 ? 's' : ''} ago`,
+        hoursAgo: ({ count }: { count: number }) => `${count} hour${count !== 1 ? 's' : ''} ago`,
+        daysAgo: ({ count }: { count: number }) => `${count} day${count !== 1 ? 's' : ''} ago`,
+    },
+
+    connect: {
+        restoreAccount: 'Restore Account',
+        enterSecretKey: 'Please enter a secret key',
+        invalidSecretKey: 'Invalid secret key. Please check and try again.',
+        enterUrlManually: 'Enter URL manually',
+    },
+
+    settings: {
+        title: 'Settings',
+        connectedAccounts: 'Connected Accounts',
+        connectAccount: 'Connect account',
+        github: 'GitHub',
+        machines: 'Machines',
+        showOfflineMachines: ({ count }: { count: number }) => count === 1 ? 'Show 1 offline machine' : `Show ${count} offline machines`,
+        hideOfflineMachines: 'Hide offline machines',
+        features: 'Features',
+        social: 'Social',
+        account: 'Account',
+        accountSubtitle: 'Manage your account details',
+        appearance: 'Appearance',
+        appearanceSubtitle: 'Customize how the app looks',
+        voiceAssistant: 'Voice Assistant',
+        voiceAssistantSubtitle: 'Configure voice interaction preferences',
+        featuresTitle: 'Features',
+        featuresSubtitle: 'Enable or disable app features',
+        developer: 'Developer',
+        developerTools: 'Developer Tools',
+        about: 'About',
+        aboutFooter: 'AgentRejoin is a Codex and Claude Code mobile client. It\'s fully end-to-end encrypted and your account is stored only on your device. Not affiliated with Anthropic.',
+        whatsNew: 'What\'s New',
+        whatsNewSubtitle: 'See the latest updates and improvements',
+        reportIssue: 'Report an Issue',
+        privacyPolicy: 'Privacy Policy',
+        termsOfService: 'Terms of Service',
+        eula: 'EULA',
+        supportUs: 'Support us',
+        supportUsSubtitlePro: 'Thank you for your support!',
+        supportUsSubtitle: 'Support project development',
+        scanQrCodeToAuthenticate: 'Scan QR code to authenticate',
+        githubConnected: ({ login }: { login: string }) => `Connected as @${login}`,
+        connectGithubAccount: 'Connect your GitHub account',
+        claudeAuthSuccess: 'Successfully connected to Claude',
+        exchangingTokens: 'Exchanging tokens...',
+        usage: 'Usage',
+        usageSubtitle: 'View your API usage and costs',
+        // Dynamic settings messages
+        accountConnected: ({ service }: { service: string }) => `${service} account connected`,
+        machineStatus: ({ name, status }: { name: string; status: 'online' | 'offline' }) =>
+            `${name} is ${status}`,
+        featureToggled: ({ feature, enabled }: { feature: string; enabled: boolean }) =>
+            `${feature} ${enabled ? 'enabled' : 'disabled'}`,
+    },
+
+    settingsAppearance: {
+        // Appearance settings screen
+        theme: 'Theme',
+        themeDescription: 'Choose your preferred color scheme',
+        themeOptions: {
+            adaptive: 'Adaptive',
+            light: 'Light',
+            dark: 'Dark',
+        },
+        themeDescriptions: {
+            adaptive: 'Match system settings',
+            light: 'Always use light theme',
+            dark: 'Always use dark theme',
+        },
+        chat: 'Chat',
+        chatDescription: 'Customize chat message appearance',
+        sessionStatusBar: 'Session Status Info',
+        sessionStatusBarDescription: 'Choose where branch, model, effort, and context appear',
+        sessionStatusDisplayOptions: {
+            hidden: 'Hidden',
+            above: 'Above composer',
+            below: 'Below composer',
+        },
+        usageLimitShowRemaining: 'Show Quota Remaining',
+        usageLimitShowRemainingDescription: 'Count plan limits down from full instead of up from empty',
+        userMessageBubbleColor: 'User Bubble Color',
+        userMessageBubbleColorDescription: 'Make your messages easier to spot in long chats',
+        userMessageBubbleColorOptions: {
+            blue: 'Blue',
+            green: 'Green',
+            purple: 'Purple',
+            rose: 'Rose',
+            sand: 'Sand',
+            gray: 'Gray',
+        },
+        display: 'Display',
+        displayDescription: 'Control layout and spacing',
+        compactToolCalls: 'Compact Tool Calls',
+        compactToolCallsDescription: 'Show non-interactive tool calls as one-line rows; open a row for details',
+        inlineToolCalls: 'Inline Tool Calls',
+        inlineToolCallsDescription: 'Display tool calls directly in chat messages',
+        expandTodoLists: 'Expand Todo Lists',
+        expandTodoListsDescription: 'Show all todos instead of just changes',
+        showLineNumbersInDiffs: 'Show Line Numbers in Diffs',
+        showLineNumbersInDiffsDescription: 'Display line numbers in code diffs',
+        showLineNumbersInToolViews: 'Show Line Numbers in Tool Views',
+        showLineNumbersInToolViewsDescription: 'Display line numbers in tool view diffs',
+        wrapLinesInDiffs: 'Wrap Lines in Diffs',
+        wrapLinesInDiffsDescription: 'Wrap long lines instead of horizontal scrolling in diff views',
+        diffStyle: 'Diff View',
+        diffStyleDescription: 'Show diffs as a single column (unified) or side-by-side (split). Split view is web-only.',
+        diffStyleOptions: {
+            unified: 'Unified',
+            split: 'Split',
+        },
+        alwaysShowContextSize: 'Always Show Context Size',
+        alwaysShowContextSizeDescription: 'Display context usage even when not near limit',
+        avatarStyle: 'Avatar Style',
+        avatarStyleDescription: 'Choose session avatar appearance',
+        avatarOptions: {
+            pixelated: 'Pixelated',
+            gradient: 'Gradient',
+            brutalist: 'Brutalist',
+        },
+        showFlavorIcons: 'Show AI Provider Icons',
+        showFlavorIconsDescription: 'Display AI provider icons on session avatars',
+    },
+
+    settingsFeatures: {
+        // Features settings screen
+        experiments: 'Experiments',
+        experimentsDescription: 'Enable experimental features that are still in development. These features may be unstable or change without notice.',
+        experimentalFeatures: 'Experimental Features',
+        experimentalFeaturesEnabled: 'Experimental features enabled',
+        experimentalFeaturesDisabled: 'Using stable features only',
+        webFeatures: 'Web Features',
+        webFeaturesDescription: 'Features available only in the web version of the app.',
+        enterToSend: 'Enter to Send',
+        enterToSendEnabled: 'Press Enter to send messages',
+        enterToSendDisabled: 'Press ⌘+Enter to send messages',
+        commandPalette: 'Command Palette',
+        commandPaletteEnabled: 'Press ⌘K to open',
+        commandPaletteDisabled: 'Quick command access disabled',
+        markdownCopyV2: 'Markdown Copy v2',
+        markdownCopyV2Subtitle: 'Long press opens copy modal',
+        hideInactiveSessions: 'Hide inactive sessions',
+        hideInactiveSessionsSubtitle: 'Show only active chats in your list',
+        groupToolCalls: 'Group Tool Calls',
+        groupToolCallsSubtitle: 'Collapse consecutive tool calls into one container',
+        privacy: 'Privacy',
+        privacyDescription: 'Completely disables all analytics and telemetry. No data will be sent to PostHog or any other tracking service.',
+        disableAnalytics: 'Disable Analytics',
+        analyticsDisabled: 'All tracking and telemetry disabled',
+        analyticsEnabled: 'Anonymous usage analytics active',
+        imageUpload: 'Image Upload',
+        imageUploadSubtitle: 'Attach images to messages for supported agents to analyze',
+    },
+
+    errors: {
+        networkError: 'Network error occurred',
+        serverError: 'Server error occurred',
+        unknownError: 'An unknown error occurred',
+        connectionTimeout: 'Connection timed out',
+        authenticationFailed: 'Authentication failed',
+        permissionDenied: 'Permission denied',
+        fileNotFound: 'File not found',
+        invalidFormat: 'Invalid format',
+        operationFailed: 'Operation failed',
+        tryAgain: 'Please try again',
+        contactSupport: 'Contact support if the problem persists',
+        sessionNotFound: 'Session not found',
+        voiceSessionFailed: 'Failed to start voice session',
+        voiceServiceUnavailable: 'Voice service is temporarily unavailable',
+        voiceLimitReachedTitle: 'Voice Limit Reached',
+        voiceHardLimitReached: ({ hours }: { hours: number }) => `You've used ${hours}+ hours of voice this month. This is the maximum allowed. You can configure your own ElevenLabs agent in Voice settings to use your own quota.`,
+        voiceConversationLimitReached: 'You\'ve reached the maximum number of voice conversations this month. We may add on-demand voice usage in the future — please file an issue at github.com/nicepkg/agentrejoin/issues if you hit this limit.',
+        oauthInitializationFailed: 'Failed to initialize OAuth flow',
+        tokenStorageFailed: 'Failed to store authentication tokens',
+        oauthStateMismatch: 'Security validation failed. Please try again',
+        tokenExchangeFailed: 'Failed to exchange authorization code',
+        oauthAuthorizationDenied: 'Authorization was denied',
+        webViewLoadFailed: 'Failed to load authentication page',
+        failedToLoadProfile: 'Failed to load user profile',
+        userNotFound: 'User not found',
+        sessionDeleted: 'Session has been deleted',
+        sessionDeletedDescription: 'This session has been permanently removed',
+
+        // Error functions with context
+        fieldError: ({ field, reason }: { field: string; reason: string }) =>
+            `${field}: ${reason}`,
+        validationError: ({ field, min, max }: { field: string; min: number; max: number }) =>
+            `${field} must be between ${min} and ${max}`,
+        retryIn: ({ seconds }: { seconds: number }) =>
+            `Retry in ${seconds} ${seconds === 1 ? 'second' : 'seconds'}`,
+        errorWithCode: ({ message, code }: { message: string; code: number | string }) =>
+            `${message} (Error ${code})`,
+        disconnectServiceFailed: ({ service }: { service: string }) =>
+            `Failed to disconnect ${service}`,
+        connectServiceFailed: ({ service }: { service: string }) =>
+            `Failed to connect ${service}. Please try again.`,
+        failedToLoadFriends: 'Failed to load friends list',
+        failedToAcceptRequest: 'Failed to accept friend request',
+        failedToRejectRequest: 'Failed to reject friend request',
+        failedToRemoveFriend: 'Failed to remove friend',
+        searchFailed: 'Search failed. Please try again.',
+        failedToSendRequest: 'Failed to send friend request',
+    },
+
+    newSession: {
+        title: 'Server conversations',
+        machineOffline: 'Machine is offline',
+        switchMachinesHint: '• Switch machines by clicking on the machine above',
+    },
+
+    sessionHistory: {
+        // Used by session history screen
+        title: 'Session History',
+        empty: 'No sessions found',
+        today: 'Today',
+        yesterday: 'Yesterday',
+        daysAgo: ({ count }: { count: number }) => `${count} ${count === 1 ? 'day' : 'days'} ago`,
+        viewAll: 'View all sessions',
+    },
+
+    session: {
+        inputPlaceholder: 'Type a message ...',
+        inactiveArchived: 'This session is inactive.',
+        resumeFromTerminal: 'To resume it from the terminal:',
+        newChat: 'New chat',
+        statusBarContext: 'Context',
+        statusBarPathTitle: 'Working directory',
+        forkAction: 'Fork session',
+        forkSubtitle: 'Continue in a new session with the same context',
+        duplicateAction: 'Duplicate from message…',
+        duplicateSubtitle: 'Rewind to a chosen point and try again',
+        forkFromHere: 'Fork from here',
+        duplicateSheetTitle: 'Choose a rewind point',
+        duplicateSheetSubtitle: 'The new session keeps the chosen turn complete (your message and the agent’s response) and drops every prompt after it.',
+        duplicateSheetConfirm: 'Duplicate',
+        duplicateSheetEmpty: 'No messages eligible for rewind in this session yet.',
+        duplicateRowDisabled: "This message can't be used as a rewind point.",
+        forkedFromLabel: 'Forked from',
+        forkedFromSubtitle: 'Open the session this fork was branched from',
+        forkErrorOffline: 'This machine is offline. Fork is only available while the machine that owns the session is online.',
+        forkErrorMissingUuid: 'The chosen rewind point is no longer present in the source session — try forking without truncation.',
+        forkErrorMissingMetadata: 'Missing session metadata required to fork.',
+        forkErrorGeneric: 'Failed to fork the session.',
+        forkClaudeOnly: 'Fork is currently only supported for Claude sessions.',
+        codexSync: 'Sync Codex thread',
+        codexSyncComplete: ({ count }: { count: number }) => `Synced ${count} new ${count === 1 ? 'turn' : 'turns'}.`,
+        codexSyncUpToDate: 'This conversation is already up to date.',
+        codexSyncBusy: 'Wait for the active turn to finish, then sync again.',
+        codexSyncFailed: 'Failed to sync the Codex conversation.',
+        codexSyncRequiresRestart: 'This session is using an older AgentRejoin runtime. End it and Resume the session once, then sync again.',
+        resumeLoading: 'Resuming conversation…',
+        resumeLoadingDescription: 'Loading the Codex conversation and its message history.',
+        resumeFailed: 'Could not resume this conversation',
+        resumeActiveWriter: 'This conversation is still open in another Codex process. Exit it on the server, then try again.',
+        resumeFailedDescription: 'The server rejected the resume request. Return to the conversation list and try again.',
+        resumeRetry: 'Retry resume',
+    },
+
+    commandPalette: {
+        placeholder: 'Type a command or search...',
+    },
+
+    server: {
+        // Used by Server Configuration screen (app/(app)/server.tsx)
+        serverConfiguration: 'Server Configuration',
+        enterServerUrl: 'Please enter a server URL',
+        notValidAgentRejoinServer: 'Not a valid AgentRejoin Server',
+        changeServer: 'Change Server',
+        continueWithServer: 'Continue with this server?',
+        resetToDefault: 'Reset to Default',
+        resetServerDefault: 'Reset server to default?',
+        validating: 'Validating...',
+        validatingServer: 'Validating server...',
+        serverReturnedError: 'Server returned an error',
+        failedToConnectToServer: 'Failed to connect to server',
+        currentlyUsingCustomServer: 'Currently using custom server',
+        customServerUrlLabel: 'Custom Server URL',
+        advancedFeatureFooter: "This is an advanced feature. Only change the server if you know what you're doing. You will need to log out and log in again after changing servers."
+    },
+
+    sessionInfo: {
+        // Used by Session Info screen (app/(app)/session/[id]/info.tsx)
+        killSession: 'Kill Session',
+        killSessionConfirm: 'Are you sure you want to terminate this session?',
+        archiveSession: 'Archive Session',
+        archiveSessionConfirm: 'Are you sure you want to archive this session?',
+        agentRejoinSessionIdCopied: 'AgentRejoin Session ID copied to clipboard',
+        failedToCopySessionId: 'Failed to copy AgentRejoin Session ID',
+        agentRejoinSessionId: 'AgentRejoin Session ID',
+        claudeCodeSessionId: 'Claude Code Session ID',
+        claudeCodeSessionIdCopied: 'Claude Code Session ID copied to clipboard',
+        codexThreadId: 'Codex Thread ID',
+        codexThreadIdCopied: 'Codex Thread ID copied to clipboard',
+        aiProvider: 'AI Provider',
+        failedToCopyClaudeCodeSessionId: 'Failed to copy Claude Code Session ID',
+        failedToCopyCodexThreadId: 'Failed to copy Codex Thread ID',
+        metadataCopied: 'Session metadata copied to clipboard',
+        failedToCopyMetadata: 'Failed to copy session metadata',
+        failedToKillSession: 'Failed to kill session',
+        failedToArchiveSession: 'Failed to archive session',
+        connectionStatus: 'Connection Status',
+        created: 'Created',
+        lastUpdated: 'Last Updated',
+        sequence: 'Sequence',
+        quickActions: 'Quick Actions',
+        viewMachine: 'View Machine',
+        viewMachineSubtitle: 'View machine details and sessions',
+        resumeSession: 'Resume Session',
+        resumeSessionSubtitle: 'Resume this session on the same machine',
+        resumeSessionSameMachineOnly: 'This session can only be resumed on the same machine it started on.',
+        resumeSessionMachineOffline: 'This machine is offline. Resume is only available while it is online.',
+        resumeSessionNeedsAgentRejoinAgent: 'Resume is unavailable on this machine. Run `agentrejoin-agent auth login` to enable it.',
+        resumeSessionMissingMachine: 'This session is missing its machine metadata, so it cannot be resumed.',
+        resumeSessionMissingBackendId: 'This session does not have a resumable Claude or Codex identifier.',
+        resumeSessionUnexpectedDirectoryPrompt: 'Resume cannot create directories. Start the session manually from its original path.',
+        killSessionSubtitle: 'Immediately terminate the session',
+        archiveSessionSubtitle: 'Archive this session and stop it',
+        metadata: 'Metadata',
+        host: 'Host',
+        path: 'Path',
+        operatingSystem: 'Operating System',
+        processId: 'Process ID',
+        happyHome: 'AgentRejoin Home',
+        copyMetadata: 'Copy session metadata',
+        agentState: 'Agent State',
+        controlledByUser: 'Controlled by User',
+        pendingRequests: 'Pending Requests',
+        activity: 'Activity',
+        thinking: 'Thinking',
+        thinkingSince: 'Thinking Since',
+        cliVersion: 'CLI Version',
+        cliVersionOutdated: 'CLI Update Required',
+        cliVersionOutdatedMessage: ({ currentVersion, requiredVersion }: { currentVersion: string; requiredVersion: string }) =>
+            `Version ${currentVersion} installed. Update to ${requiredVersion} or later`,
+        updateCliInstructions: 'Please run npm install -g agentrejoin@latest',
+        deleteSession: 'Delete Session',
+        deleteSessionSubtitle: 'Permanently remove this session',
+        deleteSessionConfirm: 'Delete Session Permanently?',
+        deleteSessionWarning: 'This action cannot be undone. All messages and data associated with this session will be permanently deleted.',
+        failedToDeleteSession: 'Failed to delete session',
+        sessionDeleted: 'Session deleted successfully',
+        worktreeCleanupTitle: 'Delete Worktree?',
+        worktreeCleanupMessage: 'The worktree has no uncommitted changes. Would you like to delete the worktree files?',
+        worktreeCleanupDelete: 'Delete Worktree',
+        worktreeCleanupKeep: 'Keep Files',
+
+    },
+
+    components: {
+        emptyMainScreen: {
+            // Used by EmptyMainScreen component
+            readyToCode: 'Ready to code?',
+            installCli: 'Install the AgentRejoin CLI',
+            runIt: 'Run it',
+            scanQrCode: 'Scan the QR code',
+            openCamera: 'Open Camera',
+        },
+        agentGoalBar: {
+            currentGoal: 'Current goal',
+            accessibilityLabel: ({ goal }: { goal: string }) => `Current goal: ${goal}`,
+            clearGoal: 'Clear goal',
+            stopGoal: 'Stop goal',
+            editGoal: 'Edit goal',
+        },
+        sessionStatusBar: {
+            contextUsage: ({ used, total, percent }: { used: string; total: string; percent: number }) => `Context ${used} of ${total} tokens, ${percent}%`,
+            limitFiveHour: '5-hour limit',
+            limitSevenDay: '7-day limit',
+            limitResets: ({ time }: { time: string }) => `resets ${time}`,
+            limitAsOf: ({ age }: { age: string }) => `as of ${age} ago`,
+            limitRemaining: ({ percent }: { percent: number }) => `${percent}% left`,
+        },
+    },
+
+    agentInput: {
+        permissionMode: {
+            title: 'PERMISSION MODE',
+            default: 'default permissions',
+            acceptEdits: 'accept edits',
+            plan: 'plan',
+            dontAsk: "don't ask",
+            bypassPermissions: 'yolo',
+            badgeAcceptAllEdits: 'accept all edits',
+            badgeBypassAllPermissions: 'yolo',
+            badgePlanMode: 'plan mode',
+        },
+        agent: {
+            claude: 'Claude',
+            codex: 'Codex',
+            gemini: 'Gemini',
+            openclaw: 'OpenClaw',
+        },
+        model: {
+            title: 'MODEL',
+            configureInCli: 'Configure models in CLI settings',
+        },
+        effort: {
+            title: 'EFFORT',
+        },
+        codexPermissionMode: {
+            title: 'CODEX PERMISSION MODE',
+            default: 'default permissions',
+            readOnly: 'read-only',
+            safeYolo: 'safe yolo',
+            yolo: 'yolo',
+            defaultDescription: 'ask before untrusted commands',
+            readOnlyDescription: 'no writes',
+            safeYoloDescription: 'no prompts, workspace sandbox',
+            yoloDescription: 'no prompts, full access',
+            badgeReadOnly: 'read-only',
+            badgeSafeYolo: 'safe yolo',
+            badgeYolo: 'yolo',
+        },
+        codexModel: {
+            title: 'CODEX MODEL',
+            gpt5CodexLow: 'gpt-5-codex low',
+            gpt5CodexMedium: 'gpt-5-codex medium',
+            gpt5CodexHigh: 'gpt-5-codex high',
+            gpt5Minimal: 'GPT-5 Minimal',
+            gpt5Low: 'GPT-5 Low',
+            gpt5Medium: 'GPT-5 Medium',
+            gpt5High: 'GPT-5 High',
+        },
+        geminiPermissionMode: {
+            title: 'GEMINI PERMISSION MODE',
+            default: 'default permissions',
+            autoEdit: 'auto edit',
+            yolo: 'yolo',
+            plan: 'plan',
+            badgeAutoEdit: 'auto edit',
+            badgeYolo: 'yolo',
+            badgePlan: 'plan',
+        },
+        context: {
+            remaining: ({ percent }: { percent: number }) => `${percent}% left`,
+        },
+        suggestion: {
+            fileLabel: 'FILE',
+            folderLabel: 'FOLDER',
+        },
+        noMachinesAvailable: 'No machines',
+    },
+
+    machineLauncher: {
+        showLess: 'Show less',
+        showAll: ({ count }: { count: number }) => `Show all (${count} paths)`,
+        enterCustomPath: 'Enter custom path',
+        offlineUnableToSpawn: 'Unable to spawn new session, offline',
+    },
+
+    agentQuestion: {
+        title: "Question",
+        submit: "Send answer",
+        chooseMultiple: "Choose as many as apply",
+        ownAnswer: "Your own answer",
+        ownAnswerPlaceholder: "Write an answer instead",
+        submitFailed: "Could not send your answer",
+        dismiss: "Dismiss",
+        unsupportedTitle: "Unsupported request",
+        unsupportedDescription: ({ kind }: { kind: string }) => `This version of AgentRejoin cannot show a «${kind}» request. Update the app to respond.`,
+        moreQuestions: ({ count }: { count: number }) =>
+            count === 1 ? "1 more question" : `${count} more questions`,
+    },
+
+    sidebar: {
+        sessionsTitle: 'AgentRejoin',
+        showArchived: 'Show archived',
+        hideArchived: 'Hide archived',
+        newSession: 'Server conversations',
+        projects: "Projects",
+    },
+
+    zen: {
+        toggle: 'Zen mode',
+    },
+
+    toolView: {
+        input: 'Input',
+        output: 'Output',
+    },
+
+    toolGroup: {
+        editedFile: 'Edited file',
+        editedFiles: ({ count }: { count: number }) => count === 1 ? 'Edited 1 file' : `Edited ${count} files`,
+        readFiles: ({ count }: { count: number }) => count === 1 ? 'Read 1 file' : `Read ${count} files`,
+        ranCommands: ({ count }: { count: number }) => count === 1 ? 'Ran 1 command' : `Ran ${count} commands`,
+        searched: ({ count }: { count: number }) => count === 1 ? 'Searched 1 time' : `Searched ${count} times`,
+        fetchedUrls: ({ count }: { count: number }) => count === 1 ? 'Fetched 1 URL' : `Fetched ${count} URLs`,
+        ranTasks: ({ count }: { count: number }) => count === 1 ? 'Ran 1 task' : `Ran ${count} tasks`,
+        usedTools: ({ count }: { count: number }) => count === 1 ? 'Used 1 tool' : `Used ${count} tools`,
+        workedFor: ({ duration }: { duration: string }) => `Worked ${duration}`,
+    },
+
+    tools: {
+        fullView: {
+            description: 'Description',
+            inputParams: 'Input Parameters',
+            output: 'Output',
+            error: 'Error',
+            completed: 'Tool completed successfully',
+            noOutput: 'No output was produced',
+            running: 'Tool is running...',
+            rawJsonDevMode: 'Raw JSON (Dev Mode)',
+        },
+        taskView: {
+            initializing: 'Initializing agent...',
+            moreTools: ({ count }: { count: number }) => `+${count} more ${plural({ count, singular: 'tool', plural: 'tools' })}`,
+        },
+        multiEdit: {
+            editNumber: ({ index, total }: { index: number; total: number }) => `Edit ${index} of ${total}`,
+            replaceAll: 'Replace All',
+        },
+        names: {
+            task: 'Task',
+            terminal: 'Terminal',
+            searchFiles: 'Search Files',
+            search: 'Search',
+            searchContent: 'Search Content',
+            listFiles: 'List Files',
+            planProposal: 'Plan proposal',
+            readFile: 'Read File',
+            editFile: 'Edit File',
+            writeFile: 'Write File',
+            fetchUrl: 'Fetch URL',
+            readNotebook: 'Read Notebook',
+            editNotebook: 'Edit Notebook',
+            todoList: 'Todo List',
+            webSearch: 'Web Search',
+            reasoning: 'Reasoning',
+            applyChanges: 'Update file',
+            viewDiff: 'Current file changes',
+            question: 'Question',
+        },
+        askUserQuestion: {
+            submit: 'Submit Answer',
+            multipleQuestions: ({ count }: { count: number }) => `${count} questions`,
+            other: 'Other',
+            otherDescription: 'Type your own answer',
+            otherPlaceholder: 'Type your answer...',
+        },
+        desc: {
+            terminalCmd: ({ cmd }: { cmd: string }) => `Terminal(cmd: ${cmd})`,
+            searchPattern: ({ pattern }: { pattern: string }) => `Search(pattern: ${pattern})`,
+            searchPath: ({ basename }: { basename: string }) => `Search(path: ${basename})`,
+            fetchUrlHost: ({ host }: { host: string }) => `Fetch URL(url: ${host})`,
+            editNotebookMode: ({ path, mode }: { path: string; mode: string }) => `Edit Notebook(file: ${path}, mode: ${mode})`,
+            todoListCount: ({ count }: { count: number }) => `Todo List(count: ${count})`,
+            webSearchQuery: ({ query }: { query: string }) => `Web Search(query: ${query})`,
+            grepPattern: ({ pattern }: { pattern: string }) => `grep(pattern: ${pattern})`,
+            multiEditEdits: ({ path, count }: { path: string; count: number }) => `${path} (${count} edits)`,
+            readingFile: ({ file }: { file: string }) => `Reading ${file}`,
+            writingFile: ({ file }: { file: string }) => `Writing ${file}`,
+            modifyingFile: ({ file }: { file: string }) => `Modifying ${file}`,
+            modifyingFiles: ({ count }: { count: number }) => `Modifying ${count} files`,
+            modifyingMultipleFiles: ({ file, count }: { file: string; count: number }) => `${file} and ${count} more`,
+            showingDiff: 'Showing changes',
+        }
+    },
+
+    files: {
+        changes: 'Changes',
+        searchPlaceholder: 'Search files...',
+        detachedHead: 'detached HEAD',
+        summary: ({ staged, unstaged }: { staged: number; unstaged: number }) => `${staged} staged • ${unstaged} unstaged`,
+        notRepo: 'Not a git repository',
+        notUnderGit: 'This directory is not under git version control',
+        searching: 'Searching files...',
+        noFilesFound: 'No files found',
+        noFilesInProject: 'No files in project',
+        tryDifferentTerm: 'Try a different search term',
+        searchResults: ({ count }: { count: number }) => `Search Results (${count})`,
+        projectRoot: 'Project root',
+        stagedChanges: ({ count }: { count: number }) => `Staged Changes (${count})`,
+        unstagedChanges: ({ count }: { count: number }) => `Unstaged Changes (${count})`,
+        // File viewer strings
+        loadingFile: ({ fileName }: { fileName: string }) => `Loading ${fileName}...`,
+        binaryFile: 'Binary File',
+        cannotDisplayBinary: 'Cannot display binary file content',
+        diff: 'Diff',
+        file: 'File',
+        fileEmpty: 'File is empty',
+        noChanges: 'No changes to display',
+        noChangesTitle: 'No changes',
+        noChangesSubtitle: 'Working tree is clean',
+        deleted: 'Deleted',
+        changedFiles: ({ count }: { count: number }) => `${count} changed ${count === 1 ? 'file' : 'files'}`,
+        allFiles: 'All Files',
+        addPanel: 'Add panel',
+        closePanel: 'Close panel',
+        editFile: 'Edit',
+        saveFile: 'Save',
+        failedToRead: 'Failed to read file',
+        failedToSave: 'Failed to save file',
+        fileConflict: 'File conflict',
+        fileConflictDescription: 'This file was modified on the device while you were editing. Reload to see the latest version.',
+        reload: 'Reload',
+        overwrite: 'Overwrite',
+    },
+    sideChat: {
+        panelTitle: 'Side chat',
+        emptyTitle: 'Start a side chat',
+        emptySubtitle: 'Ask the agent something on the side. It inherits this chat’s context but stays isolated — nothing here touches the main conversation.',
+        startButton: 'Start side chat',
+        creating: 'Starting side chat…',
+        unavailable: 'This session can’t start a side chat yet — wait for the agent to come online.',
+        composerPlaceholder: 'Message side chat…',
+        expand: 'Open full screen',
+        tabLabel: ({ index }: { index: number }) => `Side chat ${index}`,
+        newChat: 'New side chat',
+        close: 'Close side chat',
+    },
+
+    settingsVoice: {
+        // Voice settings screen
+        languageTitle: 'Language',
+        languageDescription: 'Choose your preferred language for voice assistant interactions. This setting syncs across all your devices.',
+        preferredLanguage: 'Preferred Language',
+        preferredLanguageSubtitle: 'Language used for voice assistant responses',
+        language: {
+            searchPlaceholder: 'Search languages...',
+            title: 'Languages',
+            footer: ({ count }: { count: number }) => `${count} ${plural({ count, singular: 'language', plural: 'languages' })} available`,
+            autoDetect: 'Auto-detect',
+        },
+        // Bring your own agent
+        byoTitle: 'Bring Your Own Agent',
+        byoDescription: 'Use your own ElevenLabs agent instead of the AgentRejoin default. No subscription required — connect directly with your own ElevenLabs account. Your agent must define two client tools: messageClaudeCode (sends text to the coding agent) and processPermissionRequest (allows or denies tool use). It receives session context via the {{initialConversationContext}} dynamic variable.',
+        customAgentId: 'ElevenLabs Agent ID',
+        customAgentIdNotSet: 'Not configured',
+        customAgentIdDescription: 'Enter your ElevenLabs agent ID. Leave empty to use the AgentRejoin default.',
+        customAgentIdPlaceholder: 'e.g. abc123def456',
+        bypassToken: 'Direct Connection',
+        bypassTokenSubtitle: 'Skip AgentRejoin server, connect straight to ElevenLabs',
+        promptGuideTitle: 'Agent Prompt Guide',
+        promptGuideDescription: 'Your ElevenLabs agent needs:\n\n• Tool: messageClaudeCode — parameter: message (string). Sends a message to the active coding session.\n• Tool: processPermissionRequest — parameter: decision ("allow" or "deny"). Approves or denies a pending tool permission.\n• Dynamic variable: {{initialConversationContext}} — receives session history and context on start.\n\nThe agent acts as a voice bridge between the user and coding agents. It should be concise, only respond when addressed, and report when a coding agent finishes work.',
+        usageTitle: 'Usage (Last 30 Days)',
+        usageFooter: 'Voice time used in the last 30 days. Free tier: 20 min. Subscribed: 5 hours. Max 100 conversations per month.',
+        usageLabel: 'Voice Time',
+        conversationsLabel: 'Conversations',
+        usageUsed: ({ used, limit }: { used: string; limit: string }) => `${used} used of ${limit}`,
+        supportTitle: 'Upgrade Voice',
+        supportSubtitle: 'Get more voice time and support development',
+    },
+
+    settingsAccount: {
+        // Account settings screen
+        accountInformation: 'Account Information',
+        status: 'Status',
+        statusActive: 'Active',
+        statusNotAuthenticated: 'Not Authenticated',
+        anonymousId: 'Anonymous ID',
+        publicId: 'Public ID',
+        notAvailable: 'Not available',
+        linkNewDevice: 'Link New Device',
+        linkNewDeviceSubtitle: 'Scan QR code to link device',
+        profile: 'Profile',
+        name: 'Name',
+        github: 'GitHub',
+        tapToDisconnect: 'Tap to disconnect',
+        server: 'Server',
+        backup: 'Backup',
+        backupDescription: 'Your secret key is the only way to recover your account. Save it in a secure place like a password manager.',
+        secretKey: 'Secret Key',
+        tapToReveal: 'Tap to reveal',
+        tapToHide: 'Tap to hide',
+        secretKeyLabel: 'SECRET KEY (TAP TO COPY)',
+        secretKeyCopied: 'Secret key copied to clipboard. Store it in a safe place!',
+        secretKeyCopyFailed: 'Failed to copy secret key',
+        privacy: 'Privacy',
+        privacyDescription: 'Help improve the app by sharing anonymous usage data. No personal information is collected.',
+        analytics: 'Analytics',
+        analyticsDisabled: 'No data is shared',
+        analyticsEnabled: 'Anonymous usage data is shared',
+        dangerZone: 'Danger Zone',
+        logout: 'Logout',
+        logoutSubtitle: 'Sign out and clear local data',
+        logoutConfirm: 'Are you sure you want to logout? Make sure you have backed up your secret key!',
+    },
+
+    settingsLanguage: {
+        // Language settings screen
+        title: 'Language',
+        description: 'Choose your preferred language for the app interface. This will sync across all your devices.',
+        currentLanguage: 'Current Language',
+        automatic: 'Automatic',
+        automaticSubtitle: 'Detect from device settings',
+        needsRestart: 'Language Changed',
+        needsRestartMessage: 'The app needs to restart to apply the new language setting.',
+        restartNow: 'Restart Now',
+    },
+
+    connectButton: {
+        authenticate: 'Authenticate Terminal',
+        authenticateWithUrlPaste: 'Authenticate Terminal with URL paste',
+        pasteAuthUrl: 'Paste the auth URL from your terminal',
+    },
+
+    updateBanner: {
+        updateAvailable: 'Update available',
+        pressToApply: 'Press to apply the update',
+        whatsNew: "What's new",
+        seeLatest: 'See the latest updates and improvements',
+        nativeUpdateAvailable: 'App Update Available',
+        tapToUpdateAppStore: 'Tap to update in App Store',
+        tapToUpdatePlayStore: 'Tap to update in Play Store',
+    },
+
+    changelog: {
+        // Used by the changelog screen
+        version: ({ version }: { version: number }) => `Version ${version}`,
+        noEntriesAvailable: 'No changelog entries available.',
+    },
+
+    terminal: {
+        // Used by terminal connection screens
+        webBrowserRequired: 'Web Browser Required',
+        webBrowserRequiredDescription: 'Terminal connection links can only be opened in a web browser for security reasons. Please use the QR code scanner or open this link on a computer.',
+        processingConnection: 'Processing connection...',
+        invalidConnectionLink: 'Invalid Connection Link',
+        invalidConnectionLinkDescription: 'The connection link is missing or invalid. Please check the URL and try again.',
+        connectTerminal: 'Connect Terminal',
+        terminalRequestDescription: 'A terminal is requesting to connect to your AgentRejoin account. This will allow the terminal to send and receive messages securely.',
+        connectionDetails: 'Connection Details',
+        publicKey: 'Public Key',
+        encryption: 'Encryption',
+        endToEndEncrypted: 'End-to-end encrypted',
+        acceptConnection: 'Accept Connection',
+        connecting: 'Connecting...',
+        reject: 'Reject',
+        security: 'Security',
+        securityFooter: 'This connection link was processed securely in your browser and was never sent to any server. Your private data will remain secure and only you can decrypt the messages.',
+        securityFooterDevice: 'This connection was processed securely on your device and was never sent to any server. Your private data will remain secure and only you can decrypt the messages.',
+        clientSideProcessing: 'Client-Side Processing',
+        linkProcessedLocally: 'Link processed locally in browser',
+        linkProcessedOnDevice: 'Link processed locally on device',
+    },
+
+    modals: {
+        // Used across connect flows and settings
+        authenticateTerminal: 'Authenticate Terminal',
+        pasteUrlFromTerminal: 'Paste the authentication URL from your terminal',
+        deviceLinkedSuccessfully: 'Device linked successfully',
+        terminalConnectedSuccessfully: 'Terminal connected successfully',
+        invalidAuthUrl: 'Invalid authentication URL',
+        developerMode: 'Developer Mode',
+        developerModeEnabled: 'Developer mode enabled',
+        developerModeDisabled: 'Developer mode disabled',
+        disconnectGithub: 'Disconnect GitHub',
+        disconnectGithubConfirm: 'Are you sure you want to disconnect your GitHub account?',
+        disconnectService: ({ service }: { service: string }) =>
+            `Disconnect ${service}`,
+        disconnectServiceConfirm: ({ service }: { service: string }) =>
+            `Are you sure you want to disconnect ${service} from your account?`,
+        disconnect: 'Disconnect',
+        failedToConnectTerminal: 'Failed to connect terminal',
+        cameraPermissionsRequiredToConnectTerminal: 'Camera permissions are required to connect terminal',
+        failedToLinkDevice: 'Failed to link device',
+        cameraPermissionsRequiredToScanQr: 'Camera permissions are required to scan QR codes'
+    },
+
+    navigation: {
+        // Navigation titles and screen headers
+        connectTerminal: 'Connect Terminal',
+        linkNewDevice: 'Link New Device',
+        restoreWithSecretKey: 'Restore with Secret Key',
+        whatsNew: "What's New",
+        friends: 'Friends',
+    },
+
+    welcome: {
+        // Main welcome screen for unauthenticated users
+        title: 'Codex and Claude Code mobile client',
+        subtitle: 'End-to-end encrypted and your account is stored only on your device.',
+        createAccount: 'Create account',
+        linkOrRestoreAccount: 'Link or restore account',
+        loginWithMobileApp: 'Login with mobile app',
+    },
+
+    review: {
+        // Used by utils/requestReview.ts
+        enjoyingApp: 'Enjoying the app?',
+        feedbackPrompt: "We'd love to hear your feedback!",
+        yesILoveIt: 'Yes, I love it!',
+        notReally: 'Not really'
+    },
+
+    items: {
+        // Used by Item component for copy toast
+        copiedToClipboard: ({ label }: { label: string }) => `${label} copied to clipboard`
+    },
+
+    machine: {
+        launchNewSessionInDirectory: 'Launch New Session in Directory',
+        offlineUnableToSpawn: 'Launcher disabled while machine is offline',
+        offlineHelp: '• Make sure your computer is online\n• Run `agentrejoin daemon status` to diagnose\n• Are you running the latest CLI version? Upgrade with `npm install -g agentrejoin@latest`',
+        daemon: 'Daemon',
+        status: 'Status',
+        stopDaemon: 'Stop Daemon',
+        lastKnownPid: 'Last Known PID',
+        lastKnownHttpPort: 'Last Known HTTP Port',
+        startedAt: 'Started At',
+        cliVersion: 'CLI Version',
+        daemonStateVersion: 'Daemon State Version',
+        activeSessions: ({ count }: { count: number }) => `Active Sessions (${count})`,
+        machineGroup: 'Machine',
+        host: 'Host',
+        machineId: 'Machine ID',
+        username: 'Username',
+        homeDirectory: 'Home Directory',
+        platform: 'Platform',
+        architecture: 'Architecture',
+        lastSeen: 'Last Seen',
+        never: 'Never',
+        metadataVersion: 'Metadata Version',
+        cliAvailability: 'CLI Availability',
+        cliInstalled: 'Installed',
+        cliNotFound: 'Not found',
+        lastDetected: 'Last Detected',
+        untitledSession: 'Untitled Session',
+        back: 'Back',
+        dangerZone: 'Danger Zone',
+        delete: 'Delete Machine',
+        deleteFooter: 'Removes this machine from your account. Session history is preserved, but you will no longer be able to launch new sessions on it.',
+        deleteConfirmTitle: 'Delete this machine?',
+        deleteConfirmMessage: 'This removes the machine from your account. Session history is preserved, but you can no longer launch new sessions on it until you reconnect the daemon.',
+        deleteFailed: 'Failed to delete machine.',
+    },
+
+    message: {
+        switchedToMode: ({ mode }: { mode: string }) => `Switched to ${mode} mode`,
+        unknownEvent: 'Unknown event',
+        usageLimitUntil: ({ time }: { time: string }) => `Usage limit reached until ${time}`,
+        sentAsGoal: 'Sent as goal',
+        unknownTime: 'unknown time',
+    },
+
+    codex: {
+        // Codex permission dialog buttons
+        permissions: {
+            yesForSession: "Yes, and don't ask for a session",
+            stopAndExplain: 'Stop, and explain what to do',
+        }
+    },
+
+    claude: {
+        // Claude permission dialog buttons
+        permissions: {
+            yesAllowAllEdits: 'Yes, allow all edits during this session',
+            yesAllowEverything: 'Yes, allow everything during this session',
+            yesForTool: "Yes, don't ask again for this tool",
+            noTellClaude: 'No, and provide feedback',
+        }
+    },
+
+    textSelection: {
+        // Text selection screen
+        selectText: 'Select text range',
+        title: 'Select Text',
+        noTextProvided: 'No text provided',
+        textNotFound: 'Text not found or expired',
+        textCopied: 'Text copied to clipboard',
+        failedToCopy: 'Failed to copy text to clipboard',
+        noTextToCopy: 'No text available to copy',
+    },
+
+    markdown: {
+        // Markdown copy functionality
+        codeCopied: 'Code copied',
+        copyFailed: 'Failed to copy',
+        mermaidRenderFailed: 'Failed to render mermaid diagram',
+    },
+
+    artifacts: {
+        // Artifacts feature
+        title: 'Artifacts',
+        countSingular: '1 artifact',
+        countPlural: ({ count }: { count: number }) => `${count} artifacts`,
+        empty: 'No artifacts yet',
+        emptyDescription: 'Create your first artifact to get started',
+        new: 'New Artifact',
+        edit: 'Edit Artifact',
+        delete: 'Delete',
+        updateError: 'Failed to update artifact. Please try again.',
+        notFound: 'Artifact not found',
+        discardChanges: 'Discard changes?',
+        discardChangesDescription: 'You have unsaved changes. Are you sure you want to discard them?',
+        deleteConfirm: 'Delete artifact?',
+        deleteConfirmDescription: 'This action cannot be undone',
+        titleLabel: 'TITLE',
+        titlePlaceholder: 'Enter a title for your artifact',
+        bodyLabel: 'CONTENT',
+        bodyPlaceholder: 'Write your content here...',
+        emptyFieldsError: 'Please enter a title or content',
+        createError: 'Failed to create artifact. Please try again.',
+        save: 'Save',
+        saving: 'Saving...',
+        loading: 'Loading artifacts...',
+        error: 'Failed to load artifact',
+    },
+
+    friends: {
+        // Friends feature
+        title: 'Friends',
+        manageFriends: 'Manage your friends and connections',
+        searchTitle: 'Find Friends',
+        pendingRequests: 'Friend Requests',
+        myFriends: 'My Friends',
+        noFriendsYet: "You don't have any friends yet",
+        findFriends: 'Find Friends',
+        remove: 'Remove',
+        pendingRequest: 'Pending',
+        sentOn: ({ date }: { date: string }) => `Sent on ${date}`,
+        accept: 'Accept',
+        reject: 'Reject',
+        addFriend: 'Add Friend',
+        alreadyFriends: 'Already Friends',
+        requestPending: 'Request Pending',
+        searchInstructions: 'Enter a username to search for friends',
+        searchPlaceholder: 'Enter username...',
+        searching: 'Searching...',
+        userNotFound: 'User not found',
+        noUserFound: 'No user found with that username',
+        checkUsername: 'Please check the username and try again',
+        howToFind: 'How to Find Friends',
+        findInstructions: 'Search for friends by their username. Both you and your friend need to have GitHub connected to send friend requests.',
+        requestSent: 'Friend request sent!',
+        requestAccepted: 'Friend request accepted!',
+        requestRejected: 'Friend request rejected',
+        friendRemoved: 'Friend removed',
+        confirmRemove: 'Remove Friend',
+        confirmRemoveMessage: 'Are you sure you want to remove this friend?',
+        cannotAddYourself: 'You cannot send a friend request to yourself',
+        bothMustHaveGithub: 'Both users must have GitHub connected to become friends',
+        status: {
+            none: 'Not connected',
+            requested: 'Request sent',
+            pending: 'Request pending',
+            friend: 'Friends',
+            rejected: 'Rejected',
+        },
+        acceptRequest: 'Accept Request',
+        removeFriend: 'Remove Friend',
+        removeFriendConfirm: ({ name }: { name: string }) => `Are you sure you want to remove ${name} as a friend?`,
+        requestSentDescription: ({ name }: { name: string }) => `Your friend request has been sent to ${name}`,
+        requestFriendship: 'Request friendship',
+        cancelRequest: 'Cancel friendship request',
+        cancelRequestConfirm: ({ name }: { name: string }) => `Cancel your friendship request to ${name}?`,
+        denyRequest: 'Deny friendship',
+        nowFriendsWith: ({ name }: { name: string }) => `You are now friends with ${name}`,
+    },
+
+    usage: {
+        // Usage panel strings
+        today: 'Today',
+        last7Days: 'Last 7 days',
+        last30Days: 'Last 30 days',
+        totalTokens: 'Total Tokens',
+        totalCost: 'Total Cost',
+        tokens: 'Tokens',
+        cost: 'Cost',
+        usageOverTime: 'Usage over time',
+        byModel: 'By Model',
+        noData: 'No usage data available',
+    },
+
+    imageUpload: {
+        permissionTitle: 'Photo Library Access',
+        permissionMessage: 'Allow access to your photo library to attach images to messages.',
+        limitTitle: 'Image Limit Reached',
+        limitMessage: ({ max }: { max: number }) => `You can attach up to ${max} images per message.`,
+        fileTooLargeTitle: 'File Too Large',
+        fileTooLargeMessage: ({ name, maxMb }: { name: string; maxMb: number }) => `"${name}" exceeds the ${maxMb}MB limit and was not added.`,
+        uploadFailedTitle: 'Upload Failed',
+        uploadFailedMessage: ({ count }: { count: number }) => count === 1
+            ? 'One image could not be uploaded and was not sent.'
+            : `${count} images could not be uploaded and were not sent.`,
+        notSupportedTitle: 'Images Not Supported',
+        notSupportedMessage: 'This agent does not support image attachments. Images were not sent.',
+    },
+
+    feed: {
+        // Feed notifications for friend requests and acceptances
+        friendRequestFrom: ({ name }: { name: string }) => `${name} sent you a friend request`,
+        friendRequestGeneric: 'New friend request',
+        friendAccepted: ({ name }: { name: string }) => `You are now friends with ${name}`,
+        friendAcceptedGeneric: 'Friend request accepted',
+    },
+
+} as const;
+
+export type TranslationsEn = typeof en;

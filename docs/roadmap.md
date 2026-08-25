@@ -1,4 +1,4 @@
-# Happy Roadmap
+# AgentRejoin Roadmap
 
 ## Next Up
 
@@ -89,7 +89,7 @@ Missing the concept of **workspace** (aka project) that spans multiple machines,
 
 ## Customization
 
-- UI self-customization ("change X" → happy obliges)
+- UI self-customization ("change X" → agentrejoin obliges)
 - Custom widgets per session / project
 - Widgets on mobile (iOS/Android) + desktop
 

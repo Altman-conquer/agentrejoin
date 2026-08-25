@@ -1,10 +1,10 @@
-# Privacy Policy for Happy Coder
+# Privacy Policy for AgentRejoin
 
 **Last Updated: July 23, 2026**
 
 ## Overview
 
-Happy Coder is committed to protecting your privacy. This policy explains how we handle data in our zero-knowledge encrypted synchronization features and in the optional voice feature, which has a separate data flow described below.
+AgentRejoin is committed to protecting your privacy. This policy explains how we handle data in our zero-knowledge encrypted synchronization features and in the optional voice feature, which has a separate data flow described below.
 
 ## What We Collect
 
@@ -34,13 +34,13 @@ Happy Coder is committed to protecting your privacy. This policy explains how we
 When you turn on voice, your device connects to ElevenLabs to provide the voice agent. Native apps use the ElevenLabs SDK with a LiveKit/WebRTC media connection; the web client uses the ElevenLabs web SDK over WebSocket.
 
 - **Voice Audio**: ElevenLabs receives audio from your microphone during a voice session.
-- **Voice Context**: The Happy app sends text to the voice agent so it can assist you. This can include active-session IDs and summaries; the current session's ID, project path, summary, message history, and new messages; session focus or readiness events; and pending permission requests, including the tool name and arguments. It may also include agent tool-call details configured for the voice session.
-- **Encryption Boundary**: Voice audio and context sent to the voice agent are not covered by Happy's end-to-end encryption or zero-knowledge architecture. Happy's server does not proxy this audio or context. For Happy-managed voice, it authenticates your Happy account, checks subscription and usage limits, and obtains a voice-session token. It processes account, agent, conversation, and voice-usage metadata for that purpose.
-- **Pseudonymous Voice Identifier**: For Happy-managed voice, Happy gives ElevenLabs a stable pseudonymous identifier derived from your Happy account ID using HMAC-SHA-256. This lets ElevenLabs apply per-user voice limits without using your raw Happy account ID as the voice user ID. The identifier can still link your voice sessions to one another.
-- **Direct Connection**: If you configure your own ElevenLabs agent and choose to bypass Happy's token flow, Happy bypasses its managed token and usage-limit flow. The selected ElevenLabs agent still receives the voice audio and context described above.
+- **Voice Context**: The AgentRejoin app sends text to the voice agent so it can assist you. This can include active-session IDs and summaries; the current session's ID, project path, summary, message history, and new messages; session focus or readiness events; and pending permission requests, including the tool name and arguments. It may also include agent tool-call details configured for the voice session.
+- **Encryption Boundary**: Voice audio and context sent to the voice agent are not covered by AgentRejoin's end-to-end encryption or zero-knowledge architecture. AgentRejoin's server does not proxy this audio or context. For AgentRejoin-managed voice, it authenticates your AgentRejoin account, checks subscription and usage limits, and obtains a voice-session token. It processes account, agent, conversation, and voice-usage metadata for that purpose.
+- **Pseudonymous Voice Identifier**: For AgentRejoin-managed voice, AgentRejoin gives ElevenLabs a stable pseudonymous identifier derived from your AgentRejoin account ID using HMAC-SHA-256. This lets ElevenLabs apply per-user voice limits without using your raw AgentRejoin account ID as the voice user ID. The identifier can still link your voice sessions to one another.
+- **Direct Connection**: If you configure your own ElevenLabs agent and choose to bypass AgentRejoin's token flow, AgentRejoin bypasses its managed token and usage-limit flow. The selected ElevenLabs agent still receives the voice audio and context described above.
 
 ## What We Don't Collect
-- Your actual code or conversation content sent through Happy's encrypted synchronization service (we can't decrypt it). This does not include voice audio or context you choose to send directly to ElevenLabs during an active voice session.
+- Your actual code or conversation content sent through AgentRejoin's encrypted synchronization service (we can't decrypt it). This does not include voice audio or context you choose to send directly to ElevenLabs during an active voice session.
 - Personal information contained in encrypted messages, because we cannot decrypt those messages. If you use voice, ElevenLabs may receive personal information that you include in voice audio or context.
 - Device information beyond anonymous IDs
 - Location data
@@ -67,7 +67,7 @@ Push notifications are sent directly from your devices to each other, not from o
 
 ## Data Security
 
-- **End-to-End Encryption**: Using TweetNaCl (same as Signal) for sensitive data transmitted through Happy's encrypted synchronization service
+- **End-to-End Encryption**: Using TweetNaCl (same as Signal) for sensitive data transmitted through AgentRejoin's encrypted synchronization service
 - **Zero-Knowledge**: We cannot decrypt encrypted synchronization data even if compelled
 - **Secure Key Exchange**: Encryption keys are transmitted between your devices only in encrypted form that we cannot access
 - **Open Source**: Our encryption implementation is publicly auditable
@@ -80,7 +80,7 @@ The optional voice feature is an exception to the encrypted synchronization mode
 - Encrypted messages are retained indefinitely until you delete them
 - Metadata is retained for system functionality
 - Deleted data is permanently removed from our servers within 30 days
-- Voice audio, voice-session context, and voice-usage records processed or retained by ElevenLabs are subject to ElevenLabs' own practices and privacy policy; they are not stored as Happy encrypted synchronization data.
+- Voice audio, voice-session context, and voice-usage records processed or retained by ElevenLabs are subject to ElevenLabs' own practices and privacy policy; they are not stored as AgentRejoin encrypted synchronization data.
 
 ## Your Rights
 
@@ -108,15 +108,15 @@ We will notify users of any material changes to this privacy policy through the 
 ## Contact
 
 For privacy concerns or questions:
-- GitHub Issues: https://github.com/slopus/happy/issues
+- GitHub Issues: https://github.com/Altman-conquer/agentrejoin/issues
 
 ## Compliance
 
-Happy Coder is designed with privacy by default and complies with:
+AgentRejoin is designed with privacy by default and complies with:
 - GDPR (General Data Protection Regulation)
 - CCPA (California Consumer Privacy Act)
 - Privacy by Design principles
 
 ---
 
-**Remember**: Your encryption keys are only shared between your own devices in encrypted form. We cannot read code or conversations transmitted through Happy's encrypted synchronization service. Content you choose to send through voice is processed by ElevenLabs as described in "Voice (Optional)" above.
+**Remember**: Your encryption keys are only shared between your own devices in encrypted form. We cannot read code or conversations transmitted through AgentRejoin's encrypted synchronization service. Content you choose to send through voice is processed by ElevenLabs as described in "Voice (Optional)" above.

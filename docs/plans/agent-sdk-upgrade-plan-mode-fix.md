@@ -41,7 +41,7 @@ if (this.permissionMode === 'bypassPermissions') { ... }  // other tools still b
 
 ## Part 1: Immediate Bug Fix ✅
 
-**File:** `packages/happy-cli/src/claude/utils/permissionHandler.ts`
+**File:** `packages/agentrejoin-cli/src/claude/utils/permissionHandler.ts`
 
 ExitPlanMode must never be auto-approved. In `handleToolCall`, check `descriptor.exitPlan` before the `bypassPermissions`/`acceptEdits` shortcuts and always route to `handlePermissionRequest`.
 
@@ -52,7 +52,7 @@ ExitPlanMode must never be auto-approved. In `handleToolCall`, check `descriptor
 ### 2a. Install dependency
 
 ```bash
-cd packages/happy-cli && yarn add @anthropic-ai/claude-agent-sdk@^0.2.96
+cd packages/agentrejoin-cli && yarn add @anthropic-ai/claude-agent-sdk@^0.2.96
 ```
 
 ### 2b. Migrate SDK types

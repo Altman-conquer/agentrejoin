@@ -44,7 +44,7 @@ function ensureStarted(): void {
     }
 }
 
-export const happyClient = {
+export const agentRejoinClient = {
     start(): void {
         ensureStarted()
     },
@@ -101,8 +101,8 @@ export const happyClient = {
 
 export function useHappyState(): HappyStateSnapshot {
     return useSyncExternalStore(
-        happyClient.subscribe,
-        happyClient.getSnapshot,
-        happyClient.getSnapshot,
+        agentRejoinClient.subscribe,
+        agentRejoinClient.getSnapshot,
+        agentRejoinClient.getSnapshot,
     )
 }

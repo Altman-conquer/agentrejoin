@@ -1,4 +1,4 @@
-# Standalone happy-server: single container, no external dependencies
+# Standalone agentrejoin-server: single container, no external dependencies
 # Uses PGlite (embedded Postgres), local filesystem storage, no Redis
 
 # Stage 1: install dependencies
@@ -13,33 +13,33 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY scripts ./scripts
 COPY patches ./patches
 
-RUN mkdir -p packages/happy-app packages/happy-server packages/happy-cli packages/happy-agent packages/happy-wire
+RUN mkdir -p packages/agentrejoin-app packages/agentrejoin-server packages/agentrejoin-cli packages/agentrejoin-agent packages/agentrejoin-wire
 
-COPY packages/happy-app/package.json packages/happy-app/
-COPY packages/happy-server/package.json packages/happy-server/
-COPY packages/happy-cli/package.json packages/happy-cli/
-COPY packages/happy-agent/package.json packages/happy-agent/
-COPY packages/happy-wire/package.json packages/happy-wire/
+COPY packages/agentrejoin-app/package.json packages/agentrejoin-app/
+COPY packages/agentrejoin-server/package.json packages/agentrejoin-server/
+COPY packages/agentrejoin-cli/package.json packages/agentrejoin-cli/
+COPY packages/agentrejoin-agent/package.json packages/agentrejoin-agent/
+COPY packages/agentrejoin-wire/package.json packages/agentrejoin-wire/
 
 # Workspace postinstall requirements
-COPY packages/happy-app/patches packages/happy-app/patches
-COPY packages/happy-server/prisma packages/happy-server/prisma
-COPY packages/happy-cli/scripts packages/happy-cli/scripts
-COPY packages/happy-cli/tools packages/happy-cli/tools
+COPY packages/agentrejoin-app/patches packages/agentrejoin-app/patches
+COPY packages/agentrejoin-server/prisma packages/agentrejoin-server/prisma
+COPY packages/agentrejoin-cli/scripts packages/agentrejoin-cli/scripts
+COPY packages/agentrejoin-cli/tools packages/agentrejoin-cli/tools
 
-RUN SKIP_HAPPY_WIRE_BUILD=1 pnpm install --frozen-lockfile
+RUN SKIP_AGENTREJOIN_WIRE_BUILD=1 pnpm install --frozen-lockfile
 
 # Stage 2: copy source and type-check
 FROM deps AS builder
 
-COPY packages/happy-wire ./packages/happy-wire
-COPY packages/happy-server ./packages/happy-server
-COPY packages/happy-app ./packages/happy-app
+COPY packages/agentrejoin-wire ./packages/agentrejoin-wire
+COPY packages/agentrejoin-server ./packages/agentrejoin-server
+COPY packages/agentrejoin-app ./packages/agentrejoin-app
 
-RUN pnpm --filter @slopus/happy-wire --fail-if-no-match build
-RUN pnpm --filter happy-server --fail-if-no-match build
-RUN APP_ENV=production NODE_ENV=production pnpm --filter happy-app exec expo export --platform web --output-dir dist
-RUN pnpm --filter happy-server deploy --prod --legacy /repo/runtime
+RUN pnpm --filter agentrejoin-wire --fail-if-no-match build
+RUN pnpm --filter agentrejoin-server --fail-if-no-match build
+RUN APP_ENV=production NODE_ENV=production pnpm --filter agentrejoin-app exec expo export --platform web --output-dir dist
+RUN pnpm --filter agentrejoin-server deploy --prod --legacy /repo/runtime
 RUN cd /repo/runtime && node_modules/.bin/prisma generate --schema=prisma/schema.prisma --generator client
 
 # Stage 3: runtime
@@ -52,10 +52,10 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 ENV DATA_DIR=/data
 ENV PGLITE_DIR=/data/pglite
-ENV HAPPY_STATIC_DIR=/repo/webapp
+ENV AGENTREJOIN_STATIC_DIR=/repo/webapp
 
 COPY --from=builder /repo/runtime /repo
-COPY --from=builder /repo/packages/happy-app/dist /repo/webapp
+COPY --from=builder /repo/packages/agentrejoin-app/dist /repo/webapp
 
 VOLUME /data
 EXPOSE 3005

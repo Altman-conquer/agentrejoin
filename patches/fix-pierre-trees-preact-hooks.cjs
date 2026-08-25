@@ -24,7 +24,7 @@ const path = require('path');
 
 const targets = [
     path.resolve(__dirname, '..', 'node_modules', '@pierre', 'trees', 'dist', 'render', 'runtime.js'),
-    path.resolve(__dirname, '..', 'packages', 'happy-app', 'node_modules', '@pierre', 'trees', 'dist', 'render', 'runtime.js'),
+    path.resolve(__dirname, '..', 'packages', 'agentrejoin-app', 'node_modules', '@pierre', 'trees', 'dist', 'render', 'runtime.js'),
 ];
 
 const MARKER = 'preact/hooks';

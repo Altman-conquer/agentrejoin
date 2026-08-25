@@ -8,11 +8,11 @@ require('../patches/force-preact-cjs.cjs');
 require('../patches/fix-pierre-trees-preact-hooks.cjs');
 require('../patches/fix-react-native-audio-api-size-t.cjs');
 
-if (process.env.SKIP_HAPPY_WIRE_BUILD === '1') {
-  console.log('[postinstall] SKIP_HAPPY_WIRE_BUILD=1, skipping @slopus/happy-wire build');
+if (process.env.SKIP_AGENTREJOIN_WIRE_BUILD === '1') {
+  console.log('[postinstall] SKIP_AGENTREJOIN_WIRE_BUILD=1, skipping agentrejoin-wire build');
   process.exit(0);
 }
 
-execSync('pnpm --filter @slopus/happy-wire build', {
+execSync('pnpm --filter agentrejoin-wire build', {
   stdio: 'inherit',
 });

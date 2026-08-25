@@ -25,8 +25,8 @@ const DEFAULT_WEBAPP_URL = 'https://app.happy.engineering'
 let worker: Worker | null = null
 let latestState: HappyStateSnapshot = {
     status: 'starting',
-    serverUrl: process.env.HAPPY_SERVER_URL || DEFAULT_SERVER_URL,
-    webappUrl: process.env.HAPPY_WEBAPP_URL || DEFAULT_WEBAPP_URL,
+    serverUrl: process.env.AGENTREJOIN_SERVER_URL || DEFAULT_SERVER_URL,
+    webappUrl: process.env.AGENTREJOIN_WEBAPP_URL || DEFAULT_WEBAPP_URL,
     clientReady: false,
     updatedAt: Date.now(),
 }
@@ -46,8 +46,8 @@ function ensureWorker(): Worker {
     const w = new Worker(workerEntryPath(), {
         workerData: {
             storagePath: storageFilePath('happy-auth.json'),
-            serverUrl: process.env.HAPPY_SERVER_URL || DEFAULT_SERVER_URL,
-            webappUrl: process.env.HAPPY_WEBAPP_URL || DEFAULT_WEBAPP_URL,
+            serverUrl: process.env.AGENTREJOIN_SERVER_URL || DEFAULT_SERVER_URL,
+            webappUrl: process.env.AGENTREJOIN_WEBAPP_URL || DEFAULT_WEBAPP_URL,
             clientId: `codium/${app.getVersion() || '0.0.0'}`,
         },
     })

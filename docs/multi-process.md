@@ -1,4 +1,4 @@
-# Multi-process happy-server
+# Multi-process agentrejoin-server
 
 How handy-server runs across multiple Kubernetes replicas: socket distribution,
 room-based RPC routing, broadcast fan-out, daemon lifecycle, and what happens
@@ -136,7 +136,7 @@ Rooms used by `eventRouter`:
 
 ```
 .
-├── packages/happy-server/sources/app/
+├── packages/agentrejoin-server/sources/app/
 │   ├── api/socket.ts                      io.Server setup, attaches the
 │   │                                       streams adapter when REDIS_URL
 │   │                                       is set, commented-out
@@ -147,7 +147,7 @@ Rooms used by `eventRouter`:
 │   ├── api/socket/sessionUpdateHandler.ts no longer touches RPC state
 │   └── events/eventRouter.ts              broadcast emission via rooms
 │
-└── packages/happy-server/deploy/handy.yaml  k8s Deployment + Service
+└── packages/agentrejoin-server/deploy/handy.yaml  k8s Deployment + Service
                                              (replicas: 1 in this PR)
 ```
 

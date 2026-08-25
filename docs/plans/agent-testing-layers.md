@@ -8,7 +8,7 @@ Layer 1 is direct integration with the real agent.
 
 Source of truth:
 
-- `packages/happy-cli/agents.md`
+- `packages/agentrejoin-cli/agents.md`
 
 ## Layer 2
 
@@ -18,11 +18,11 @@ Source of truth:
 
 - `./product.md`
 
-## happy-agent spawn
+## agentrejoin-agent spawn
 
-`happy-agent spawn` is product-layer validation work.
+`agentrejoin-agent spawn` is product-layer validation work.
 
 Source of truth:
 
-- `./happy-agent.md`
-- `packages/happy-agent/src/happy-agent.integration.test.ts`
+- `./agentrejoin-agent.md`
+- `packages/agentrejoin-agent/src/agentrejoin-agent.integration.test.ts`

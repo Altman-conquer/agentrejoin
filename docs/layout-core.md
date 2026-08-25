@@ -1,4 +1,4 @@
-# Happy Layout — Core Spec
+# AgentRejoin Layout — Core Spec
 
 ## Current Layout (from code)
 
@@ -177,7 +177,7 @@ Edit on desktop only!
 
 #### Aspirational (not in v1, not in tabs)
 
-Everyone loves arc ... chrome is bringing vertical tabs ... but conductor is pushing the industry back into horizontal. Happy to bring you relief!
+Everyone loves arc ... chrome is bringing vertical tabs ... but conductor is pushing the industry back into horizontal. AgentRejoin to bring you relief!
 
 Below the tab content, future additions:
 - **Important tab** — "working set" skeleton of files the agent recently read/wrote

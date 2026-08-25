@@ -85,7 +85,7 @@ class HappyAuthenticatedClient {
     async request(path: string, init: RequestInit = {}): Promise<Response> {
         const headers = new Headers(init.headers)
         headers.set('Authorization', `Bearer ${this.auth.token}`)
-        headers.set('X-Happy-Client', this.cfg.clientId)
+        headers.set('X-AgentRejoin-Client', this.cfg.clientId)
         return fetch(`${this.cfg.serverUrl}${path}`, { ...init, headers })
     }
 }
@@ -199,7 +199,7 @@ async function startLinkDevice(requestId: string): Promise<void> {
         const flow: LinkFlow = {
             keypair,
             publicKey,
-            authUrl: `happy:///account?${publicKey}`,
+            authUrl: `agentrejoin:///account?${publicKey}`,
             startedAt: Date.now(),
             cancelled: false,
         }
@@ -340,7 +340,7 @@ async function apiJson(path: string, body: unknown): Promise<Record<string, unkn
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Happy-Client': config.clientId,
+            'X-AgentRejoin-Client': config.clientId,
         },
         body: JSON.stringify(body),
     })

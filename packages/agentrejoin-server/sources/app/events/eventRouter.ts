@@ -1,0 +1,682 @@
+import { Server, Socket } from "socket.io";
+import { log } from "@/utils/log";
+import { GitHubProfile } from "@/app/api/types";
+import { AccountProfile } from "@/types";
+import { getPublicUrl } from "@/storage/files";
+import type { SessionMessageContent } from "agentrejoin-wire";
+
+/**
+ * Cross-replica presence lookups must stay well inside the CLI's 15s push
+ * timeout, and a stalled peer replica should degrade to "send" quickly.
+ */
+const PRESENCE_FETCH_TIMEOUT_MS = 2_000;
+
+// === CONNECTION TYPES ===
+
+export interface SessionScopedConnection {
+    connectionType: 'session-scoped';
+    socket: Socket;
+    userId: string;
+    sessionId: string;
+    agentRejoinClient?: string;
+}
+
+export interface UserScopedConnection {
+    connectionType: 'user-scoped';
+    socket: Socket;
+    userId: string;
+    agentRejoinClient?: string;
+}
+
+export interface MachineScopedConnection {
+    connectionType: 'machine-scoped';
+    socket: Socket;
+    userId: string;
+    machineId: string;
+    agentRejoinClient?: string;
+}
+
+export type ClientConnection = SessionScopedConnection | UserScopedConnection | MachineScopedConnection;
+
+// === RECIPIENT FILTER TYPES ===
+
+export type RecipientFilter =
+    | { type: 'all-interested-in-session'; sessionId: string }
+    | { type: 'user-scoped-only' }
+    | { type: 'machine-scoped-only'; machineId: string }  // For update-machine: sends to user-scoped + only the specific machine
+    | { type: 'all-user-authenticated-connections' };
+
+// === UPDATE EVENT TYPES (Persistent) ===
+
+export type UpdateEvent = {
+    type: 'new-message';
+    sessionId: string;
+    message: {
+        id: string;
+        seq: number;
+        content: SessionMessageContent;
+        localId: string | null;
+        createdAt: number;
+        updatedAt: number;
+    }
+} | {
+    type: 'new-session';
+    sessionId: string;
+    seq: number;
+    metadata: string;
+    metadataVersion: number;
+    agentState: string | null;
+    agentStateVersion: number;
+    dataEncryptionKey: string | null;
+    active: boolean;
+    activeAt: number;
+    createdAt: number;
+    updatedAt: number;
+} | {
+    type: 'update-session';
+    sessionId: string;
+    metadata?: {
+        value: string | null;
+        version: number;
+    } | null | undefined;
+    agentState?: {
+        value: string | null;
+        version: number;
+    } | null | undefined;
+} | {
+    type: 'update-account';
+    userId: string;
+    settings?: {
+        value: string | null;
+        version: number;
+    } | null | undefined;
+    github?: GitHubProfile | null | undefined;
+} | {
+    type: 'new-machine';
+    machineId: string;
+    seq: number;
+    metadata: string;
+    metadataVersion: number;
+    daemonState: string | null;
+    daemonStateVersion: number;
+    dataEncryptionKey: string | null;
+    active: boolean;
+    activeAt: number;
+    createdAt: number;
+    updatedAt: number;
+} | {
+    type: 'update-machine';
+    machineId: string;
+    metadata?: {
+        value: string;
+        version: number;
+    };
+    daemonState?: {
+        value: string;
+        version: number;
+    };
+    activeAt?: number;
+} | {
+    type: 'delete-machine';
+    machineId: string;
+} | {
+    type: 'new-artifact';
+    artifactId: string;
+    seq: number;
+    header: string;
+    headerVersion: number;
+    body: string;
+    bodyVersion: number;
+    dataEncryptionKey: string | null;
+    createdAt: number;
+    updatedAt: number;
+} | {
+    type: 'update-artifact';
+    artifactId: string;
+    header?: {
+        value: string;
+        version: number;
+    };
+    body?: {
+        value: string;
+        version: number;
+    };
+} | {
+    type: 'delete-artifact';
+    artifactId: string;
+} | {
+    type: 'delete-session';
+    sessionId: string;
+} | {
+    type: 'relationship-updated';
+    uid: string;
+    status: 'none' | 'requested' | 'pending' | 'friend' | 'rejected';
+    timestamp: number;
+} | {
+    type: 'new-feed-post';
+    id: string;
+    body: any;
+    cursor: string;
+    createdAt: number;
+} | {
+    type: 'kv-batch-update';
+    changes: Array<{
+        key: string;
+        value: string | null; // null indicates deletion
+        version: number; // -1 for deleted keys
+    }>;
+};
+
+// === EPHEMERAL EVENT TYPES (Transient) ===
+
+export type EphemeralEvent = {
+    type: 'activity';
+    id: string;
+    active: boolean;
+    activeAt: number;
+    thinking?: boolean;
+} | {
+    type: 'machine-activity';
+    id: string;
+    active: boolean;
+    activeAt: number;
+} | {
+    type: 'usage';
+    id: string;
+    key: string;
+    tokens: Record<string, number>;
+    cost: Record<string, number>;
+    timestamp: number;
+} | {
+    type: 'machine-status';
+    machineId: string;
+    online: boolean;
+    timestamp: number;
+} | {
+    type: 'session-event';
+    sessionId: string;
+    kind: 'done' | 'permission' | 'question';
+    title: string;
+    body: string;
+    timestamp: number;
+};
+
+// === EVENT PAYLOAD TYPES ===
+
+export interface UpdatePayload {
+    id: string;
+    seq: number;
+    body: {
+        t: UpdateEvent['type'];
+        [key: string]: any;
+    };
+    createdAt: number;
+}
+
+export interface EphemeralPayload {
+    type: EphemeralEvent['type'];
+    [key: string]: any;
+}
+
+// === EVENT ROUTER CLASS ===
+
+class EventRouter {
+    private io!: Server;
+
+    // === INITIALIZATION ===
+
+    init(io: Server): void {
+        this.io = io;
+    }
+
+    // === CONNECTION MANAGEMENT (via Socket.IO rooms) ===
+
+    addConnection(userId: string, connection: ClientConnection): void {
+        const socket = connection.socket;
+        socket.join(`user:${userId}`);
+
+        switch (connection.connectionType) {
+            case 'user-scoped':
+                socket.join(`user:${userId}:user-scoped`);
+                break;
+            case 'session-scoped':
+                socket.join(`user:${userId}:session:${connection.sessionId}`);
+                break;
+            case 'machine-scoped':
+                socket.join(`user:${userId}:machine:${connection.machineId}`);
+                break;
+        }
+    }
+
+    removeConnection(userId: string, connection: ClientConnection): void {
+        // Socket.IO automatically removes sockets from all rooms on disconnect
+    }
+
+    // === EVENT EMISSION METHODS ===
+
+    emitUpdate(params: {
+        userId: string;
+        payload: UpdatePayload;
+        recipientFilter?: RecipientFilter;
+        skipSenderConnection?: ClientConnection;
+    }): void {
+        this.emit({
+            userId: params.userId,
+            eventName: 'update',
+            payload: params.payload,
+            recipientFilter: params.recipientFilter || { type: 'all-user-authenticated-connections' },
+            skipSenderConnection: params.skipSenderConnection
+        });
+    }
+
+    emitEphemeral(params: {
+        userId: string;
+        payload: EphemeralPayload;
+        recipientFilter?: RecipientFilter;
+        skipSenderConnection?: ClientConnection;
+    }): void {
+        this.emit({
+            userId: params.userId,
+            eventName: 'ephemeral',
+            payload: params.payload,
+            recipientFilter: params.recipientFilter || { type: 'all-user-authenticated-connections' },
+            skipSenderConnection: params.skipSenderConnection
+        });
+    }
+
+    // === PRESENCE QUERIES ===
+
+    /**
+     * Returns true if the user is demonstrably looking at a AgentRejoin UI client
+     * right now. Used to suppress a push they would only find redundant.
+     *
+     * Both conditions are deliberately positive — presence must be proven, not
+     * assumed. The costs are asymmetric: a redundant push is a buzz the user
+     * dismisses, while a missed push leaves an agent blocked on a permission
+     * prompt with nobody watching.
+     *
+     *   - Only `user-scoped` sockets are notification surfaces. `session-scoped`
+     *     is the coding agent itself and `machine-scoped` is the daemon; neither
+     *     displays anything. Counting `session-scoped` meant a running session's
+     *     own socket suppressed the very push that session was asking for, so
+     *     mobile push went silent whenever a session was live.
+     *   - Only an explicit `app-state: active` counts. A client that never
+     *     reported is unknown, not present.
+     *
+     * Uses fetchSockets() which works cross-replica via Redis streams adapter,
+     * bounded so an unresponsive peer replica cannot stall a push. On timeout
+     * this throws and the caller fails open — an infrastructure problem must
+     * never turn into silence.
+     */
+    async hasActiveUiClient(userId: string): Promise<boolean> {
+        const sockets = await this.io.in(`user:${userId}`)
+            .timeout(PRESENCE_FETCH_TIMEOUT_MS)
+            .fetchSockets();
+        return sockets.some(s => s.data.clientType === 'user-scoped' && s.data.appState === 'active');
+    }
+
+    // === PRIVATE ROUTING LOGIC ===
+
+    private getRoomsForFilter(userId: string, filter: RecipientFilter): string[] {
+        switch (filter.type) {
+            case 'all-user-authenticated-connections':
+                return [`user:${userId}`];
+            case 'user-scoped-only':
+                return [`user:${userId}:user-scoped`];
+            case 'all-interested-in-session':
+                // Union: session watchers + user-scoped (Socket.IO deduplicates)
+                return [`user:${userId}:session:${filter.sessionId}`, `user:${userId}:user-scoped`];
+            case 'machine-scoped-only':
+                // Union: specific machine + user-scoped
+                return [`user:${userId}:machine:${filter.machineId}`, `user:${userId}:user-scoped`];
+        }
+    }
+
+    private emit(params: {
+        userId: string;
+        eventName: 'update' | 'ephemeral';
+        payload: any;
+        recipientFilter: RecipientFilter;
+        skipSenderConnection?: ClientConnection;
+    }): void {
+        const rooms = this.getRoomsForFilter(params.userId, params.recipientFilter);
+
+        if (params.skipSenderConnection) {
+            params.skipSenderConnection.socket.broadcast.to(rooms).emit(params.eventName, params.payload);
+        } else {
+            this.io.to(rooms).emit(params.eventName, params.payload);
+        }
+    }
+}
+
+export const eventRouter = new EventRouter();
+
+// === EVENT BUILDER FUNCTIONS ===
+
+export function buildNewSessionUpdate(session: {
+    id: string;
+    seq: number;
+    metadata: string;
+    metadataVersion: number;
+    agentState: string | null;
+    agentStateVersion: number;
+    dataEncryptionKey: Uint8Array | null;
+    active: boolean;
+    lastActiveAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+}, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'new-session',
+            id: session.id,
+            seq: session.seq,
+            metadata: session.metadata,
+            metadataVersion: session.metadataVersion,
+            agentState: session.agentState,
+            agentStateVersion: session.agentStateVersion,
+            dataEncryptionKey: session.dataEncryptionKey ? Buffer.from(session.dataEncryptionKey).toString('base64') : null,
+            active: session.active,
+            activeAt: session.lastActiveAt.getTime(),
+            createdAt: session.createdAt.getTime(),
+            updatedAt: session.updatedAt.getTime()
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildNewMessageUpdate(message: {
+    id: string;
+    seq: number;
+    content: SessionMessageContent;
+    localId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+}, sessionId: string, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'new-message',
+            sid: sessionId,
+            message: {
+                id: message.id,
+                seq: message.seq,
+                content: message.content,
+                localId: message.localId,
+                createdAt: message.createdAt.getTime(),
+                updatedAt: message.updatedAt.getTime()
+            }
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildUpdateSessionUpdate(sessionId: string, updateSeq: number, updateId: string, metadata?: { value: string; version: number }, agentState?: { value: string; version: number }): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'update-session',
+            id: sessionId,
+            metadata,
+            agentState
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildDeleteSessionUpdate(sessionId: string, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'delete-session',
+            sid: sessionId
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildUpdateAccountUpdate(userId: string, profile: Partial<AccountProfile>, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'update-account',
+            id: userId,
+            ...profile,
+            avatar: profile.avatar ? { ...profile.avatar, url: getPublicUrl(profile.avatar.path) } : undefined
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildNewMachineUpdate(machine: {
+    id: string;
+    seq: number;
+    metadata: string;
+    metadataVersion: number;
+    daemonState: string | null;
+    daemonStateVersion: number;
+    dataEncryptionKey: Uint8Array | null;
+    active: boolean;
+    lastActiveAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+}, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'new-machine',
+            machineId: machine.id,
+            seq: machine.seq,
+            metadata: machine.metadata,
+            metadataVersion: machine.metadataVersion,
+            daemonState: machine.daemonState,
+            daemonStateVersion: machine.daemonStateVersion,
+            dataEncryptionKey: machine.dataEncryptionKey ? Buffer.from(machine.dataEncryptionKey).toString('base64') : null,
+            active: machine.active,
+            activeAt: machine.lastActiveAt.getTime(),
+            createdAt: machine.createdAt.getTime(),
+            updatedAt: machine.updatedAt.getTime()
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildUpdateMachineUpdate(machineId: string, updateSeq: number, updateId: string, metadata?: { value: string; version: number }, daemonState?: { value: string; version: number }): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'update-machine',
+            machineId,
+            metadata,
+            daemonState
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildDeleteMachineUpdate(machineId: string, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'delete-machine',
+            machineId
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildSessionActivityEphemeral(sessionId: string, active: boolean, activeAt: number, thinking?: boolean): EphemeralPayload {
+    return {
+        type: 'activity',
+        id: sessionId,
+        active,
+        activeAt,
+        thinking: thinking || false
+    };
+}
+
+export function buildMachineActivityEphemeral(machineId: string, active: boolean, activeAt: number): EphemeralPayload {
+    return {
+        type: 'machine-activity',
+        id: machineId,
+        active,
+        activeAt
+    };
+}
+
+export function buildUsageEphemeral(sessionId: string, key: string, tokens: Record<string, number>, cost: Record<string, number>): EphemeralPayload {
+    return {
+        type: 'usage',
+        id: sessionId,
+        key,
+        tokens,
+        cost,
+        timestamp: Date.now()
+    };
+}
+
+export function buildMachineStatusEphemeral(machineId: string, online: boolean): EphemeralPayload {
+    return {
+        type: 'machine-status',
+        machineId,
+        online,
+        timestamp: Date.now()
+    };
+}
+
+/**
+ * Session-level lifecycle event (Claude finished, needs permission, asks question).
+ * Emitted alongside the mobile push so other clients (e.g. web) can surface a
+ * tab-title counter or inline indicator without parsing every encrypted message.
+ */
+export function buildSessionEventEphemeral(sessionId: string, kind: 'done' | 'permission' | 'question', title: string, body: string): EphemeralPayload {
+    return {
+        type: 'session-event',
+        sessionId,
+        kind,
+        title,
+        body,
+        timestamp: Date.now()
+    };
+}
+
+export function buildNewArtifactUpdate(artifact: {
+    id: string;
+    seq: number;
+    header: Uint8Array;
+    headerVersion: number;
+    body: Uint8Array;
+    bodyVersion: number;
+    dataEncryptionKey: Uint8Array;
+    createdAt: Date;
+    updatedAt: Date;
+}, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'new-artifact',
+            artifactId: artifact.id,
+            seq: artifact.seq,
+            header: Buffer.from(artifact.header).toString('base64'),
+            headerVersion: artifact.headerVersion,
+            body: Buffer.from(artifact.body).toString('base64'),
+            bodyVersion: artifact.bodyVersion,
+            dataEncryptionKey: Buffer.from(artifact.dataEncryptionKey).toString('base64'),
+            createdAt: artifact.createdAt.getTime(),
+            updatedAt: artifact.updatedAt.getTime()
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildUpdateArtifactUpdate(artifactId: string, updateSeq: number, updateId: string, header?: { value: string; version: number }, body?: { value: string; version: number }): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'update-artifact',
+            artifactId,
+            header,
+            body
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildDeleteArtifactUpdate(artifactId: string, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'delete-artifact',
+            artifactId
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildRelationshipUpdatedEvent(
+    data: {
+        uid: string;
+        status: 'none' | 'requested' | 'pending' | 'friend' | 'rejected';
+        timestamp: number;
+    },
+    updateSeq: number,
+    updateId: string
+): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'relationship-updated',
+            ...data
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildNewFeedPostUpdate(feedItem: {
+    id: string;
+    body: any;
+    cursor: string;
+    createdAt: number;
+}, updateSeq: number, updateId: string): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'new-feed-post',
+            id: feedItem.id,
+            body: feedItem.body,
+            cursor: feedItem.cursor,
+            createdAt: feedItem.createdAt
+        },
+        createdAt: Date.now()
+    };
+}
+
+export function buildKVBatchUpdateUpdate(
+    changes: Array<{ key: string; value: string | null; version: number }>,
+    updateSeq: number,
+    updateId: string
+): UpdatePayload {
+    return {
+        id: updateId,
+        seq: updateSeq,
+        body: {
+            t: 'kv-batch-update',
+            changes
+        },
+        createdAt: Date.now()
+    };
+}

@@ -1,0 +1,5 @@
+# Build artifacts assembled from packages/agentrejoin-server by scripts/build-runtime.cjs
+dist/
+prisma/
+webapp/
+*.tgz

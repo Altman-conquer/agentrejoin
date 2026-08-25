@@ -1,7 +1,7 @@
 # Portable Single-Binary Distribution
 
 ## Overview
-Create a portable, self-contained distribution of happy-server as a single Bun-compiled binary. It runs without Redis (already has in-memory event bus), uses PGlite for embedded PostgreSQL, and local filesystem for file storage. CLI provides `happy-server migrate` and `happy-server serve` commands.
+Create a portable, self-contained distribution of agentrejoin-server as a single Bun-compiled binary. It runs without Redis (already has in-memory event bus), uses PGlite for embedded PostgreSQL, and local filesystem for file storage. CLI provides `agentrejoin-server migrate` and `agentrejoin-server serve` commands.
 
 ## Context
 - **Event bus**: Already 100% in-memory (`eventRouter.ts`). Redis is only used for `redis.ping()` health check — zero actual pub/sub usage. `@socket.io/redis-streams-adapter` is a dependency but never imported in source code.
@@ -19,7 +19,7 @@ Create a portable, self-contained distribution of happy-server as a single Bun-c
 ## Implementation Steps
 
 ### Task 1: Add PGlite + adapter dependencies
-- [ ] Add `@electric-sql/pglite`, `pglite-prisma-adapter` to happy-server dependencies
+- [ ] Add `@electric-sql/pglite`, `pglite-prisma-adapter` to agentrejoin-server dependencies
 - [ ] Add `driverAdapters` to `previewFeatures` in `prisma/schema.prisma` generator block
 - [ ] Run `prisma generate` to regenerate client with adapter support
 - [ ] Verify existing server still works (no breaking changes from preview feature)
@@ -52,16 +52,16 @@ Create a portable, self-contained distribution of happy-server as a single Bun-c
 - [ ] Embed migration SQL files at build time (Bun can import text files)
 
 ### Task 6: Add Bun build configuration
-- [ ] Add `build:standalone` script to `package.json`: `bun build ./sources/standalone.ts --compile --outfile happy-server`
+- [ ] Add `build:standalone` script to `package.json`: `bun build ./sources/standalone.ts --compile --outfile agentrejoin-server`
 - [ ] Handle PGlite WASM files: add a post-build step to copy postgres data files next to the binary
 - [ ] Test the build: `bun run build:standalone`
-- [ ] Test: `./happy-server migrate` creates and migrates a PGlite database
-- [ ] Test: `./happy-server serve` starts the server with PGlite
+- [ ] Test: `./agentrejoin-server migrate` creates and migrates a PGlite database
+- [ ] Test: `./agentrejoin-server serve` starts the server with PGlite
 
 ### Task 7: Verify end-to-end
 - [ ] Build the binary
-- [ ] Run `./happy-server migrate` — verify database is created in `./data/`
-- [ ] Run `./happy-server serve` — verify server starts, health endpoint responds
+- [ ] Run `./agentrejoin-server migrate` — verify database is created in `./data/`
+- [ ] Run `./agentrejoin-server serve` — verify server starts, health endpoint responds
 - [ ] Verify no Redis connection attempted
 - [ ] Verify files can be stored/served locally
 
@@ -92,11 +92,11 @@ const db = new PrismaClient({ adapter });
 
 **CLI usage:**
 ```
-happy-server migrate    # Apply database migrations
-happy-server serve      # Start the server
+agentrejoin-server migrate    # Apply database migrations
+agentrejoin-server serve      # Start the server
 ```
 
 ## Post-Completion
-- Document env vars for portable mode (`PGLITE_DIR`, `DATA_DIR`, `HANDY_MASTER_SECRET`)
+- Document env vars for portable mode (`PGLITE_DIR`, `DATA_DIR`, `AGENTREJOIN_MASTER_SECRET`)
 - Test on Linux for cross-platform binary (Bun cross-compile)
-- Consider adding `happy-server init` command for first-time setup
+- Consider adding `agentrejoin-server init` command for first-time setup

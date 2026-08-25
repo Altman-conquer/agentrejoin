@@ -1,0 +1,20 @@
+{
+  "$schema": "../../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "AgentRejoin",
+  "identifier": "com.zhandj.agentrejoin.dev",
+  "app": {
+    "windows": [
+      {
+        "title": "AgentRejoin",
+        "width": 1680,
+        "height": 1050,
+        "titleBarStyle": "Overlay",
+        "trafficLightPosition": {
+          "x": 22,
+          "y": 22
+        },
+        "hiddenTitle": true
+      }
+    ]
+  }
+}

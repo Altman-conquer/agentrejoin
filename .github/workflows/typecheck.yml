@@ -3,13 +3,13 @@ name: Expo App TypeScript typecheck
 on:
     pull_request:
         paths:
-            - 'packages/happy-app/**'
+            - 'packages/agentrejoin-app/**'
             - '.github/workflows/typecheck.yml'
     push:
         branches:
             - main
         paths:
-            - 'packages/happy-app/**'
+            - 'packages/agentrejoin-app/**'
             - '.github/workflows/typecheck.yml'
 
 jobs:
@@ -33,4 +33,4 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: TypeScript typecheck
-              run: pnpm --filter happy-app typecheck
+              run: pnpm --filter agentrejoin-app typecheck

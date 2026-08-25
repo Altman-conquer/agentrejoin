@@ -152,11 +152,11 @@ all include flow property which customizes the upsell screen shown by revenue ca
 
 ## Relevant Sources
 
-- packages/happy-app/sources/track/index.ts
-- packages/happy-app/sources/hooks/useNavigateToSession.ts
-- packages/happy-app/sources/-session/SessionView.tsx
-- packages/happy-app/sources/realtime/RealtimeSession.ts
-- packages/happy-app/sources/components/SettingsView.tsx
-- packages/happy-app/sources/sync/sync.ts
-- packages/happy-app/sources/track/useTrackScreens.ts
-- packages/happy-app/sources/track/tracking.ts
+- packages/agentrejoin-app/sources/track/index.ts
+- packages/agentrejoin-app/sources/hooks/useNavigateToSession.ts
+- packages/agentrejoin-app/sources/-session/SessionView.tsx
+- packages/agentrejoin-app/sources/realtime/RealtimeSession.ts
+- packages/agentrejoin-app/sources/components/SettingsView.tsx
+- packages/agentrejoin-app/sources/sync/sync.ts
+- packages/agentrejoin-app/sources/track/useTrackScreens.ts
+- packages/agentrejoin-app/sources/track/tracking.ts

@@ -11,7 +11,7 @@ This enables support for Gemini, OpenCode, and any future ACP agent without writ
 - **Existing AcpBackend** (`agent/acp/AcpBackend.ts`) already handles process spawning, ACP JSON-RPC, permissions, and tool tracking. Reused as-is.
 - **Existing runGemini.ts** (~1300 lines) is vendor-specific. Stays untouched; migration happens later.
 - **Codex already uses new session protocol** via `mapCodexMcpMessageToSessionEnvelopes()` — reference pattern.
-- **Session protocol types** in `@slopus/happy-wire` (`SessionEnvelope`, `createEnvelope()`).
+- **Session protocol types** in `agentrejoin-wire` (`SessionEnvelope`, `createEnvelope()`).
 - **AgentMessage** is the event type emitted by `AcpBackend.onMessage()`.
 - The runner does NOT resolve credentials, API keys, OAuth tokens, or environment variables. The user's shell environment is inherited as-is. If `gemini` needs `GEMINI_API_KEY`, the user sets it before running.
 
@@ -36,7 +36,7 @@ This enables support for Gemini, OpenCode, and any future ACP agent without writ
 
 The stateful handler that maps `AgentMessage` events from `AcpBackend` into `SessionEnvelope[]` for the new session protocol. This is the core logic.
 
-**File**: `packages/happy-cli/src/agent/acp/AcpSessionMapper.ts`
+**File**: `packages/agentrejoin-cli/src/agent/acp/AcpSessionMapper.ts`
 
 **Class design**:
 ```typescript
@@ -76,7 +76,7 @@ Since all IDs are non-deterministic cuid2, tests must:
 - Assert ID format (valid cuid2)
 - NOT assert exact ID values
 
-**Test file**: `packages/happy-cli/src/agent/acp/AcpSessionMapper.test.ts`
+**Test file**: `packages/agentrejoin-cli/src/agent/acp/AcpSessionMapper.test.ts`
 
 **Test cases for turn lifecycle**:
 - `running` -> emits 1 envelope: `turn-start` with cuid2 `turn`
@@ -135,7 +135,7 @@ Since all IDs are non-deterministic cuid2, tests must:
 
 The runner function that wires everything together: creates AcpBackend, listens for messages, maps them through AcpSessionMapper, and sends them to the session.
 
-**File**: `packages/happy-cli/src/agent/acp/runAcp.ts`
+**File**: `packages/agentrejoin-cli/src/agent/acp/runAcp.ts`
 
 **Signature**:
 ```typescript
@@ -177,7 +177,7 @@ async function runAcp(opts: {
 Wire the generic runner into the CLI so users can run `happy acp gemini` or `happy acp opencode` or `happy acp -- custom-agent --flag`.
 
 **Files**:
-- `packages/happy-cli/src/index.ts` — add CLI command routing
+- `packages/agentrejoin-cli/src/index.ts` — add CLI command routing
 - Agent configs for known agents (command + args only, no env/credentials)
 
 **Agent config**:

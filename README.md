@@ -32,36 +32,34 @@
 
 ## Quick start
 
-The product name is AgentRejoin. The published CLI commands remain `happy` and
-`happy-agent` for compatibility while the package and protocol migration is
-deferred.
+Install the AgentRejoin CLI and connect this machine:
 
 ```bash
-npm install -g happy
-happy auth login
-happy daemon start
+npm install -g agentrejoin
+agentrejoin auth login
+agentrejoin daemon start
 ```
 
 Run an agent through the connected CLI:
 
 ```bash
-happy claude
-happy codex
+agentrejoin claude
+agentrejoin codex
 ```
 
 Resume a known AgentRejoin session from the terminal:
 
 ```bash
-happy resume <session-id>
+agentrejoin resume <session-id>
 ```
 
 For the remote control CLI:
 
 ```bash
-happy-agent auth login
-happy-agent machines
-happy-agent list
-happy-agent resume <session-id>
+agentrejoin-agent auth login
+agentrejoin-agent machines
+agentrejoin-agent list
+agentrejoin-agent resume <session-id>
 ```
 
 ## How it works
@@ -74,27 +72,27 @@ but cannot read conversation content.
 
 ## Repository
 
-- `packages/happy-app` - Expo web and mobile client, plus the Tauri desktop shell
-- `packages/happy-cli` - coding-agent runtime and machine daemon
-- `packages/happy-agent` - remote session control CLI
-- `packages/happy-server` - encrypted synchronization relay
-- `packages/happy-server-self-host` - self-hosted relay and bundled web app
+- `packages/agentrejoin-app` - Expo web and mobile client, plus the Tauri desktop shell
+- `packages/agentrejoin-cli` - coding-agent runtime and machine daemon
+- `packages/agentrejoin-agent` - remote session control CLI
+- `packages/agentrejoin-server` - encrypted synchronization relay
+- `packages/agentrejoin-server-self-host` - self-hosted relay and bundled web app
 
 ## Development
 
 ```bash
 pnpm install
-pnpm --filter happy-app web
+pnpm --filter agentrejoin-app web
 ```
 
 Run focused checks before submitting changes:
 
 ```bash
-pnpm --filter happy-app typecheck
-pnpm --filter happy-cli typecheck
-pnpm --filter happy-agent typecheck
+pnpm --filter agentrejoin-app typecheck
+pnpm --filter agentrejoin-cli typecheck
+pnpm --filter agentrejoin-agent typecheck
 ```
 
 ## License
 
-[GNU AGPL v3](LICENSE). The original Happy MIT notice is preserved in [NOTICE](NOTICE).
+[GNU AGPL v3](LICENSE). Third-party copyright notices are preserved in [NOTICE](NOTICE).

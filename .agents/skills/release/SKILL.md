@@ -28,7 +28,7 @@ Present these as options. Wait for the user to pick.
 
 ## CLI Release
 
-    Package:     packages/happy-cli
+    Package:     packages/agentrejoin-cli
     npm name:    happy
     Registry:    https://registry.npmjs.org
     Git tags:    cli-{version}
@@ -43,7 +43,7 @@ Tag namespace note:
 
 Run these in parallel:
 1. `npm view happy dist-tags` — see current latest + beta
-2. `cat packages/happy-cli/package.json | grep version` — local version
+2. `cat packages/agentrejoin-cli/package.json | grep version` — local version
 3. `git status --short` — check for dirty state
 4. `git branch --show-current` — confirm branch
 5. `git log --oneline -10` — recent commits for release notes context
@@ -69,14 +69,14 @@ Present as options. Wait for confirmation.
 
 ### Step 4: Version bump
 
-Edit `packages/happy-cli/package.json` directly — do NOT use `npm version` (it chokes on pnpm workspace protocol).
+Edit `packages/agentrejoin-cli/package.json` directly — do NOT use `npm version` (it chokes on pnpm workspace protocol).
 
 IMPORTANT: do this **before** build/test for the CLI. The build imports `package.json` and bakes the version into the generated bundle. If you build first and bump later, `happy --version` can still report the old prerelease version even though npm metadata shows the new one.
 
 ### Step 5: Build
 
 ```bash
-cd packages/happy-cli
+cd packages/agentrejoin-cli
 pnpm --filter happy run build
 ```
 
@@ -86,16 +86,16 @@ Report success/failure. Stop on failure.
 
 The `happy` npm package no longer bundles the self-host server binary or webapp.
 Packaged installs resolve those from the separately installed
-`happy-server-self-host` package. Do not rebuild or ship `tools/server` or
+`agentrejoin-server-self-host` package. Do not rebuild or ship `tools/server` or
 `tools/webapp` as part of a CLI release.
 
 If the CLI release depends on self-host server changes, release
-`happy-server-self-host` separately. It lives in `packages/happy-server-self-host`
-and is the publishing shell around the private `packages/happy-server`:
-`pnpm --filter happy-server-self-host build` bundles that package's standalone
+`agentrejoin-server-self-host` separately. It lives in `packages/agentrejoin-server-self-host`
+and is the publishing shell around the private `packages/agentrejoin-server`:
+`pnpm --filter agentrejoin-server-self-host build` bundles that package's standalone
 entrypoint into `dist/` and copies `prisma/` in (this needs bun), then
-`pnpm --filter happy-server-self-host run bundle:webapp` builds the bundled
-webapp. Publish from `packages/happy-server-self-host` — `packages/happy-server`
+`pnpm --filter agentrejoin-server-self-host run bundle:webapp` builds the bundled
+webapp. Publish from `packages/agentrejoin-server-self-host` — `packages/agentrejoin-server`
 is private and is never published. The server package is a JS/TS npm package;
 npm handles platform
 specific dependencies such as Prisma and sharp normally. Do not pass
@@ -107,7 +107,7 @@ chain yourself to catch failures early — the `bundle:webapp` step runs a multi
 `expo export`, and `build` needs bun:
 
 ```bash
-pnpm --filter happy-server-self-host --fail-if-no-match run prepublishOnly
+pnpm --filter agentrejoin-server-self-host --fail-if-no-match run prepublishOnly
 ```
 
 The server typecheck, unit suite, and both Docker images are gated by
@@ -120,7 +120,7 @@ aborted the publish at the `prepublishOnly` test step.)
 ### Step 6: Test (unit only)
 
 ```bash
-cd packages/happy-cli
+cd packages/agentrejoin-cli
 pnpm --filter happy exec vitest run --project unit
 ```
 
@@ -132,7 +132,7 @@ Report results. If failures, ask the user whether to proceed or abort.
 ### Step 7: Publish
 
 ```bash
-cd packages/happy-cli
+cd packages/agentrejoin-cli
 pnpm publish --tag {channel} --no-git-checks
 ```
 
@@ -244,7 +244,7 @@ The smoke check must confirm that `happy --version` matches the published versio
 
 ## Mobile Release
 
-    Package:     packages/happy-app
+    Package:     packages/agentrejoin-app
     Variants:    development, preview, production
     Platform:    Expo SDK 54 / React Native 0.81.4
 
@@ -262,36 +262,36 @@ options in order of popularity:
 
   ```bash
   # Preview (most common)
-  pnpm --filter happy-app run ota
+  pnpm --filter agentrejoin-app run ota
 
   # Production
-  pnpm --filter happy-app run ota:production
+  pnpm --filter agentrejoin-app run ota:production
   ```
 
 OTA scripts require a message — stdin is not readable from Claude Code, so run the
 underlying `eas update` directly with `--message`:
   ```bash
-  cd packages/happy-app && APP_ENV=preview NODE_ENV=preview tsx sources/scripts/parseChangelog.ts && pnpm typecheck && eas update --branch preview --message "<message>"
+  cd packages/agentrejoin-app && APP_ENV=preview NODE_ENV=preview tsx sources/scripts/parseChangelog.ts && pnpm typecheck && eas update --branch preview --message "<message>"
   ```
 
 #### Native Builds
 
 - **Dev build** — development profile, used when native code changes (points to dev server)
   ```bash
-  cd packages/happy-app && eas build --profile development --platform all --non-interactive
+  cd packages/agentrejoin-app && eas build --profile development --platform all --non-interactive
   ```
 
 - **TestFlight / Play Store builds** — use `-store` profiles for distribution via TestFlight and Play Store.
   **Always pass `--auto-submit`** so the build goes straight to TestFlight after completion.
   ```bash
   # Preview (TestFlight/internal testing)
-  cd packages/happy-app && eas build --profile preview-store --platform ios --non-interactive --auto-submit
+  cd packages/agentrejoin-app && eas build --profile preview-store --platform ios --non-interactive --auto-submit
 
   # Dev (TestFlight, points to dev server)
-  cd packages/happy-app && eas build --profile development-store --platform ios --non-interactive --auto-submit
+  cd packages/agentrejoin-app && eas build --profile development-store --platform ios --non-interactive --auto-submit
 
   # Production (App Store / Play Store submission)
-  cd packages/happy-app && eas build --profile production --platform ios --non-interactive --auto-submit
+  cd packages/agentrejoin-app && eas build --profile production --platform ios --non-interactive --auto-submit
   ```
 
 **IMPORTANT:** Always pass `--non-interactive` to `eas build` commands. Without it,
@@ -336,10 +336,10 @@ Runtime version "20" — bump when native code changes to invalidate OTA.
 
 ## Web Release
 
-    Package:     packages/happy-app (same Expo app, web export)
+    Package:     packages/agentrejoin-app (same Expo app, web export)
     Dockerfile:  Dockerfile.webapp
-    Image:       docker.korshakov.com/happy-app:{version}
-    K8s:         packages/happy-app/deploy/happy-app.yaml (3 replicas)
+    Image:       docker.korshakov.com/agentrejoin-app:{version}
+    K8s:         packages/agentrejoin-app/deploy/agentrejoin-app.yaml (3 replicas)
 
 Web releases go through TeamCity (`Lab_HappyWeb`). The config is in the TeamCity UI, not in the repo.
 
@@ -353,14 +353,14 @@ Guide the user to trigger the TeamCity build, or help with manual Docker builds 
 
 ## Server Release
 
-    Package:     packages/happy-server
+    Package:     packages/agentrejoin-server
     Dockerfile:  Dockerfile.server (production), Dockerfile (standalone w/ PGlite)
     Image:       docker.korshakov.com/handy-server:{version}
-    K8s:         packages/happy-server/deploy/handy.yaml (1 replica, port 3005)
+    K8s:         packages/agentrejoin-server/deploy/handy.yaml (1 replica, port 3005)
 
 Server releases go through TeamCity (`Lab_HappyServer`). The config is in the TeamCity UI, not in the repo.
 
-Build: node:20 + python3 + ffmpeg, builds happy-wire + happy-server.
+Build: node:20 + python3 + ffmpeg, builds agentrejoin-wire + agentrejoin-server.
 Secrets from Vault: handy-db, handy-master, handy-github, handy-files, handy-e2b, handy-revenuecat, handy-elevenlabs.
 Redis: happy-redis StatefulSet (redis:7-alpine, 1Gi persistent volume).
 
@@ -385,14 +385,14 @@ Separate repo, not part of this monorepo. Guide the user to push to that repo.
 2. **Default-off ⇒ exclude.** A change behind a setting/experimental flag that defaults to OFF (or whose UI entry point is hidden) is a silent ship — omit it until it's on by default. Same for impl / perf-internal / refactor / type-only changes.
 3. **Audience is phone users.** Most never touch the CLI or desktop. Be skeptical of CLI-only / desktop-only / web-only / beta-only items — a genuinely strong feature can still be wrong for *this* venue; announce those in CLI release notes / docs / GitHub instead.
 4. **Ask, don't assume.** When announce-vs-silent-ship, default state, or scope is unclear, ask the owner and confirm the final include/exclude list before writing. Never headline-announce on your own judgment.
-5. **Voice:** benefit-first, terse, em-dash, one line per item, grouped as a dated themed entry like existing ones. Edit `CHANGELOG.md` only, then regenerate via `tsx packages/happy-app/sources/scripts/parseChangelog.ts`.
+5. **Voice:** benefit-first, terse, em-dash, one line per item, grouped as a dated themed entry like existing ones. Edit `CHANGELOG.md` only, then regenerate via `tsx packages/agentrejoin-app/sources/scripts/parseChangelog.ts`.
 
 ## Rules
 
 - **Release notes: investigate with subagents, exclude default-off, ask when unsure** — see "Writing release notes" above.
 - **Always present options** — never assume which component, channel, or version.
 - **Always verify before publishing** — show the user what will be published and get confirmation.
-- **Do not bundle self-host server/webapp into `happy`** — self-host runtime and the bundled webapp ship through `happy-server-self-host`, not the main CLI package.
+- **Do not bundle self-host server/webapp into `happy`** — self-host runtime and the bundled webapp ship through `agentrejoin-server-self-host`, not the main CLI package.
 - **Unit tests are the gate, not integration tests** — integration tests are slow and have flaky abort/interrupt tests.
 - **Use pnpm publish, not npm publish** — avoids workspace protocol issues.
 - **Never use --ignore-scripts for package publishing** — prepublish scripts are the last guard before npm receives the tarball.

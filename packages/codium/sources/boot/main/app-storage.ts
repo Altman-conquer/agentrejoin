@@ -6,7 +6,7 @@ export function happyHomeName(platform: NodeJS.Platform = process.platform): 'Ha
     return platform === 'linux' ? 'happy' : 'Happy'
 }
 
-export function happyHomeDir(
+export function agentRejoinHomeDir(
     platform: NodeJS.Platform = process.platform,
     homeDir: string = homedir(),
 ): string {
@@ -14,7 +14,7 @@ export function happyHomeDir(
 }
 
 export function ensureHappyHomeDir(): string {
-    const dir = happyHomeDir()
+    const dir = agentRejoinHomeDir()
     mkdirSync(dir, { recursive: true, mode: 0o700 })
     return dir
 }

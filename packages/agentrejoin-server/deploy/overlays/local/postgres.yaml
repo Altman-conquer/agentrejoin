@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentrejoin-postgres
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: agentrejoin-postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentrejoin-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agentrejoin-postgres
+  template:
+    metadata:
+      labels:
+        app: agentrejoin-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: agentrejoin
+            - name: POSTGRES_PASSWORD
+              value: agentrejoin
+            - name: POSTGRES_DB
+              value: agentrejoin

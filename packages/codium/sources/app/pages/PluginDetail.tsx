@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import * as QRCode from 'qrcode'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Page } from '@/app/components/Page'
-import { happyClient, useHappyState } from '@/happy/client'
+import { agentRejoinClient, useHappyState } from '@/happy/client'
 import { pluginHost, usePlugin } from '@/plugins'
 import './Plugins.css'
 
@@ -241,7 +241,7 @@ function HappyAuthPanel() {
                     <button
                         type="button"
                         className="plugins-page__action"
-                        onClick={() => run('logout', () => happyClient.logout())}
+                        onClick={() => run('logout', () => agentRejoinClient.logout())}
                         disabled={busy !== null}
                     >
                         Disconnect
@@ -280,7 +280,7 @@ function HappyAuthPanel() {
                     <button
                         type="button"
                         className="plugins-page__action"
-                        onClick={() => run('cancel', () => happyClient.cancelAuth())}
+                        onClick={() => run('cancel', () => agentRejoinClient.cancelAuth())}
                         disabled={busy !== null}
                     >
                         Cancel
@@ -301,7 +301,7 @@ function HappyAuthPanel() {
                 <button
                     type="button"
                     className="plugins-page__action plugins-page__action--primary"
-                    onClick={() => run('create', () => happyClient.createAccount())}
+                    onClick={() => run('create', () => agentRejoinClient.createAccount())}
                     disabled={busy !== null}
                 >
                     {busy === 'create' ? 'Creating…' : 'Create account'}
@@ -309,7 +309,7 @@ function HappyAuthPanel() {
                 <button
                     type="button"
                     className="plugins-page__action"
-                    onClick={() => run('link', () => happyClient.startLinkDevice())}
+                    onClick={() => run('link', () => agentRejoinClient.startLinkDevice())}
                     disabled={busy !== null}
                 >
                     {busy === 'link' ? 'Starting…' : 'Link device'}
@@ -329,7 +329,7 @@ function HappyAuthPanel() {
                 <button
                     type="button"
                     className="plugins-page__action"
-                    onClick={() => run('restore', () => happyClient.restoreSecret(secretKey))}
+                    onClick={() => run('restore', () => agentRejoinClient.restoreSecret(secretKey))}
                     disabled={busy !== null || secretKey.trim().length === 0}
                 >
                     {busy === 'restore' ? 'Restoring…' : 'Restore'}

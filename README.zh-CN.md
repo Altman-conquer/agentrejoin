@@ -32,34 +32,34 @@
 
 ## 快速开始
 
-产品名称为 AgentRejoin。为保持现有生态兼容，当前发布的 CLI 命令仍为 `happy` 和 `happy-agent`。
+安装 AgentRejoin CLI 并连接当前机器：
 
 ```bash
-npm install -g happy
-happy auth login
-happy daemon start
+npm install -g agentrejoin
+agentrejoin auth login
+agentrejoin daemon start
 ```
 
 通过已连接的 CLI 运行 Agent：
 
 ```bash
-happy claude
-happy codex
+agentrejoin claude
+agentrejoin codex
 ```
 
 从终端恢复已知会话：
 
 ```bash
-happy resume <session-id>
+agentrejoin resume <session-id>
 ```
 
 使用远程控制 CLI：
 
 ```bash
-happy-agent auth login
-happy-agent machines
-happy-agent list
-happy-agent resume <session-id>
+agentrejoin-agent auth login
+agentrejoin-agent machines
+agentrejoin-agent list
+agentrejoin-agent resume <session-id>
 ```
 
 ## 工作原理
@@ -68,27 +68,27 @@ happy-agent resume <session-id>
 
 ## 仓库结构
 
-- `packages/happy-app`：Expo 网页与移动客户端，以及 Tauri 桌面外壳
-- `packages/happy-cli`：Coding Agent 运行时与服务器 daemon
-- `packages/happy-agent`：远程会话控制 CLI
-- `packages/happy-server`：加密同步 Relay
-- `packages/happy-server-self-host`：自行部署的 Relay 与 Web 应用
+- `packages/agentrejoin-app`：Expo 网页与移动客户端，以及 Tauri 桌面外壳
+- `packages/agentrejoin-cli`：Coding Agent 运行时与服务器 daemon
+- `packages/agentrejoin-agent`：远程会话控制 CLI
+- `packages/agentrejoin-server`：加密同步 Relay
+- `packages/agentrejoin-server-self-host`：自行部署的 Relay 与 Web 应用
 
 ## 本地开发
 
 ```bash
 pnpm install
-pnpm --filter happy-app web
+pnpm --filter agentrejoin-app web
 ```
 
 提交前运行核心检查：
 
 ```bash
-pnpm --filter happy-app typecheck
-pnpm --filter happy-cli typecheck
-pnpm --filter happy-agent typecheck
+pnpm --filter agentrejoin-app typecheck
+pnpm --filter agentrejoin-cli typecheck
+pnpm --filter agentrejoin-agent typecheck
 ```
 
 ## 开源协议
 
-[GNU AGPL v3](LICENSE)。Happy 上游项目的 MIT 声明保留在 [NOTICE](NOTICE) 中。
+[GNU AGPL v3](LICENSE)。第三方版权声明保留在 [NOTICE](NOTICE) 中。

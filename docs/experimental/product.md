@@ -34,9 +34,9 @@ happy daemon start
 
 That shell now points at the local stack through:
 
-- `HAPPY_SERVER_URL`
-- `HAPPY_WEBAPP_URL`
-- `HAPPY_HOME_DIR`
+- `AGENTREJOIN_SERVER_URL`
+- `AGENTREJOIN_WEBAPP_URL`
+- `AGENTREJOIN_HOME_DIR`
 
 Use the local web app URL printed by `yarn env:web`, or open the mobile app if
 you are testing on device.

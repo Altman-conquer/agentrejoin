@@ -30,7 +30,7 @@ On unsupported layouts, the existing mobile/tablet/narrow behavior is unchanged.
 
 ## Architecture
 
-Extract the `/new` configuration UI into a local reusable component inside `packages/happy-app/sources/app/(app)/new/index.tsx`. Render that component either inline above the composer or inside a right-sidebar container depending on a small pure layout helper in `sources/utils/newSessionSidebarLayout.ts`.
+Extract the `/new` configuration UI into a local reusable component inside `packages/agentrejoin-app/sources/app/(app)/new/index.tsx`. Render that component either inline above the composer or inside a right-sidebar container depending on a small pure layout helper in `sources/utils/newSessionSidebarLayout.ts`.
 
 The helper keeps the gating testable without rendering the full Expo screen. The `/new` screen reuses the same sidebar width formula and threshold as `SessionView` so active-session and new-session sidebars behave consistently.
 
