@@ -21,7 +21,7 @@ const copy = {
     en: {
         nav: ['Features', 'How it works', 'Security'],
         openApp: 'Open app',
-        eyebrow: 'CLAUDE CODE · CODEX · YOUR SERVERS',
+        eyebrow: 'CLAUDE CODE · CODEX · GEMINI · OPENCLAW · ACP',
         product: 'AgentRejoin',
         headline: 'Rejoin your coding-agent sessions from anywhere.',
         subheadline: 'Find conversations already running on your servers, resume their original context, and keep working from web or mobile.',
@@ -48,7 +48,7 @@ const copy = {
             ['03', 'Rejoin and continue', 'Open any conversation from web or mobile and resume it with its original context.'],
         ],
         agentsTitle: 'Made for the agents you already use.',
-        agentsBody: 'AgentRejoin works with existing sessions instead of forcing you into a new chat workflow.',
+        agentsBody: 'Resume existing Claude Code and Codex sessions, or start and control Gemini, OpenClaw, Antigravity, and other ACP-compatible agents.',
         securityEyebrow: 'PRIVATE BY DESIGN',
         securityTitle: 'The relay moves encrypted data. It cannot read your work.',
         securityBody: 'Your account key stays on your devices. Messages are encrypted before synchronization, and the server daemon only exposes sessions linked to your account.',
@@ -79,7 +79,7 @@ const copy = {
     zh: {
         nav: ['产品能力', '工作方式', '安全'],
         openApp: '打开应用',
-        eyebrow: 'CLAUDE CODE · CODEX · 你的服务器',
+        eyebrow: 'CLAUDE CODE · CODEX · GEMINI · OPENCLAW · ACP',
         product: 'AgentRejoin',
         headline: '随时回到服务器上的 Agent 对话。',
         subheadline: '自动发现服务器上已有的对话，恢复原始上下文，再从网页或手机继续和 Agent 协作。',
@@ -106,7 +106,7 @@ const copy = {
             ['03', '恢复并继续', '从网页或手机打开任意对话，带着原始上下文继续工作。'],
         ],
         agentsTitle: '为你已经在用的 Agent 而生。',
-        agentsBody: 'AgentRejoin 直接接入现有会话，不要求你改用另一套新聊天流程。',
+        agentsBody: '恢复已有的 Claude Code 与 Codex 会话，也可以启动并控制 Gemini、OpenClaw、Antigravity 和其他兼容 ACP 的 Agent。',
         securityEyebrow: '隐私优先',
         securityTitle: 'Relay 只转发加密数据，无法读取你的工作内容。',
         securityBody: '账号密钥只保存在你的设备上。消息会在同步前完成加密，服务器 daemon 也只暴露已绑定到你账号的会话。',
@@ -165,8 +165,8 @@ export function LandingPage() {
             ? 'AgentRejoin - 从网页或手机恢复 Coding Agent 对话'
             : 'AgentRejoin - Resume coding-agent sessions from anywhere';
         const description = locale === 'zh'
-            ? '发现服务器上已有的 Claude Code 和 Codex 对话，从网页或手机恢复原始上下文并继续工作。'
-            : 'Find existing Claude Code and Codex conversations on your servers, resume their original context, and continue from web or mobile.';
+            ? '发现并恢复服务器上的 Claude Code 与 Codex 对话，也可以从网页或手机控制 Gemini、OpenClaw、Antigravity 和兼容 ACP 的 Agent。'
+            : 'Resume Claude Code and Codex conversations on your servers, and control Gemini, OpenClaw, Antigravity, and ACP-compatible agents from web or mobile.';
         document.title = title;
         document.querySelector('meta[name="description"]')?.setAttribute('content', description);
         document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
@@ -369,7 +369,7 @@ export function LandingPage() {
                         <FlowLine compact={compact} />
                         <FlowNode icon="server-outline" label={locale === 'zh' ? '服务器 daemon' : 'Server daemon'} />
                         <FlowLine compact={compact} />
-                        <FlowNode icon="terminal-outline" label="Claude Code / Codex" />
+                        <FlowNode icon="terminal-outline" label={locale === 'zh' ? 'Coding Agent CLI' : 'Coding agent CLI'} />
                     </View>
                     <View style={[styles.securityGrid, compact && styles.stack]}>
                         {text.securityItems.map((item, index) => (

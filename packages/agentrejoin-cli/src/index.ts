@@ -715,6 +715,7 @@ ${chalk.bold('Usage:')}
   agentrejoin resume            Resume a previous AgentRejoin session by AgentRejoin session ID
   agentrejoin codex             Start Codex mode
   agentrejoin gemini            Start Gemini mode (ACP) [deprecated — use agy]
+  agentrejoin openclaw          Start OpenClaw mode
   agentrejoin agy               Start agy (Antigravity CLI) mode
   agentrejoin acp               Start a generic ACP-compatible agent
   agentrejoin connect           Connect AI vendor API keys

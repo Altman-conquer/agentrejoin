@@ -32,6 +32,10 @@
 
 ## Quick start
 
+> The first npm release is still pending. Until `agentrejoin`,
+> `agentrejoin-agent`, and `agentrejoin-wire` are published, use the
+> [Development](#development) setup below.
+
 Install the AgentRejoin CLI and connect this machine:
 
 ```bash
@@ -45,7 +49,23 @@ Run an agent through the connected CLI:
 ```bash
 agentrejoin claude
 agentrejoin codex
+agentrejoin gemini       # deprecated upstream; prefer agy
+agentrejoin openclaw
+agentrejoin agy          # Antigravity CLI
+agentrejoin acp opencode # any supported ACP agent
 ```
+
+| Agent CLI | Start and control remotely | Discover existing local history |
+| --- | --- | --- |
+| Claude Code | Yes | Yes |
+| Codex | Yes | Yes |
+| Gemini | Yes | No |
+| OpenClaw | Yes | No |
+| Antigravity (`agy`) | Yes | No |
+| ACP-compatible agents | Yes | No |
+
+Existing-history discovery is currently limited to Claude Code and Codex because
+the other integrations expose live sessions, not a stable on-disk history format.
 
 Resume a known AgentRejoin session from the terminal:
 
@@ -56,6 +76,7 @@ agentrejoin resume <session-id>
 For the remote control CLI:
 
 ```bash
+npm install -g agentrejoin-agent
 agentrejoin-agent auth login
 agentrejoin-agent machines
 agentrejoin-agent list
@@ -89,7 +110,7 @@ Run focused checks before submitting changes:
 
 ```bash
 pnpm --filter agentrejoin-app typecheck
-pnpm --filter agentrejoin-cli typecheck
+pnpm --filter agentrejoin typecheck
 pnpm --filter agentrejoin-agent typecheck
 ```
 

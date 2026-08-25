@@ -15,7 +15,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <title>AgentRejoin</title>
         <meta
           name="description"
-          content="Find existing Claude Code and Codex conversations on your servers, resume their original context, and continue from web or mobile."
+          content="Resume Claude Code and Codex conversations on your servers, and control Gemini, OpenClaw, Antigravity, and ACP-compatible agents from web or mobile."
         />
         <meta name="robots" content="index, follow, max-image-preview:large" />
         <meta name="theme-color" content="#111318" />
@@ -24,13 +24,13 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta property="og:title" content="AgentRejoin - Resume coding-agent sessions from anywhere" />
         <meta
           property="og:description"
-          content="Find existing Claude Code and Codex conversations on your servers, resume their original context, and continue from web or mobile."
+          content="Resume Claude Code and Codex conversations on your servers, and control Gemini, OpenClaw, Antigravity, and ACP-compatible agents from web or mobile."
         />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content="AgentRejoin - Resume coding-agent sessions from anywhere" />
         <meta
           name="twitter:description"
-          content="Find existing Claude Code and Codex conversations on your servers, resume their original context, and continue from web or mobile."
+          content="Resume Claude Code and Codex conversations on your servers, and control Gemini, OpenClaw, Antigravity, and ACP-compatible agents from web or mobile."
         />
 
         {/* 
