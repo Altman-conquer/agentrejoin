@@ -29,6 +29,8 @@ import {
  * Options for creating a Gemini ACP backend
  */
 export interface GeminiBackendOptions extends AgentFactoryOptions {
+  /** Existing Gemini ACP session to load. */
+  resumeSessionId?: string;
   /** API key for Gemini (defaults to GEMINI_API_KEY or GOOGLE_API_KEY env var) */
   apiKey?: string;
   
@@ -152,6 +154,7 @@ export function createGeminiBackend(options: GeminiBackendOptions): GeminiBacken
              lower.includes('set title') ||
              lower.includes('mcp__agentrejoin__change_title');
     },
+    resumeSessionId: options.resumeSessionId,
   };
 
   // Determine model source for logging

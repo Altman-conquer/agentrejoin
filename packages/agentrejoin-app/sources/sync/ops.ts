@@ -202,6 +202,8 @@ export interface SpawnSessionOptions {
      * session attaches to an app-server thread created by fork / duplicate.
      */
     resumeCodexThreadId?: string;
+    /** Existing Gemini CLI session loaded through ACP session/load. */
+    resumeGeminiSessionId?: string;
     /** AgentRejoin session id this fork was branched from (lineage). */
     parentSessionId?: string;
     /** AgentRejoin message id used as the rewind point (only set for "duplicate"). */
@@ -231,6 +233,14 @@ export type ListCodexThreadsOptions = {
 };
 
 export type ClaudeSessionSummary = {
+    id: string;
+    preview: string;
+    cwd: string;
+    cwdExists: boolean;
+    updatedAt: number;
+};
+
+export type GeminiSessionSummary = {
     id: string;
     preview: string;
     cwd: string;
@@ -295,7 +305,7 @@ export interface ResumeSessionOptions {
  */
 export async function machineSpawnNewSession(options: SpawnSessionOptions): Promise<SpawnSessionResult> {
 
-    const { machineId, directory, approvedNewDirectoryCreation = false, token, agent, permissionMode, modelMode, effortLevel, resumeClaudeSessionId, resumeCodexThreadId, parentSessionId, forkedFromMessageId, isSideChat } = options;
+    const { machineId, directory, approvedNewDirectoryCreation = false, token, agent, permissionMode, modelMode, effortLevel, resumeClaudeSessionId, resumeCodexThreadId, resumeGeminiSessionId, parentSessionId, forkedFromMessageId, isSideChat } = options;
 
     try {
         const result = await apiSocket.machineRPC<SpawnSessionResult, {
@@ -309,13 +319,14 @@ export async function machineSpawnNewSession(options: SpawnSessionOptions): Prom
             effortLevel?: string,
             resumeClaudeSessionId?: string,
             resumeCodexThreadId?: string,
+            resumeGeminiSessionId?: string,
             parentSessionId?: string,
             forkedFromMessageId?: string,
             isSideChat?: boolean,
         }>(
             machineId,
             'spawn-agentrejoin-session',
-            { type: 'spawn-in-directory', directory, approvedNewDirectoryCreation, token, agent, permissionMode, modelMode, effortLevel, resumeClaudeSessionId, resumeCodexThreadId, parentSessionId, forkedFromMessageId, isSideChat }
+            { type: 'spawn-in-directory', directory, approvedNewDirectoryCreation, token, agent, permissionMode, modelMode, effortLevel, resumeClaudeSessionId, resumeCodexThreadId, resumeGeminiSessionId, parentSessionId, forkedFromMessageId, isSideChat }
         );
         return result;
     } catch (error) {
@@ -342,6 +353,15 @@ export async function listClaudeSessions(machineId: string): Promise<ClaudeSessi
     const result = await apiSocket.machineRPC<{ sessions: ClaudeSessionSummary[] }, {}>(
         machineId,
         'claude-list-sessions',
+        {},
+    );
+    return result.sessions;
+}
+
+export async function listGeminiSessions(machineId: string): Promise<GeminiSessionSummary[]> {
+    const result = await apiSocket.machineRPC<{ sessions: GeminiSessionSummary[] }, {}>(
+        machineId,
+        'gemini-list-sessions',
         {},
     );
     return result.sessions;

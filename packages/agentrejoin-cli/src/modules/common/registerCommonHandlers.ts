@@ -139,6 +139,8 @@ export interface SpawnSessionOptions {
      * session attaches to a forked Codex app-server thread.
      */
     resumeCodexThreadId?: string;
+    /** Existing Gemini CLI session loaded through ACP session/load. */
+    resumeGeminiSessionId?: string;
     /** AgentRejoin session id this fork was branched from (lineage). */
     parentSessionId?: string;
     /** AgentRejoin message id used as the rewind point (only set for "duplicate"). */

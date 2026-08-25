@@ -338,9 +338,12 @@ Conversation history is preserved on the server, but in-flight tool calls are in
 
       // Parse startedBy argument
       let startedBy: 'daemon' | 'terminal' | undefined = undefined;
+      let resumeSessionId: string | undefined;
       for (let i = 1; i < args.length; i++) {
         if (args[i] === '--started-by') {
           startedBy = args[++i] as 'daemon' | 'terminal';
+        } else if (args[i] === '--resume') {
+          resumeSessionId = args[++i];
         }
       }
       
@@ -349,7 +352,7 @@ Conversation history is preserved on the server, but in-flight tool calls are in
       } = await authAndSetupMachineIfNeeded();
       await ensureDaemonRunning()
 
-      await runGemini({credentials, startedBy});
+      await runGemini({credentials, startedBy, resumeSessionId});
     } catch (error) {
       console.error(chalk.red('Error:'), error instanceof Error ? error.message : 'Unknown error')
       if (process.env.DEBUG) {

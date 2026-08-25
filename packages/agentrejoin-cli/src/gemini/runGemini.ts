@@ -30,6 +30,7 @@ import { registerKillSessionHandler } from '@/claude/registerKillSessionHandler'
 import { connectionState } from '@/utils/serverConnectionErrors';
 import { setupOfflineReconnection } from '@/utils/setupOfflineReconnection';
 import type { ApiSessionClient } from '@/api/apiSession';
+import { createEnvelope } from 'agentrejoin-wire';
 
 import { createGeminiBackend } from '@/agent/factories/gemini';
 import type { AgentBackend, AgentMessage } from '@/agent';
@@ -59,6 +60,7 @@ import { ConversationHistory } from '@/gemini/utils/conversationHistory';
 export async function runGemini(opts: {
   credentials: Credentials;
   startedBy?: 'daemon' | 'terminal';
+  resumeSessionId?: string;
 }): Promise<void> {
   //
   // Define session
@@ -131,6 +133,9 @@ export async function runGemini(opts: {
     startedBy: opts.startedBy,
     sandbox: sandboxConfig,
   });
+  if (opts.resumeSessionId) {
+    metadata.resumeStatus = 'loading';
+  }
   const response = await api.getOrCreateSession({ tag: sessionTag, metadata, state });
 
   // Handle server unreachable case - create offline stub with hot reconnection
@@ -539,6 +544,21 @@ export async function runGemini(opts: {
   let pendingChangeTitle = false; // Track if we're waiting for change_title to complete
   let changeTitleCompleted = false; // Track if change_title was completed in this turn
   let taskStartedSent = false; // Track if task_started was sent this turn (prevent duplicates)
+  let historyRole: 'user' | 'agent' | null = null;
+  let historyText = '';
+  let historyTime = Date.now();
+
+  const flushHistoryMessage = () => {
+    if (historyRole && historyText.trim()) {
+      session.sendSessionProtocolMessage(createEnvelope(
+        historyRole,
+        { t: 'text', text: historyText },
+        { time: historyTime++ },
+      ));
+    }
+    historyRole = null;
+    historyText = '';
+  };
 
   /**
    * Set up message handler for Gemini backend
@@ -854,6 +874,20 @@ export async function runGemini(opts: {
         break;
 
       case 'event':
+        if (msg.name === 'history-message') {
+          const payload = msg.payload as { role?: unknown; text?: unknown } | null;
+          const role = payload?.role === 'user' || payload?.role === 'agent' ? payload.role : null;
+          if (role && typeof payload?.text === 'string') {
+            if (historyRole !== role) flushHistoryMessage();
+            historyRole = role;
+            historyText += payload.text;
+          }
+          break;
+        }
+        if (msg.name === 'history-complete') {
+          flushHistoryMessage();
+          break;
+        }
         // Handle thinking events - process through ReasoningProcessor like Codex
         if (msg.name === 'thinking') {
           const thinkingPayload = msg.payload as { text?: string } | undefined;
@@ -898,6 +932,39 @@ export async function runGemini(opts: {
   try {
     let currentModeHash: string | null = null;
     let pending: { message: string; mode: GeminiMode; isolate: boolean; hash: string } | null = null;
+
+    if (opts.resumeSessionId) {
+      try {
+        const backendResult = createGeminiBackend({
+          cwd: process.cwd(),
+          mcpServers,
+          permissionHandler,
+          cloudToken,
+          currentUserEmail,
+          resumeSessionId: opts.resumeSessionId,
+        });
+        geminiBackend = backendResult.backend;
+        setupGeminiMessageHandler(geminiBackend);
+        updateDisplayedModel(backendResult.model, false);
+        conversationHistory.setCurrentModel(backendResult.model);
+        const started = await geminiBackend.startSession();
+        acpSessionId = started.sessionId;
+        wasSessionCreated = true;
+        first = false;
+        await session.flush();
+        await session.updateMetadata((currentMetadata) => {
+          const nextMetadata = { ...currentMetadata };
+          delete nextMetadata.resumeStatus;
+          return nextMetadata;
+        });
+      } catch (error) {
+        await session.updateMetadata((currentMetadata) => ({
+          ...currentMetadata,
+          resumeStatus: 'failed',
+        }));
+        throw error;
+      }
+    }
 
     while (!shouldExit) {
       let message: { message: string; mode: GeminiMode; isolate: boolean; hash: string } | null = pending;

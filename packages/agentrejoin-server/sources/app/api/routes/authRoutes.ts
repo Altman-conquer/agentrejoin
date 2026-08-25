@@ -5,6 +5,12 @@ import { db } from "@/storage/db";
 import { auth } from "@/app/auth/auth";
 import { log } from "@/utils/log";
 
+const ACCOUNT_AUTH_REQUEST_TTL_MS = 5 * 60 * 1000;
+
+function accountAuthRequestExpired(createdAt: Date): boolean {
+    return Date.now() - createdAt.getTime() >= ACCOUNT_AUTH_REQUEST_TTL_MS;
+}
+
 export function authRoutes(app: Fastify) {
     app.post('/v1/auth', {
         schema: {
@@ -181,6 +187,9 @@ export function authRoutes(app: Fastify) {
                 })]),
                 401: z.object({
                     error: z.literal('Invalid public key')
+                }),
+                410: z.object({
+                    error: z.string()
                 })
             }
         }
@@ -198,7 +207,23 @@ export function authRoutes(app: Fastify) {
             create: { publicKey: privacyKit.encodeHex(publicKey) }
         });
 
+        if (accountAuthRequestExpired(answer.createdAt)) {
+            return reply.code(410).send({ error: 'Pairing request expired' });
+        }
+
+        if (answer.responseAccountId && !answer.response) {
+            return reply.code(410).send({ error: 'Pairing request already used' });
+        }
+
         if (answer.response && answer.responseAccountId) {
+            const claimed = await db.accountAuthRequest.updateMany({
+                where: { id: answer.id, response: { not: null } },
+                data: { response: null }
+            });
+            if (claimed.count !== 1) {
+                return reply.code(410).send({ error: 'Pairing request already used' });
+            }
+
             const token = await auth.createToken(answer.responseAccountId!);
             return reply.send({
                 state: 'authorized',
@@ -232,12 +257,19 @@ export function authRoutes(app: Fastify) {
         if (!authRequest) {
             return reply.code(404).send({ error: 'Request not found' });
         }
-        if (!authRequest.response) {
-            await db.accountAuthRequest.update({
-                where: { id: authRequest.id },
-                data: { response: request.body.response, responseAccountId: request.userId }
-            });
+
+        if (accountAuthRequestExpired(authRequest.createdAt)) {
+            return reply.code(410).send({ error: 'Pairing request expired' });
         }
+
+        const approved = await db.accountAuthRequest.updateMany({
+            where: { id: authRequest.id, responseAccountId: null },
+            data: { response: request.body.response, responseAccountId: request.userId }
+        });
+        if (approved.count !== 1) {
+            return reply.code(409).send({ error: 'Pairing request already approved or used' });
+        }
+
         return reply.send({ success: true });
     });
 

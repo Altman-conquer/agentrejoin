@@ -21,15 +21,17 @@ import type { Machine } from '@/sync/storageTypes';
 import {
     listClaudeSessions,
     listCodexThreads,
+    listGeminiSessions,
     machineSpawnNewSession,
     type ClaudeSessionSummary,
     type CodexThreadSummary,
+    type GeminiSessionSummary,
 } from '@/sync/ops';
 import { t } from '@/text';
 import { isMachineOnline } from '@/utils/machineUtils';
 import { formatLastSeen, formatPathRelativeToHome } from '@/utils/sessionUtils';
 
-type Provider = 'codex' | 'claude';
+type Provider = 'codex' | 'claude' | 'gemini';
 
 type Conversation = {
     id: string;
@@ -44,6 +46,7 @@ type Conversation = {
 const PROVIDERS: Array<{ id: Provider; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
     { id: 'codex', label: 'Codex', icon: 'code-slash-outline' },
     { id: 'claude', label: 'Claude Code', icon: 'sparkles-outline' },
+    { id: 'gemini', label: 'Gemini', icon: 'diamond-outline' },
 ];
 
 function machineName(machine: Machine): string {
@@ -66,6 +69,17 @@ function claudeConversation(session: ClaudeSessionSummary): Conversation {
     return {
         id: session.id,
         provider: 'claude',
+        title: session.preview.trim().replace(/\s+/g, ' ') || session.id,
+        cwd: session.cwd,
+        cwdExists: session.cwdExists,
+        updatedAt: session.updatedAt,
+    };
+}
+
+function geminiConversation(session: GeminiSessionSummary): Conversation {
+    return {
+        id: session.id,
+        provider: 'gemini',
         title: session.preview.trim().replace(/\s+/g, ' ') || session.id,
         cwd: session.cwd,
         cwdExists: session.cwdExists,
@@ -110,8 +124,8 @@ function ExistingConversationsScreen() {
     React.useEffect(() => {
         const availability = selectedMachine?.metadata?.cliAvailability;
         if (!availability || availability[provider]) return;
-        if (availability.codex) setProvider('codex');
-        else if (availability.claude) setProvider('claude');
+        const available = PROVIDERS.find((item) => availability[item.id]);
+        if (available) setProvider(available.id);
     }, [provider, selectedMachine]);
 
     React.useEffect(() => {
@@ -135,8 +149,10 @@ function ExistingConversationsScreen() {
                 items: result.threads.map(codexConversation),
                 hasMore: result.hasMore,
             }))
-            : listClaudeSessions(selectedMachine.id).then((items) => ({
-                items: items.map(claudeConversation),
+            : (provider === 'claude' ? listClaudeSessions(selectedMachine.id) : listGeminiSessions(selectedMachine.id)).then((items) => ({
+                items: provider === 'claude'
+                    ? (items as ClaudeSessionSummary[]).map(claudeConversation)
+                    : (items as GeminiSessionSummary[]).map(geminiConversation),
                 hasMore: false,
             }))
         ).then((result) => {
@@ -215,7 +231,9 @@ function ExistingConversationsScreen() {
                 agent: conversation.provider,
                 ...(conversation.provider === 'codex'
                     ? { resumeCodexThreadId: conversation.id }
-                    : { resumeClaudeSessionId: conversation.id }),
+                    : conversation.provider === 'claude'
+                        ? { resumeClaudeSessionId: conversation.id }
+                        : { resumeGeminiSessionId: conversation.id }),
             });
             if (result.type === 'success') {
                 await sync.refreshSessions();
@@ -389,7 +407,7 @@ function ExistingConversationsScreen() {
                         >
                             <View style={styles.providerIcon}>
                                 <Ionicons
-                                    name={item.provider === 'codex' ? 'code-slash-outline' : 'sparkles-outline'}
+                                    name={PROVIDERS.find((providerItem) => providerItem.id === item.provider)?.icon ?? 'chatbubble-outline'}
                                     size={19}
                                     color={theme.colors.textSecondary}
                                 />
@@ -482,6 +500,7 @@ const styles = StyleSheet.create((theme) => ({
     providerControl: {
         minHeight: 44,
         flexDirection: 'row',
+        flexWrap: 'wrap',
         alignSelf: 'flex-start',
         padding: 3,
         gap: 2,

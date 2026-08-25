@@ -10,7 +10,7 @@ import { Item } from '@/components/Item';
 import { ItemGroup } from '@/components/ItemGroup';
 import { ItemList } from '@/components/ItemList';
 import { Modal } from '@/modal';
-import { t } from '@/text';
+import { getCurrentLanguage, t } from '@/text';
 import { layout } from '@/components/layout';
 import { useSettingMutable, useProfile } from '@/sync/storage';
 import { sync } from '@/sync/sync';
@@ -22,6 +22,7 @@ import { Image } from 'expo-image';
 import { useHappyAction } from '@/hooks/useHappyAction';
 import { disconnectGitHub } from '@/sync/apiGithub';
 import { disconnectService } from '@/sync/apiServices';
+import { useRouter } from 'expo-router';
 import { fetchPushTokens, type PushToken } from '@/sync/apiPush';
 import {
     getCurrentExpoPushToken,
@@ -103,6 +104,7 @@ function buildPushTokenSubtitle(pushToken: PushToken, options: {
 export default React.memo(() => {
     const { theme } = useUnistyles();
     const auth = useAuth();
+    const router = useRouter();
     const [showSecret, setShowSecret] = useState(false);
     const [copiedRecently, setCopiedRecently] = useState(false);
     const [analyticsOptOut, setAnalyticsOptOut] = useSettingMutable('analyticsOptOut');
@@ -330,16 +332,20 @@ export default React.memo(() => {
                         showChevron={false}
                         copy={!!sync.serverID}
                     />
-                    {Platform.OS !== 'web' && (
-                        <Item
-                            title={t('settingsAccount.linkNewDevice')}
-                            subtitle={isConnecting ? t('common.scanning') : t('settingsAccount.linkNewDeviceSubtitle')}
-                            icon={<Ionicons name="qr-code-outline" size={29} color="#007AFF" />}
-                            onPress={connectAccount}
-                            disabled={isConnecting}
-                            showChevron={false}
-                        />
-                    )}
+                    <Item
+                        title={t('settingsAccount.linkNewDevice')}
+                        subtitle={isConnecting
+                            ? t('common.scanning')
+                            : Platform.OS === 'web'
+                                ? getCurrentLanguage().startsWith('zh')
+                                    ? '显示二维码，让手机浏览器加入当前账号'
+                                    : 'Show a QR code to join this account in a mobile browser'
+                                : t('settingsAccount.linkNewDeviceSubtitle')}
+                        icon={<Ionicons name="qr-code-outline" size={29} color="#007AFF" />}
+                        onPress={Platform.OS === 'web' ? () => router.push('/settings/pair') : connectAccount}
+                        disabled={isConnecting}
+                        showChevron={false}
+                    />
                 </ItemGroup>
 
                 {/* Profile Section */}

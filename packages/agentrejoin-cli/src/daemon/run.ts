@@ -439,7 +439,9 @@ export async function startDaemon(): Promise<void> {
           const agent = options.agent === 'gemini' ? 'gemini' : (options.agent === 'codex' ? 'codex' : (options.agent === 'openclaw' ? 'openclaw' : (options.agent === 'agy' ? 'agy' : 'claude')));
           const resumeId = agent === 'claude'
             ? options.resumeClaudeSessionId
-            : (agent === 'codex' ? options.resumeCodexThreadId : undefined);
+            : (agent === 'codex'
+              ? options.resumeCodexThreadId
+              : (agent === 'gemini' ? options.resumeGeminiSessionId : undefined));
           const resumeFragment = resumeId
             ? ` --resume ${shellescape(resumeId)}`
             : '';
@@ -570,6 +572,9 @@ export async function startDaemon(): Promise<void> {
           }
           if (options.resumeCodexThreadId && agentCommand === 'codex') {
             args.push('--resume', options.resumeCodexThreadId);
+          }
+          if (options.resumeGeminiSessionId && agentCommand === 'gemini') {
+            args.push('--resume', options.resumeGeminiSessionId);
           }
 
           // TODO: In future, sessionId could be used with --resume to continue existing sessions

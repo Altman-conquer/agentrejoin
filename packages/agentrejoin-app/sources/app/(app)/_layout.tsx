@@ -121,6 +121,18 @@ export default function RootLayout() {
                 }}
             />
             <Stack.Screen
+                name="settings/pair"
+                options={{
+                    headerTitle: t('settingsAccount.linkNewDevice'),
+                }}
+            />
+            <Stack.Screen
+                name="pair"
+                options={{
+                    headerTitle: t('settingsAccount.linkNewDevice'),
+                }}
+            />
+            <Stack.Screen
                 name="settings/appearance"
                 options={{
                     headerTitle: t('settings.appearance'),
