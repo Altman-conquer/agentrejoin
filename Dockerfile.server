@@ -58,4 +58,4 @@ EXPOSE 3000
 # Command to run the application
 COPY --from=builder /repo/package.json /repo/pnpm-workspace.yaml /repo/
 WORKDIR /repo/packages/agentrejoin-server
-CMD ["pnpm", "run", "start"]
+CMD ["sh", "-c", "pnpm exec tsx sources/standalone.ts migrate && exec pnpm exec tsx sources/standalone.ts serve"]
