@@ -18,6 +18,7 @@ html.agentrejoin-app-zoomed {
 html.agentrejoin-app-zoomed body {
     width: calc(100vw / var(--agentrejoin-app-zoom));
     height: calc(100vh / var(--agentrejoin-app-zoom));
+    height: calc(100dvh / var(--agentrejoin-app-zoom));
     transform-origin: top left;
 }
 
