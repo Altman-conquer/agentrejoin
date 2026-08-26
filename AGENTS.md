@@ -10,3 +10,24 @@ When the user says `sync to main` or `synt to main`, they mean:
    `git push origin HEAD:main`
 
 Do not force push for this workflow.
+
+## Default Delivery
+
+After completing and verifying a user-requested code change:
+
+1. Commit only the relevant tracked changes and push `main` to `origin/main`
+   without waiting for a separate push request. Never force push or include
+   unrelated user changes.
+2. Deploy the production web stack at `https://agentrejoin.zhandj.com` using
+   the existing deployment on `root@agentrejoin-prod` in `/opt/agentrejoin`,
+   then verify the website and web app. Preserve the server `.env`,
+   `AGENTREJOIN_MASTER_SECRET`, and persistent data volumes.
+3. Rebuild the Android arm64 APK when the change affects
+   `packages/agentrejoin-app`, mobile/shared UI or behavior, app assets,
+   configuration, or native dependencies. Increment `versionCode`, verify the
+   package, ABI, and signature, and place the APK in `releases/`. Do not commit
+   large APK files to Git history. Documentation-only and server-only changes
+   do not require an APK rebuild.
+
+If push, deployment, or packaging is genuinely blocked, report the blocker
+and the completed local work instead of silently skipping delivery.

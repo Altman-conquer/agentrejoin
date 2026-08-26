@@ -6,7 +6,6 @@ import { Text } from '@/components/StyledText';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import { useAuth } from '@/auth/AuthContext';
 import { Typography } from "@/constants/Typography";
 import { Item } from '@/components/Item';
 import { ItemGroup } from '@/components/ItemGroup';
@@ -22,9 +21,6 @@ import { useAllMachines } from '@/sync/storage';
 import { isMachineOnline } from '@/utils/machineUtils';
 import { useUnistyles } from 'react-native-unistyles';
 import { layout } from '@/components/layout';
-import { useHappyAction } from '@/hooks/useHappyAction';
-import { getGitHubOAuthParams, disconnectGitHub } from '@/sync/apiGithub';
-import { disconnectService } from '@/sync/apiServices';
 import { useProfile } from '@/sync/storage';
 import { getDisplayName, getAvatarUrl, getBio } from '@/sync/profile';
 import { Avatar } from '@/components/Avatar';
@@ -91,7 +87,6 @@ export const SettingsView = React.memo(function SettingsView({
         runtimeVersion ? `runtime ${runtimeVersion}` : undefined,
     ].filter(Boolean).join(' / ');
     const versionSubtitle = formatBuildSubtitle(getBuildConfig());
-    const auth = useAuth();
     const [devModeEnabled, setDevModeEnabled] = useLocalSettingMutable('devModeEnabled');
     const isPro = __DEV__ || useEntitlement('pro');
     const experiments = useSetting('experiments');
@@ -146,47 +141,6 @@ export const SettingsView = React.memo(function SettingsView({
         requiredClicks: 10,
         resetTimeout: 2000
     });
-
-    // Connection status
-    const isGitHubConnected = !!profile.github;
-    const isAnthropicConnected = profile.connectedServices?.includes('anthropic') || false;
-
-    // GitHub connection
-    const [connectingGitHub, connectGitHub] = useHappyAction(async () => {
-        const params = await getGitHubOAuthParams(auth.credentials!);
-        await openExternalUrl(params.url);
-    });
-
-    // GitHub disconnection
-    const [disconnectingGitHub, handleDisconnectGitHub] = useHappyAction(async () => {
-        const confirmed = await Modal.confirm(
-            t('modals.disconnectGithub'),
-            t('modals.disconnectGithubConfirm'),
-            { confirmText: t('modals.disconnect'), destructive: true }
-        );
-        if (confirmed) {
-            await disconnectGitHub(auth.credentials!);
-        }
-    });
-
-    // Anthropic connection
-    const [connectingAnthropic, connectAnthropic] = useHappyAction(async () => {
-        router.push('/settings/connect/claude');
-    });
-
-    // Anthropic disconnection
-    const [disconnectingAnthropic, handleDisconnectAnthropic] = useHappyAction(async () => {
-        const confirmed = await Modal.confirm(
-            t('modals.disconnectService', { service: 'Claude' }),
-            t('modals.disconnectServiceConfirm', { service: 'Claude' }),
-            { confirmText: t('modals.disconnect'), destructive: true }
-        );
-        if (confirmed) {
-            await disconnectService(auth.credentials!, 'anthropic');
-            await sync.refreshProfile();
-        }
-    });
-
 
     return (
 
@@ -281,43 +235,6 @@ export const SettingsView = React.memo(function SettingsView({
                     icon={<Ionicons name="heart" size={29} color="#FF3B30" />}
                     showChevron={false}
                     onPress={isPro ? undefined : handleSubscribe}
-                />
-            </ItemGroup>
-
-            <ItemGroup title={t('settings.connectedAccounts')}>
-                <Item
-                    title="Claude Code"
-                    subtitle={isAnthropicConnected
-                        ? t('settingsAccount.statusActive')
-                        : t('settings.connectAccount')
-                    }
-                    icon={
-                        <Image
-                            source={require('@/assets/images/icon-claude.png')}
-                            style={{ width: 29, height: 29 }}
-                            contentFit="contain"
-                        />
-                    }
-                    onPress={isAnthropicConnected ? handleDisconnectAnthropic : connectAnthropic}
-                    loading={connectingAnthropic || disconnectingAnthropic}
-                    showChevron={false}
-                />
-                <Item
-                    title={t('settings.github')}
-                    subtitle={isGitHubConnected
-                        ? t('settings.githubConnected', { login: profile.github?.login! })
-                        : t('settings.connectGithubAccount')
-                    }
-                    icon={
-                        <Ionicons
-                            name="logo-github"
-                            size={29}
-                            color={isGitHubConnected ? theme.colors.status.connected : theme.colors.textSecondary}
-                        />
-                    }
-                    onPress={isGitHubConnected ? handleDisconnectGitHub : connectGitHub}
-                    loading={connectingGitHub || disconnectingGitHub}
-                    showChevron={false}
                 />
             </ItemGroup>
 

@@ -30,7 +30,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '@/constants/Typography';
 import { t } from '@/text';
 import { isUsingCustomServer } from '@/sync/serverConfig';
-import { trackFriendsSearch } from '@/track';
 import { MOBILE_GLASS_HEADER_HEIGHT } from './navigation/headerMetrics';
 
 const MOBILE_CONVERSATION_BROWSER_INSET = 82;
@@ -338,21 +337,6 @@ const HeaderRight = React.memo(({
                 style={styles.headerButton}
             >
                 <Ionicons name="server-outline" size={23} color={theme.colors.header.tint} />
-            </Pressable>
-        );
-    }
-
-    if (activeTab === 'inbox') {
-        return (
-            <Pressable
-                onPress={() => {
-                    trackFriendsSearch();
-                    router.push('/friends/search');
-                }}
-                hitSlop={15}
-                style={styles.headerButton}
-            >
-                <Ionicons name="person-add-outline" size={24} color={theme.colors.header.tint} />
             </Pressable>
         );
     }
