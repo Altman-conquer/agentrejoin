@@ -27,7 +27,7 @@ COPY packages/agentrejoin-server/prisma packages/agentrejoin-server/prisma
 COPY packages/agentrejoin-cli/scripts packages/agentrejoin-cli/scripts
 COPY packages/agentrejoin-cli/tools packages/agentrejoin-cli/tools
 
-RUN SKIP_AGENTREJOIN_WIRE_BUILD=1 pnpm install --frozen-lockfile
+RUN ELECTRON_SKIP_BINARY_DOWNLOAD=1 SKIP_AGENTREJOIN_WIRE_BUILD=1 pnpm install --frozen-lockfile
 
 # Stage 2: copy source and type-check
 FROM deps AS builder
