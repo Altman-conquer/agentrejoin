@@ -28,7 +28,7 @@ COPY packages/agentrejoin-cli/scripts packages/agentrejoin-cli/scripts
 COPY packages/agentrejoin-cli/tools packages/agentrejoin-cli/tools
 
 ARG NPM_CONFIG_REGISTRY
-RUN ELECTRON_SKIP_BINARY_DOWNLOAD=1 SKIP_AGENTREJOIN_WIRE_BUILD=1 pnpm install --frozen-lockfile
+RUN ELECTRON_SKIP_BINARY_DOWNLOAD=1 SKIP_AGENTREJOIN_WIRE_BUILD=1 pnpm install --frozen-lockfile --network-concurrency=4 --fetch-timeout=120000
 
 # Stage 2: copy source and type-check
 FROM deps AS builder
