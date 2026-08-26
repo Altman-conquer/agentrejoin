@@ -961,7 +961,7 @@ export const HomeDock = React.memo(({
                             style={[styles.inputEntryText, !prompt && styles.inputEntryPlaceholder]}
                             numberOfLines={1}
                         >
-                            {prompt || 'Plan, ask, build…'}
+                            {prompt || t('session.inputPlaceholder')}
                         </Text>
                     </Pressable>
                 ) : (
@@ -972,7 +972,7 @@ export const HomeDock = React.memo(({
                         onSubmitEditing={() => canSubmit && onSend()}
                         onFocus={onFocus}
                         onBlur={onBlur}
-                        placeholder="Plan, ask, build…"
+                        placeholder={t('session.inputPlaceholder')}
                         placeholderTextColor={theme.colors.textSecondary}
                         selectionColor={theme.colors.text}
                         returnKeyType="send"
@@ -1054,7 +1054,7 @@ export const HomeDock = React.memo(({
                             value={prompt}
                             onChangeText={onPromptChange}
                             onFocus={() => setIsFocused(true)}
-                            placeholder="Ask Codex"
+                            placeholder={t('session.inputPlaceholder')}
                             placeholderTextColor={theme.colors.textSecondary}
                             selectionColor={theme.colors.text}
                             autoCorrect

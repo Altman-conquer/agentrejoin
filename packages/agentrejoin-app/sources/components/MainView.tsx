@@ -31,8 +31,9 @@ import { Typography } from '@/constants/Typography';
 import { t } from '@/text';
 import { isUsingCustomServer } from '@/sync/serverConfig';
 import { MOBILE_GLASS_HEADER_HEIGHT } from './navigation/headerMetrics';
-
-const MOBILE_CONVERSATION_BROWSER_INSET = 82;
+import { HomeDock, MOBILE_HOME_DOCK_CONTENT_INSET } from './HomeDock';
+import { useNewSessionDraft } from '@/hooks/useNewSessionDraft';
+import { useStartSessionFromDraft } from '@/hooks/useStartSessionFromDraft';
 
 interface MainViewProps {
     variant: 'phone' | 'sidebar';
@@ -72,31 +73,6 @@ const styles = StyleSheet.create((theme) => ({
         right: 0,
         bottom: 0,
         zIndex: 30,
-    },
-    conversationBrowserDock: {
-        width: '100%',
-        paddingHorizontal: 16,
-        paddingTop: 8,
-    },
-    conversationBrowserButton: {
-        width: '100%',
-        maxWidth: 720,
-        minHeight: 50,
-        alignSelf: 'center',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        borderRadius: 8,
-        backgroundColor: theme.colors.button.primary.background,
-    },
-    conversationBrowserButtonPressed: {
-        opacity: 0.8,
-    },
-    conversationBrowserText: {
-        color: theme.colors.button.primary.tint,
-        fontSize: 15,
-        ...Typography.default('semiBold'),
     },
     sidebarContentContainer: {
         flex: 1,
@@ -322,6 +298,12 @@ const HeaderRight = React.memo(({
                         />
                     </Pressable>
                     <Pressable
+                        onPress={() => router.navigate('/new')}
+                        style={styles.headerActionButton}
+                    >
+                        <Ionicons name="server-outline" size={21} color={theme.colors.header.tint} />
+                    </Pressable>
+                    <Pressable
                         onPress={() => router.push('/settings')}
                         style={styles.headerActionButton}
                     >
@@ -363,10 +345,12 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
     const { theme } = useUnistyles();
     const sessionListViewData = useVisibleSessionListViewData();
     const isTablet = useIsTablet();
-    const router = useRouter();
     const friendRequests = useFriendRequests();
     const realtimeStatus = useRealtimeStatus();
     const safeArea = useSafeAreaInsets();
+    const prompt = useNewSessionDraft((state) => state.input);
+    const setPrompt = useNewSessionDraft((state) => state.setInput);
+    const { isStarting, startSession } = useStartSessionFromDraft();
 
     // Tab state management
     // NOTE: Zen tab removed - the feature never got to a useful state
@@ -384,7 +368,15 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
             + 12;
     const bottomContentInset = Platform.OS === 'web'
         ? 0
-        : searchActive ? 16 : MOBILE_CONVERSATION_BROWSER_INSET;
+        : searchActive ? 16 : MOBILE_HOME_DOCK_CONTENT_INSET;
+    const homeDock = (
+        <HomeDock
+            prompt={prompt}
+            onPromptChange={setPrompt}
+            onSubmit={startSession}
+            isSubmitting={isStarting}
+        />
+    );
 
     const handleSearchPress = React.useCallback(() => {
         setSearchActive((currentValue) => {
@@ -461,9 +453,12 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
     // Phone variant
     // Tablet in phone mode - special case (when showing index view on tablets, show empty view)
     if (isTablet) {
-        // Just show an empty view on tablets for the index view
-        // The sessions list is shown in the sidebar, so the main area should be blank
-        return <View style={styles.emptyStateContentContainer} />;
+        return (
+            <View style={styles.emptyStateContentContainer}>
+                <View style={{ flex: 1 }} />
+                {homeDock}
+            </View>
+        );
     }
 
     // Regular phone mode with tabs
@@ -511,28 +506,17 @@ export const MainView = React.memo(({ variant }: MainViewProps) => {
                 )}
                 {Platform.OS !== 'web' && phoneHeader}
             </View>
-            {Platform.OS === 'web' ? (
+            {Platform.OS === 'web' && activeTab === 'sessions' && !searchActive && homeDock}
+            {Platform.OS === 'web' && (
                 <TabBar
                     activeTab={activeTab}
                     onTabPress={handleTabPress}
                     inboxBadgeCount={friendRequests.length}
                 />
-            ) : (
+            )}
+            {Platform.OS !== 'web' && activeTab === 'sessions' && !searchActive && (
                 <View pointerEvents="box-none" style={styles.phoneBottomDockOverlay}>
-                    {!searchActive && (
-                        <View style={[styles.conversationBrowserDock, { paddingBottom: safeArea.bottom + 8 }]}>
-                            <Pressable
-                                onPress={() => router.navigate('/new')}
-                                style={({ pressed }) => [
-                                    styles.conversationBrowserButton,
-                                    pressed && styles.conversationBrowserButtonPressed,
-                                ]}
-                            >
-                                <Ionicons name="server-outline" size={19} color={theme.colors.button.primary.tint} />
-                                <Text style={styles.conversationBrowserText}>{t('newSession.title')}</Text>
-                            </Pressable>
-                        </View>
-                    )}
+                    {homeDock}
                 </View>
             )}
         </View>
