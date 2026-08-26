@@ -10,5 +10,8 @@ node_modules
 **/.turbo
 **/.next
 **/ios/Pods
+packages/agentrejoin-app/android
+releases
+research-reports
 **/src-tauri/target
 **/target
