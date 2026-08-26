@@ -1,9 +1,10 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import 'react-native-reanimated';
 import * as React from 'react';
 import { Typography } from '@/constants/Typography';
 import { createHeader } from '@/components/navigation/Header';
-import { Platform, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { isRunningOnMac } from '@/utils/platform';
 import { useUnistyles } from 'react-native-unistyles';
 import { t } from '@/text';
@@ -19,6 +20,7 @@ export default function RootLayout() {
     const shouldUseCustomHeader = Platform.OS === 'android' || isRunningOnMac() || Platform.OS === 'web';
     const isDesktop = Platform.OS === 'web' || isRunningOnMac();
     const { theme } = useUnistyles();
+    const router = useRouter();
 
     return (
         <View
@@ -337,6 +339,17 @@ export default function RootLayout() {
                 options={{
                     headerTitle: t('newSession.title'),
                     headerBackTitle: t('common.back'),
+                    headerRight: () => (
+                        <Pressable
+                            onPress={() => router.replace('/app')}
+                            hitSlop={12}
+                            accessibilityRole="button"
+                            accessibilityLabel={t('session.newChat')}
+                            style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}
+                        >
+                            <Ionicons name="add" size={24} color={theme.colors.header.tint} />
+                        </Pressable>
+                    ),
                 }}
             />
         </Stack>
