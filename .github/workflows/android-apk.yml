@@ -1,0 +1,104 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/agentrejoin-app/**'
+      - 'packages/agentrejoin-wire/**'
+      - 'patches/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      APP_ENV: production
+      EXPO_NO_TELEMETRY: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter agentrejoin-app typecheck
+
+      - name: Set build metadata
+        run: |
+          APP_VERSION=$(node -p "require('./packages/agentrejoin-app/package.json').version")
+          BUILD_NUMBER=$((6 + GITHUB_RUN_NUMBER))
+          echo "AGENTREJOIN_ANDROID_VERSION_CODE=$BUILD_NUMBER" >> "$GITHUB_ENV"
+          echo "APK_NAME=AgentRejoin-${APP_VERSION}-build${BUILD_NUMBER}-arm64-release.apk" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=android-v${APP_VERSION}-build${BUILD_NUMBER}" >> "$GITHUB_ENV"
+          echo "RELEASE_TITLE=AgentRejoin Android ${APP_VERSION} (build ${BUILD_NUMBER})" >> "$GITHUB_ENV"
+
+      - name: Generate Android project
+        working-directory: packages/agentrejoin-app
+        run: pnpm exec expo prebuild --platform android --clean --no-install
+
+      - name: Build arm64 APK
+        working-directory: packages/agentrejoin-app/android
+        run: ./gradlew app:assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon
+
+      - name: Sign and verify APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          test -n "$KEYSTORE_PASSWORD"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/agentrejoin-release.p12"
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          SOURCE_APK=packages/agentrejoin-app/android/app/build/outputs/apk/release/app-release.apk
+          ALIGNED_APK="$RUNNER_TEMP/aligned.apk"
+          APK_PATH="$RUNNER_TEMP/$APK_NAME"
+          "$BUILD_TOOLS/zipalign" -f 4 "$SOURCE_APK" "$ALIGNED_APK"
+          export AGENTREJOIN_APK_SIGN_PASS="$KEYSTORE_PASSWORD"
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks "$RUNNER_TEMP/agentrejoin-release.p12" \
+            --ks-type PKCS12 \
+            --ks-pass env:AGENTREJOIN_APK_SIGN_PASS \
+            --key-pass env:AGENTREJOIN_APK_SIGN_PASS \
+            --out "$APK_PATH" \
+            "$ALIGNED_APK"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK_PATH"
+          "$BUILD_TOOLS/aapt" dump badging "$APK_PATH" | grep -q "package: name='com.zhandj.agentrejoin' versionCode='$AGENTREJOIN_ANDROID_VERSION_CODE'"
+          test "$(unzip -Z1 "$APK_PATH" | sed -n 's#^lib/\([^/]*\)/.*#\1#p' | sort -u)" = "arm64-v8a"
+          echo "APK_PATH=$APK_PATH" >> "$GITHUB_ENV"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$RELEASE_TAG"; then
+            gh release upload "$RELEASE_TAG" "$APK_PATH" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$APK_PATH" \
+              --target "$GITHUB_SHA" \
+              --title "$RELEASE_TITLE" \
+              --notes "Signed arm64 APK built from commit $GITHUB_SHA."
+          fi
