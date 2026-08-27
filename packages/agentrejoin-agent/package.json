@@ -2,7 +2,7 @@
   "name": "agentrejoin-agent",
   "version": "0.1.0",
   "description": "CLI client for controlling AgentRejoin sessions remotely",
-  "author": "Kirill Dubovitskiy",
+  "author": "AgentRejoin contributors",
   "license": "AGPL-3.0-only",
   "type": "module",
   "homepage": "https://github.com/Altman-conquer/agentrejoin/tree/main/packages/agentrejoin-agent",

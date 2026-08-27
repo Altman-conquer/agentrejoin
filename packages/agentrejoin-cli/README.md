@@ -10,8 +10,6 @@ Free. Open source. Code anywhere.
 npm install -g agentrejoin
 ```
 
-> Migrated from the `agentrejoin-coder` package. Thanks to [@franciscop](https://github.com/franciscop) for donating the `agentrejoin` package name!
-
 ## Usage
 
 ### Claude Code (default)

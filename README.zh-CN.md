@@ -32,9 +32,6 @@
 
 ## 快速开始
 
-> npm 首次发布尚未完成。在 `agentrejoin`、`agentrejoin-agent` 和
-> `agentrejoin-wire` 发布前，请先使用下方的[本地开发](#本地开发)流程。
-
 安装 AgentRejoin CLI 并连接当前机器：
 
 ```bash
@@ -58,13 +55,13 @@ agentrejoin acp opencode # 任意受支持的 ACP Agent
 | --- | --- | --- |
 | Claude Code | 是 | 是 |
 | Codex | 是 | 是 |
-| Gemini | 是 | 否 |
+| Gemini | 是 | 是 |
 | OpenClaw | 是 | 否 |
 | Antigravity (`agy`) | 是 | 否 |
 | 兼容 ACP 的 Agent | 是 | 否 |
 
-现有历史会话的自动发现目前仅支持 Claude Code 和 Codex。其他集成提供
-实时会话控制，但没有稳定的本地历史格式可供扫描。
+现有历史会话的自动发现目前支持 Claude Code、Codex 和 Gemini。其他集成
+提供实时会话控制，但没有稳定的本地历史格式可供扫描。
 
 从终端恢复已知会话：
 

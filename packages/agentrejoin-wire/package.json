@@ -2,7 +2,7 @@
   "name": "agentrejoin-wire",
   "version": "0.1.0",
   "description": "Shared message wire types and Zod schemas for AgentRejoin clients and services",
-  "author": "Kirill Dubovitskiy",
+  "author": "AgentRejoin contributors",
   "license": "AGPL-3.0-only",
   "type": "module",
   "homepage": "https://github.com/Altman-conquer/agentrejoin/tree/main/packages/agentrejoin-wire",

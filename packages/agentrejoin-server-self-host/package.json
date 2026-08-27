@@ -8,7 +8,7 @@
   },
   "homepage": "https://agentrejoin.zhandj.com",
   "bugs": "https://github.com/Altman-conquer/agentrejoin/issues",
-  "author": "Kirill Dubovitskiy",
+  "author": "AgentRejoin contributors",
   "license": "AGPL-3.0-only",
   "type": "module",
   "bin": {

@@ -32,10 +32,6 @@
 
 ## Quick start
 
-> The first npm release is still pending. Until `agentrejoin`,
-> `agentrejoin-agent`, and `agentrejoin-wire` are published, use the
-> [Development](#development) setup below.
-
 Install the AgentRejoin CLI and connect this machine:
 
 ```bash
@@ -59,13 +55,13 @@ agentrejoin acp opencode # any supported ACP agent
 | --- | --- | --- |
 | Claude Code | Yes | Yes |
 | Codex | Yes | Yes |
-| Gemini | Yes | No |
+| Gemini | Yes | Yes |
 | OpenClaw | Yes | No |
 | Antigravity (`agy`) | Yes | No |
 | ACP-compatible agents | Yes | No |
 
-Existing-history discovery is currently limited to Claude Code and Codex because
-the other integrations expose live sessions, not a stable on-disk history format.
+Existing-history discovery is currently available for Claude Code, Codex, and Gemini.
+The other integrations expose live sessions, not a stable on-disk history format.
 
 Resume a known AgentRejoin session from the terminal:
 

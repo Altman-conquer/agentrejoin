@@ -136,7 +136,7 @@ export async function runCodex(opts: {
         console.error('\x1b[1mOption 2 - Homebrew (macOS):\x1b[0m');
         console.error('  \x1b[36mbrew install --cask codex\x1b[0m\n');
         console.error('Alternatively, use Claude Code:');
-        console.error('  \x1b[36mhappy claude\x1b[0m\n');
+        console.error('  \x1b[36magentrejoin claude\x1b[0m\n');
         process.exit(1);
     }
 

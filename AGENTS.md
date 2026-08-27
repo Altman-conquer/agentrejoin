@@ -28,6 +28,10 @@ After completing and verifying a user-requested code change:
    package, ABI, and signature, and place the APK in `releases/`. Do not commit
    large APK files to Git history. Documentation-only and server-only changes
    do not require an APK rebuild.
+   Sign public APKs with the long-lived release key stored outside the repository
+   at `~/.local/share/agentrejoin/signing/agentrejoin-release.p12`; never ship an
+   APK signed with the Android debug key. Build standalone APKs only. Do not add
+   Google Play, AAB, or Play App Signing configuration unless explicitly requested.
 
 If push, deployment, or packaging is genuinely blocked, report the blocker
 and the completed local work instead of silently skipping delivery.

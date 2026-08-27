@@ -2,7 +2,7 @@
   "name": "agentrejoin",
   "version": "1.2.0",
   "description": "AgentRejoin - resume Claude Code and Codex sessions from mobile or web",
-  "author": "Kirill Dubovitskiy",
+  "author": "AgentRejoin contributors",
   "license": "AGPL-3.0-only",
   "type": "module",
   "homepage": "https://agentrejoin.zhandj.com",
