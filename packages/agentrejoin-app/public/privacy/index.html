@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Privacy Policy - AgentRejoin</title>
+    <meta name="description" content="AgentRejoin privacy policy." />
+    <meta name="robots" content="index, follow" />
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #20242b;
+        background: #f7f8f5;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #f7f8f5; }
+      a { color: inherit; }
+      header { border-bottom: 1px solid #dfe2dc; background: #ffffff; }
+      nav {
+        width: min(100% - 32px, 920px);
+        min-height: 64px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .brand { font-size: 18px; font-weight: 750; text-decoration: none; color: #111318; }
+      .languages { display: flex; padding: 3px; border-radius: 6px; background: #e8eae5; }
+      .languages button {
+        min-width: 38px;
+        height: 30px;
+        border: 0;
+        border-radius: 4px;
+        color: #666c75;
+        background: transparent;
+        cursor: pointer;
+      }
+      .languages button[aria-pressed="true"] { color: #111318; background: #ffffff; font-weight: 700; }
+      main { width: min(100% - 40px, 760px); margin: 0 auto; padding: 64px 0 80px; }
+      h1 { margin: 0; color: #111318; font-size: clamp(34px, 7vw, 54px); line-height: 1.08; }
+      .updated { margin: 14px 0 42px; color: #68707a; font-size: 14px; }
+      section { padding: 27px 0; border-top: 1px solid #dfe2dc; }
+      h2 { margin: 0 0 13px; color: #111318; font-size: 21px; line-height: 1.3; }
+      h3 { margin: 22px 0 8px; color: #30353d; font-size: 16px; }
+      p, li { color: #4e555f; font-size: 16px; line-height: 1.75; }
+      p { margin: 0 0 12px; }
+      ul { margin: 0; padding-left: 22px; }
+      li + li { margin-top: 7px; }
+      .notice { padding: 16px 18px; border-left: 3px solid #168a4c; background: #edf7ef; }
+      footer { padding: 25px 20px; color: #a8adb7; background: #111318; text-align: center; }
+      footer a { margin: 0 10px; }
+      [hidden] { display: none !important; }
+      @media (max-width: 520px) {
+        main { padding-top: 42px; }
+        nav { width: min(100% - 24px, 920px); }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav aria-label="Primary navigation">
+        <a class="brand" href="/">AgentRejoin</a>
+        <div class="languages" role="group" aria-label="Language">
+          <button type="button" data-locale="en">EN</button>
+          <button type="button" data-locale="zh">中文</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <article data-language="en">
+        <h1>Privacy Policy</h1>
+        <p class="updated">Last updated: August 26, 2026</p>
+
+        <section>
+          <h2>Overview</h2>
+          <p>AgentRejoin synchronizes coding-agent sessions between your connected devices. Sensitive synchronization content is encrypted on your device before it is sent through the relay.</p>
+          <p>This policy describes the hosted AgentRejoin service. Self-hosted operators are responsible for their own deployment and data practices.</p>
+        </section>
+
+        <section>
+          <h2>What we collect</h2>
+          <h3>Encrypted synchronization data</h3>
+          <ul>
+            <li>Conversation messages and code sent through the relay.</li>
+            <li>Account keys exchanged between devices during encrypted pairing.</li>
+          </ul>
+          <h3>Unencrypted metadata</h3>
+          <ul>
+            <li>Message IDs and timestamps used for ordering and synchronization.</li>
+            <li>Anonymous account, device, machine, and session identifiers.</li>
+            <li>Machine presence, connection status, and push notification tokens when enabled.</li>
+          </ul>
+          <h3>Optional analytics</h3>
+          <p>When analytics is configured, AgentRejoin may collect anonymous product-usage events. These events do not contain conversation content or code. Analytics can be disabled in Settings.</p>
+        </section>
+
+        <section>
+          <h2>Direct voice connection</h2>
+          <p>AgentRejoin does not currently provide hosted or subscription voice service. If you configure your own ElevenLabs agent and enable Direct Connection, your device sends microphone audio and selected session context directly to ElevenLabs.</p>
+          <p>That data is outside AgentRejoin's encrypted relay and is governed by your ElevenLabs account and ElevenLabs' privacy policy.</p>
+        </section>
+
+        <section>
+          <h2>What the hosted relay does not collect</h2>
+          <ul>
+            <li>Plaintext conversation content or code.</li>
+            <li>Email addresses for account creation.</li>
+            <li>Location data.</li>
+            <li>Voice audio or voice context used through Direct Connection.</li>
+          </ul>
+          <p>The AgentRejoin daemon and coding-agent CLI run on your server and necessarily access the local files and session data required to perform the work you request.</p>
+        </section>
+
+        <section>
+          <h2>How we use data</h2>
+          <ul>
+            <li>Encrypted content is stored and transmitted to synchronize connected devices.</li>
+            <li>Metadata authenticates devices, orders updates, shows machine presence, and routes sessions.</li>
+            <li>Push tokens are used only to deliver notifications.</li>
+            <li>Anonymous analytics, when enabled, is used to improve the product.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Security</h2>
+          <ul>
+            <li>Sensitive synchronization content is encrypted before reaching the relay.</li>
+            <li>Account keys remain on your devices and use the encrypted pairing flow.</li>
+            <li>The implementation is open source and can be audited or self-hosted.</li>
+          </ul>
+          <p>No system is completely secure. Protect your account secret and the servers on which AgentRejoin and your coding agents run.</p>
+        </section>
+
+        <section>
+          <h2>Retention and controls</h2>
+          <ul>
+            <li>Relay data is retained while needed for synchronization and until removed through available controls or operational cleanup.</li>
+            <li>You can delete individual sessions and remove linked machines or push tokens where those controls are available.</li>
+            <li>You can back up your account secret from account settings.</li>
+          </ul>
+          <p class="notice">Full account deletion and full-data export are not currently self-service features. Never post account secrets, private code, or conversation content in a public issue.</p>
+        </section>
+
+        <section>
+          <h2>Data sharing</h2>
+          <ul>
+            <li><strong>Expo:</strong> push delivery when notifications are enabled.</li>
+            <li><strong>PostHog:</strong> anonymous analytics when configured and enabled.</li>
+            <li><strong>ElevenLabs:</strong> only when you start Direct Connection with your own agent.</li>
+          </ul>
+          <p>We do not sell personal data.</p>
+        </section>
+
+        <section>
+          <h2>Changes and contact</h2>
+          <p>Material changes will be reflected by updating this page and its effective date.</p>
+          <p>For privacy questions, open an issue on <a href="https://github.com/Altman-conquer/agentrejoin/issues">GitHub</a>. Do not include secrets or private content.</p>
+        </section>
+      </article>
+
+      <article data-language="zh" hidden>
+        <h1>隐私政策</h1>
+        <p class="updated">最后更新：2026 年 8 月 26 日</p>
+
+        <section>
+          <h2>概述</h2>
+          <p>AgentRejoin 用于在已连接的设备之间同步 Coding Agent 会话。敏感同步内容会先在设备上加密，再发送到 Relay。</p>
+          <p>本政策适用于 AgentRejoin 托管服务。自行部署服务的运营者需要对其部署及数据处理方式负责。</p>
+        </section>
+
+        <section>
+          <h2>我们收集的数据</h2>
+          <h3>加密的同步数据</h3>
+          <ul>
+            <li>通过 Relay 同步的对话消息与代码。</li>
+            <li>设备配对时在设备之间加密传递的账号密钥。</li>
+          </ul>
+          <h3>未加密的元数据</h3>
+          <ul>
+            <li>用于排序和同步的消息 ID 与时间戳。</li>
+            <li>匿名账号、设备、服务器和会话标识符。</li>
+            <li>服务器在线状态、连接状态，以及启用通知后的推送令牌。</li>
+          </ul>
+          <h3>可选分析</h3>
+          <p>配置分析服务后，AgentRejoin 可能收集匿名产品使用事件，其中不包含对话内容或代码。你可以在设置中关闭分析。</p>
+        </section>
+
+        <section>
+          <h2>语音直连</h2>
+          <p>AgentRejoin 目前不提供托管或订阅语音服务。如果你配置自己的 ElevenLabs Agent 并启用“直接连接”，设备会把麦克风音频和选定的会话上下文直接发送给 ElevenLabs。</p>
+          <p>这些数据不经过 AgentRejoin 的加密 Relay，并受你的 ElevenLabs 账号设置及 ElevenLabs 隐私政策约束。</p>
+        </section>
+
+        <section>
+          <h2>托管 Relay 不收集的内容</h2>
+          <ul>
+            <li>明文对话内容或代码。</li>
+            <li>用于创建账号的邮箱地址。</li>
+            <li>位置信息。</li>
+            <li>通过“直接连接”使用的语音音频或语音上下文。</li>
+          </ul>
+          <p>AgentRejoin daemon 和 Coding Agent CLI 运行在你的服务器上，因此必然会访问完成任务所需的本地文件和会话数据。</p>
+        </section>
+
+        <section>
+          <h2>数据用途</h2>
+          <ul>
+            <li>加密内容只用于在已连接设备之间存储和同步。</li>
+            <li>元数据用于设备鉴权、更新排序、显示服务器在线状态以及路由会话。</li>
+            <li>推送令牌只用于发送通知。</li>
+            <li>启用匿名分析时，相关数据只用于改进产品。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>安全</h2>
+          <ul>
+            <li>敏感同步内容在到达 Relay 前完成加密。</li>
+            <li>账号密钥保留在你的设备上，并通过加密配对流程交换。</li>
+            <li>项目代码开源，可以审计或自行部署。</li>
+          </ul>
+          <p>任何系统都无法保证绝对安全。请妥善保管账号密钥以及运行 AgentRejoin 和 Coding Agent 的服务器。</p>
+        </section>
+
+        <section>
+          <h2>保留期限与用户控制</h2>
+          <ul>
+            <li>Relay 数据会在提供同步功能所需期间保留，直至通过已有产品入口删除或被运维清理。</li>
+            <li>在产品提供对应入口时，你可以删除单个会话、已连接服务器或推送令牌。</li>
+            <li>你可以在账号设置中备份账号密钥。</li>
+          </ul>
+          <p class="notice">目前尚未提供自助删除整个账号或导出全部数据的功能。请勿在公开 Issue 中提交账号密钥、私有代码或对话内容。</p>
+        </section>
+
+        <section>
+          <h2>数据共享</h2>
+          <ul>
+            <li><strong>Expo：</strong>启用通知后用于推送通知。</li>
+            <li><strong>PostHog：</strong>完成配置且用户启用分析时，用于匿名产品分析。</li>
+            <li><strong>ElevenLabs：</strong>仅在你使用自己的 Agent 主动启动“直接连接”时使用。</li>
+          </ul>
+          <p>我们不会出售个人数据。</p>
+        </section>
+
+        <section>
+          <h2>政策变更与联系方式</h2>
+          <p>如有重大变更，我们会更新本页面及生效日期。</p>
+          <p>如有隐私问题，请在 <a href="https://github.com/Altman-conquer/agentrejoin/issues">GitHub</a> 提交 Issue。请勿包含密钥或私密内容。</p>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <a href="/">AgentRejoin</a>
+      <a href="https://github.com/Altman-conquer/agentrejoin">GitHub</a>
+    </footer>
+
+    <script>
+      const supported = ['en', 'zh'];
+      const saved = localStorage.getItem('agentrejoin-site-locale');
+      let locale = supported.includes(saved) ? saved : (navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en');
+
+      function renderLanguage() {
+        document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en';
+        document.title = locale === 'zh' ? '隐私政策 - AgentRejoin' : 'Privacy Policy - AgentRejoin';
+        document.querySelectorAll('[data-language]').forEach((element) => {
+          element.hidden = element.dataset.language !== locale;
+        });
+        document.querySelectorAll('[data-locale]').forEach((button) => {
+          button.setAttribute('aria-pressed', String(button.dataset.locale === locale));
+        });
+      }
+
+      document.querySelectorAll('[data-locale]').forEach((button) => {
+        button.addEventListener('click', () => {
+          locale = button.dataset.locale;
+          localStorage.setItem('agentrejoin-site-locale', locale);
+          renderLanguage();
+        });
+      });
+      renderLanguage();
+    </script>
+  </body>
+</html>

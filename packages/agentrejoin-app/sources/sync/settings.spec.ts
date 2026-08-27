@@ -193,7 +193,6 @@ describe('settings', () => {
                 usageLimitShowRemaining: false,
                 hideInactiveSessions: false,
                 sortSessionsByActivity: false,
-                expResumeSession: false,
                 fileDiffsSidebar: false,
                 groupToolCalls: false,
                 compactToolCalls: true,

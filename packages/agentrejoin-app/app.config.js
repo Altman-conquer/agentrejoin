@@ -11,13 +11,7 @@ const bundleId = {
     preview: "com.zhandj.agentrejoin.preview",
     production: "com.zhandj.agentrejoin"
 }[variant];
-// const stagingElevenLabsAgentId = 'agent_7801k2c0r5hjfraa1kdbytpvs6yt';
-const productionElevenLabsAgentId = 'agent_6701k211syvvegba4kt7m68nxjmw';
-const elevenLabsAgentId = {
-    development: productionElevenLabsAgentId,
-    preview: productionElevenLabsAgentId,
-    production: productionElevenLabsAgentId,
-}[variant];
+const elevenLabsAgentId = process.env.EXPO_PUBLIC_ELEVENLABS_AGENT_ID;
 const consoleLoggingDefault = {
     development: true,
     preview: true,
@@ -92,7 +86,7 @@ export default {
                 : {})
         },
         android: {
-            versionCode: 4,
+            versionCode: 5,
             adaptiveIcon: {
                 foregroundImage: "./sources/assets/images/icon-adaptive.png",
                 monochromeImage: "./sources/assets/images/icon-monochrome.png",

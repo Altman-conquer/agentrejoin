@@ -117,7 +117,7 @@ export const zhHans: TranslationStructure = {
         appearance: '外观',
         appearanceSubtitle: '自定义应用外观',
         voiceAssistant: '语音助手',
-        voiceAssistantSubtitle: '配置语音交互偏好',
+        voiceAssistantSubtitle: '直连你自己的 ElevenLabs 语音 Agent',
         featuresTitle: '功能',
         featuresSubtitle: '启用或禁用应用功能',
         developer: '开发者',

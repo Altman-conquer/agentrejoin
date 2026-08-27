@@ -63,6 +63,7 @@ const copy = {
         finalTitle: 'The session is still there.',
         finalBody: 'Rejoin it from wherever you are.',
         footer: 'Open-source remote continuity for coding agents.',
+        privacy: 'Privacy',
         preview: {
             sessions: 'Sessions',
             allMachines: 'All machines',
@@ -121,6 +122,7 @@ const copy = {
         finalTitle: '那个会话还在那里。',
         finalBody: '现在，从任何地方回到它。',
         footer: '为 Coding Agent 提供开源的跨设备会话连续性。',
+        privacy: '隐私政策',
         preview: {
             sessions: '对话',
             allMachines: '所有服务器',
@@ -422,6 +424,9 @@ export function LandingPage() {
             <View style={[styles.footer, mobile && styles.footerMobile]}>
                 <Image source={require('@/assets/images/logotype-light.png')} contentFit="contain" style={styles.footerLogo} />
                 <Text style={styles.footerText}>{text.footer}</Text>
+                <Pressable onPress={() => window.location.assign('/privacy/')} hitSlop={10}>
+                    <Text style={styles.footerLink}>{text.privacy}</Text>
+                </Pressable>
                 <Pressable onPress={() => Linking.openURL(GITHUB_URL)} hitSlop={10} accessibilityLabel="GitHub">
                     <Ionicons name="logo-github" size={22} color="#A8ADB7" />
                 </Pressable>
@@ -746,4 +751,5 @@ const styles = StyleSheet.create({
     footerMobile: { paddingVertical: 26, flexDirection: 'column' },
     footerLogo: { width: 145, height: 38 },
     footerText: { flex: 1, color: '#A8ADB7', fontSize: 13, textAlign: 'center', fontFamily: 'IBMPlexSans-Regular' },
+    footerLink: { color: '#A8ADB7', fontSize: 13, fontFamily: 'IBMPlexSans-SemiBold' },
 });

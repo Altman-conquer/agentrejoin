@@ -37,7 +37,6 @@ export const SettingsSchema = z.object({
 
     hideInactiveSessions: z.boolean().describe('Hide inactive sessions in the main list'),
     sortSessionsByActivity: z.boolean().describe('Sort the session list by last activity instead of creation date'),
-    expResumeSession: z.boolean().describe('Enable experimental session resume feature'),
     fileDiffsSidebar: z.boolean().describe('Show the file diffs sidebar next to the chat on desktop'),
     groupToolCalls: z.boolean().describe('Collapse consecutive tool calls into grouped containers in chat'),
     compactToolCalls: z.boolean().describe('Render non-interactive tool calls as compact one-line rows'),
@@ -115,7 +114,6 @@ export const settingsDefaults: Settings = {
 
     hideInactiveSessions: false,
     sortSessionsByActivity: false,
-    expResumeSession: false,
     fileDiffsSidebar: false,
     groupToolCalls: false,
     compactToolCalls: true,

@@ -847,7 +847,9 @@ export function SessionViewLoaded({
     const alwaysShowContextSize = useSetting('alwaysShowContextSize');
     const sessionStatusBarDisplay = useSetting('sessionStatusBarDisplay');
     const experiments = useSetting('experiments');
-    const expResumeSession = useSetting('expResumeSession');
+    const voiceCustomAgentId = useSetting('voiceCustomAgentId');
+    const voiceBypassToken = useSetting('voiceBypassToken');
+    const canUseVoice = voiceBypassToken && Boolean(voiceCustomAgentId);
     const { canResume, resumeSession, resumingSession } = useSessionQuickActions(session);
     const isDisconnected = !sessionStatus.isConnected;
     const resumeBlocked = session.metadata?.resumeStatus !== undefined;
@@ -1118,8 +1120,8 @@ export function SessionViewLoaded({
             connectionStatus={connectionStatus}
             blockSend={resumeBlocked || (isRig && session.thinking && session.metadata?.capabilities?.steering !== true)}
             onSend={handleSend}
-            onMicPress={(embedded || isDisconnected) ? undefined : micButtonState.onMicPress}
-            isMicActive={(embedded || isDisconnected) ? false : micButtonState.isMicActive}
+            onMicPress={(!canUseVoice || embedded || isDisconnected) ? undefined : micButtonState.onMicPress}
+            isMicActive={(!canUseVoice || embedded || isDisconnected) ? false : micButtonState.isMicActive}
             onAbort={isDisconnected || !rigCanAbort(session.metadata) ? undefined : handleAbort}
             showAbortButton={rigCanAbort(session.metadata) && (Platform.OS === 'web'
                 ? sessionStatus.state === 'thinking' || sessionStatus.state === 'waiting'
@@ -1146,13 +1148,12 @@ export function SessionViewLoaded({
     // whether they were explicitly archived or just lost their CLI (e.g.
     // Ctrl-C in terminal — lifecycleState stays 'running', server flips
     // active=false). InactiveArchivedHint handles both cases: shows the
-    // Resume button when canResume is true, falls back to the
-    // copy-this-command hint when the experiments toggle is off or the
-    // machine isn't reachable.
+    // Resume button when canResume is true, falling back to the
+    // copy-this-command hint when the machine isn't reachable.
     const inactiveHint = showBottomDockDetails && isDisconnected && !isRig && !resumeBlocked ? (
         <CenteredInputWidth horizontalPadding={sessionInputHorizontalPadding}>
             <InactiveArchivedHint
-                resumeCommandBlock={expResumeSession ? resumeCommandBlock : null}
+                resumeCommandBlock={resumeCommandBlock}
                 canResume={canResume}
                 resuming={resumingSession}
                 onResume={resumeSession}

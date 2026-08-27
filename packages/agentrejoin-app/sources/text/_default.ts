@@ -114,7 +114,7 @@ export const en = {
         appearance: 'Appearance',
         appearanceSubtitle: 'Customize how the app looks',
         voiceAssistant: 'Voice Assistant',
-        voiceAssistantSubtitle: 'Configure voice interaction preferences',
+        voiceAssistantSubtitle: 'Connect your own ElevenLabs voice agent directly',
         featuresTitle: 'Features',
         featuresSubtitle: 'Enable or disable app features',
         developer: 'Developer',
