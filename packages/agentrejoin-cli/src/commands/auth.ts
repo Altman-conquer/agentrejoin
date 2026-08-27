@@ -6,6 +6,7 @@ import { existsSync, rmSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { stopDaemon, checkIfDaemonRunningAndCleanupStaleState } from '@/daemon/controlClient';
 import { logger } from '@/ui/logger';
+import { ensureDaemonRunning } from '@/daemon/ensureDaemonRunning';
 import os from 'node:os';
 
 export async function handleAuthCommand(args: string[]): Promise<void> {
@@ -94,6 +95,7 @@ async function handleAuthLogin(args: string[]): Promise<void> {
       console.log(chalk.gray(`  Machine ID: ${settings.machineId}`));
       console.log(chalk.gray(`  Host: ${os.hostname()}`));
       console.log(chalk.gray(`  Use 'agentrejoin auth login --force' to re-authenticate`));
+      await ensureDaemonRunning();
       return;
     } else if (existingCreds && !settings?.machineId) {
       console.log(chalk.yellow('⚠️  Credentials exist but machine ID is missing'));
@@ -106,6 +108,7 @@ async function handleAuthLogin(args: string[]): Promise<void> {
   // "Finally we'll run the auth and setup machine if needed"
   try {
     const result = await authAndSetupMachineIfNeeded();
+    await ensureDaemonRunning();
     console.log(chalk.green('\n✓ Authentication successful'));
     console.log(chalk.gray(`  Machine ID: ${result.machineId}`));
   } catch (error) {
