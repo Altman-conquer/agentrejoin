@@ -1,0 +1,30 @@
+name: Publish CLI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter agentrejoin test
+
+      - run: pnpm --filter agentrejoin pack --pack-destination packages/agentrejoin-cli
+
+      - run: npm publish packages/agentrejoin-cli/agentrejoin-*.tgz --access public --provenance
