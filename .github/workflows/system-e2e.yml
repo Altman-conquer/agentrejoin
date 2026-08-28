@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run account, pairing, Codex, Claude, desktop and mobile flow
-        run: docker compose -f e2e/docker-compose.yml up --build --abort-on-container-exit --exit-code-from browser
+        run: mkdir -p e2e/artifacts && docker compose -f e2e/docker-compose.yml up --build --abort-on-container-exit --exit-code-from browser
 
       - name: Container logs
         if: always()
