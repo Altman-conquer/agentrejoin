@@ -69,6 +69,7 @@ docs/competition/opencode/traces/
 # scratch tooling
 .cdp-scripts/
 agentrejoin-workspaces/
+e2e/artifacts/
 
 # local AGENTREJOIN_HOME_DIR for self-host testing
 .agentrejoin-fully-local/

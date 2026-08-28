@@ -18,7 +18,10 @@ export async function doAuth(): Promise<Credentials | null> {
     console.clear();
 
     // Show authentication method selector
-    const authMethod = await selectAuthenticationMethod();
+    const configuredAuthMethod = process.env.AGENTREJOIN_AUTH_METHOD;
+    const authMethod = configuredAuthMethod === 'web' || configuredAuthMethod === 'mobile'
+        ? configuredAuthMethod
+        : await selectAuthenticationMethod();
     if (!authMethod) {
         console.log('\nAuthentication cancelled.\n');
         process.exit(0);

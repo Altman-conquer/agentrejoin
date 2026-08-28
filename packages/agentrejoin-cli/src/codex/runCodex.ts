@@ -61,6 +61,7 @@ import {
     type CodexGoalCommand,
 } from './codexGoalStatus';
 import type { SessionEnvelope } from 'agentrejoin-wire';
+import { resolveCodexIdleTimeoutMs } from './codexIdleTimeout';
 
 /**
  * Extracts a human-readable error from a codex task_complete/turn_aborted event.
@@ -285,6 +286,15 @@ export async function runCodex(opts: {
     }
 
     const messageQueue = new MessageQueue2<EnhancedMode>(hashCodexEnhancedMode);
+    const codexIdleTimeoutMs = resolveCodexIdleTimeoutMs();
+    let codexIdleTimer: NodeJS.Timeout | undefined;
+
+    const clearCodexIdleTimer = () => {
+        if (codexIdleTimer) {
+            clearTimeout(codexIdleTimer);
+            codexIdleTimer = undefined;
+        }
+    };
 
     session.onFileEvent((fileEvent) => {
         const ev = fileEvent.content.data.ev;
@@ -364,6 +374,7 @@ export async function runCodex(opts: {
     ];
 
     const handleUserMessage = createSerialAsyncHandler<UserMessage>(async (message) => {
+        clearCodexIdleTimer();
         const attachmentsForThisMessage = await session.drainAttachmentsForUserMessage();
 
         // Resolve permission mode (validate against Codex-native modes)
@@ -575,8 +586,9 @@ export async function runCodex(opts: {
      * Abort stops the current inference but keeps the session alive.
      * Kill terminates the entire process.
      */
-    const handleKillSession = async () => {
-        logger.debug('[Codex] Kill session requested - terminating process');
+    const handleKillSession = async (archiveReason = 'User terminated') => {
+        clearCodexIdleTimer();
+        logger.debug(`[Codex] Terminating session: ${archiveReason}`);
         await handleAbort();
         logger.debug('[Codex] Abort completed, proceeding with termination');
 
@@ -588,7 +600,7 @@ export async function runCodex(opts: {
                     lifecycleState: 'archived',
                     lifecycleStateSince: Date.now(),
                     archivedBy: 'cli',
-                    archiveReason: 'User terminated'
+                    archiveReason
                 }));
                 
                 // Send session death message
@@ -613,6 +625,28 @@ export async function runCodex(opts: {
             logger.debug('[Codex] Error during session termination:', error);
             process.exit(1);
         }
+    };
+
+    const scheduleCodexIdleTermination = () => {
+        clearCodexIdleTimer();
+        if (codexIdleTimeoutMs === 0 || shouldExit) return;
+
+        codexIdleTimer = setTimeout(() => {
+            codexIdleTimer = undefined;
+            if (
+                thinking
+                || handlingQueuedMessage
+                || messageQueue.size() > 0
+                || abortInProgress !== null
+                || codexThreadSyncInProgress !== null
+                || shouldExit
+            ) {
+                scheduleCodexIdleTermination();
+                return;
+            }
+            void handleKillSession('Idle timeout');
+        }, codexIdleTimeoutMs);
+        codexIdleTimer.unref();
     };
 
     // Register abort handler
@@ -1107,6 +1141,8 @@ export async function runCodex(opts: {
             }));
         }
 
+        scheduleCodexIdleTermination();
+
         let pending: { message: string; mode: EnhancedMode; isolate: boolean; hash: string; attachments?: PendingAttachment[] } | null = null;
 
         while (!shouldExit) {
@@ -1170,6 +1206,7 @@ export async function runCodex(opts: {
                     sendReady,
                 });
                 handlingQueuedMessage = false;
+                scheduleCodexIdleTermination();
                 continue;
             }
 
@@ -1275,6 +1312,7 @@ export async function runCodex(opts: {
                     shouldExit,
                     sendReady,
                 });
+                scheduleCodexIdleTermination();
                 logActiveHandles('after-turn');
             }
         }
@@ -1283,6 +1321,7 @@ export async function runCodex(opts: {
         // Clean up resources when main loop exits
         logger.debug('[codex]: Final cleanup start');
         logActiveHandles('cleanup-start');
+        clearCodexIdleTimer();
 
         // Cancel offline reconnection if still running
         if (reconnectionHandle) {

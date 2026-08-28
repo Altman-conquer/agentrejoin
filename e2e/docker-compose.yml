@@ -1,0 +1,72 @@
+x-build-args: &build-args
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-}
+
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      network: host
+      args: *build-args
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3005
+      DATA_DIR: /data
+      PGLITE_DIR: /data/pglite
+      AGENTREJOIN_MASTER_SECRET: e2e-master-secret
+      AGENTREJOIN_INJECT_HTML_CONFIG: '{"serverUrl":"http://localhost:3005","disableAnalytics":true}'
+    ports:
+      - "127.0.0.1:${AGENTREJOIN_E2E_PORT:-43105}:3005"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3005/health"]
+      interval: 2s
+      timeout: 2s
+      retries: 60
+
+  machine:
+    build:
+      context: ..
+      dockerfile: e2e/Dockerfile
+      target: machine
+      network: host
+      args: *build-args
+    init: true
+    environment:
+      AGENTREJOIN_HOME_DIR: /state/home
+      AGENTREJOIN_SERVER_URL: http://server:3005
+      AGENTREJOIN_WEBAPP_URL: http://server:3005/app
+      AGENTREJOIN_AUTH_METHOD: web
+      AGENTREJOIN_DISABLE_CAFFEINATE: "true"
+      HEADLESS: "true"
+      HOME: /root
+    volumes:
+      - state:/state
+    depends_on:
+      server:
+        condition: service_healthy
+
+  browser:
+    build:
+      context: ..
+      dockerfile: e2e/Dockerfile
+      target: browser
+      network: host
+      args: *build-args
+    environment:
+      BASE_URL: http://localhost:3005
+      STATE_DIR: /state
+      ARTIFACTS_DIR: /artifacts
+    network_mode: service:server
+    volumes:
+      - state:/state
+      - ./artifacts:/artifacts
+    depends_on:
+      server:
+        condition: service_healthy
+      machine:
+        condition: service_started
+
+volumes:
+  state:

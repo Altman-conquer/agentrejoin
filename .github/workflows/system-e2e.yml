@@ -1,0 +1,46 @@
+name: System E2E
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 3 * * 1'
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'e2e/**'
+      - 'packages/agentrejoin-app/**'
+      - 'packages/agentrejoin-cli/**'
+      - 'packages/agentrejoin-server/**'
+      - 'packages/agentrejoin-wire/**'
+      - '.github/workflows/system-e2e.yml'
+
+concurrency:
+  group: system-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run account, pairing, Codex, Claude, desktop and mobile flow
+        run: docker compose -f e2e/docker-compose.yml up --build --abort-on-container-exit --exit-code-from browser
+
+      - name: Container logs
+        if: always()
+        run: mkdir -p e2e/artifacts && docker compose -f e2e/docker-compose.yml logs --no-color > e2e/artifacts/containers.log
+
+      - name: Upload screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-e2e
+          path: e2e/artifacts/
+          if-no-files-found: ignore
+
+      - name: Clean up
+        if: always()
+        run: docker compose -f e2e/docker-compose.yml down -v --remove-orphans
