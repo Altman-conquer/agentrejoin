@@ -22,6 +22,10 @@ After completing and verifying a user-requested code change:
    the existing deployment on `root@agentrejoin-prod` in `/opt/agentrejoin`,
    then verify the website and web app. Preserve the server `.env`,
    `AGENTREJOIN_MASTER_SECRET`, and persistent data volumes.
+   Build production Docker images on the local workstation with Docker Desktop;
+   never build them on the production server, which does not have enough build
+   capacity. Transfer the completed image to the server, load it there, and only
+   then recreate the container.
 3. Rebuild the Android arm64 APK when the change affects
    `packages/agentrejoin-app`, mobile/shared UI or behavior, app assets,
    configuration, or native dependencies. Increment `versionCode`, verify the
