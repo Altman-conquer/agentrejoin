@@ -482,6 +482,8 @@ export const ru: TranslationStructure = {
     },
 
     agentInput: {
+        stop: 'Остановить',
+        queuedFollowUp: 'В очереди на следующий ход',
         permissionMode: {
             title: 'РЕЖИМ РАЗРЕШЕНИЙ',
             default: 'По умолчанию',

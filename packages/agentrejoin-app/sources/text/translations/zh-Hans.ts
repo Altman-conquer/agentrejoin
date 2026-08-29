@@ -467,6 +467,8 @@ export const zhHans: TranslationStructure = {
     },
 
     agentInput: {
+        stop: '停止',
+        queuedFollowUp: '已排队，将在当前回复后发送',
         permissionMode: {
             title: '权限模式',
             default: '默认',

@@ -464,6 +464,8 @@ export const it: TranslationStructure = {
     },
 
     agentInput: {
+        stop: 'Interrompi',
+        queuedFollowUp: 'In coda per il turno successivo',
         permissionMode: {
             title: 'MODALITÀ PERMESSI',
             default: 'Predefinito',

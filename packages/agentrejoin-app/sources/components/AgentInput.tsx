@@ -780,11 +780,11 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
     const shouldShowVoiceButton = primaryAction === 'voice';
     const canSendMessage = primaryAction === 'send';
     const mobileCanPressSendButton = !isAborting && primaryAction !== 'idle';
-    const desktopCanPressSendButton = !props.isSending
-        && !props.isSendDisabled
-        && (isSendBlocked
-            ? hasComposerContent
-            : hasComposerContent || !!props.onMicPress);
+    const desktopCanPressSendButton = !isAborting
+        && (shouldShowStopButton || (!props.isSendDisabled
+            && (isSendBlocked
+                ? hasComposerContent
+                : hasComposerContent || !!props.onMicPress)));
     const canPressSendButton = compactMobileComposer
         ? mobileCanPressSendButton
         : desktopCanPressSendButton;
@@ -1057,7 +1057,7 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
             handleBlockedSendAttempt();
             return;
         }
-        if (props.isSendDisabled || (!compactMobileComposer && props.isSending)) return;
+        if (props.isSendDisabled) return;
 
         hapticsLight();
         // Live read avoids stalling behind the transitioned `hasText`.
@@ -1068,7 +1068,7 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
         } else if (!compactMobileComposer) {
             props.onMicPress?.();
         }
-    }, [compactMobileComposer, handleBlockedSendAttempt, hasImages, isSendBlocked, props.isSendDisabled, props.isSending, props.onMicPress, props.onSend]);
+    }, [handleBlockedSendAttempt, hasImages, isSendBlocked, props.isSendDisabled, props.onMicPress, props.onSend]);
 
     const handleMicrophonePress = React.useCallback(() => {
         if (!props.onMicPress || props.isSendDisabled) return;
@@ -1080,7 +1080,7 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
     // the live text rather than from `hasText`, which is set in a transition and
     // lags a fast type-then-tap. Without the live read that tap would abort the
     // agent or open dictation instead of sending what was just typed.
-    const handleMobilePrimaryPress = React.useCallback(() => {
+    const handlePrimaryPress = React.useCallback(() => {
         const liveHasContent = (inputRef.current?.getText() ?? '').trim().length > 0 || hasImages;
         if (!liveHasContent && shouldShowStopButton) {
             handleAbortPress();
@@ -1319,7 +1319,7 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
                             </Pressable>
                         )}
 
-                        {props.onAbort && (
+                        {props.showAbortButton && hasComposerContent && props.onAbort && (
                             <Shaker ref={shakerRef}>
                                 <Pressable
                                     style={(p) => ({
@@ -1330,16 +1330,20 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
                                         paddingVertical: 6,
                                         justifyContent: 'center',
                                         height: 32,
+                                        backgroundColor: p.pressed ? theme.colors.surfacePressed : 'transparent',
                                         opacity: p.pressed ? 0.7 : 1,
                                     })}
                                     hitSlop={{ top: 5, bottom: 10, left: 0, right: 0 }}
                                     onPress={handleAbortPress}
-                                    disabled={isAborting}
+                                    disabled={isAborting || stopRequested}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={t('agentInput.stop')}
+                                    accessibilityState={{ busy: isAborting, disabled: isAborting || stopRequested }}
                                 >
                                     {isAborting ? (
                                         <ActivityIndicator size="small" color={theme.colors.button.secondary.tint} />
                                     ) : (
-                                        <Octicons name="stop" size={16} color={theme.colors.button.secondary.tint} />
+                                        <Octicons name="stop" size={16} color={theme.colors.textDestructive} />
                                     )}
                                 </Pressable>
                             </Shaker>
@@ -1376,9 +1380,11 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
                     <View
                         style={[
                             styles.sendButton,
-                            isSendBlocked
+                            shouldShowStopButton
+                                ? styles.mobileStopButton
+                                : isSendBlocked
                                 ? styles.sendButtonLocked
-                                : (hasText || props.isSending || (props.onMicPress && !props.isMicActive))
+                                : (hasText || (props.onMicPress && !props.isMicActive))
                                     ? styles.sendButtonActive
                                     : styles.sendButtonInactive,
                         ]}
@@ -1392,11 +1398,16 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
                                 opacity: p.pressed ? 0.7 : 1,
                             })}
                             hitSlop={{ top: 5, bottom: 10, left: 0, right: 0 }}
-                            onPress={handleSendPress}
+                            onPress={handlePrimaryPress}
                             disabled={!desktopCanPressSendButton}
+                            accessibilityRole="button"
+                            accessibilityLabel={shouldShowStopButton ? t('agentInput.stop') : 'Send'}
+                            accessibilityState={{ busy: isAborting, disabled: !desktopCanPressSendButton }}
                         >
-                            {props.isSending ? (
+                            {isAborting ? (
                                 <ActivityIndicator size="small" color={theme.colors.button.primary.tint} />
+                            ) : shouldShowStopButton ? (
+                                <Octicons name="stop" size={16} color={theme.colors.button.primary.tint} />
                             ) : isSendBlocked ? (
                                 <Ionicons name="lock-closed" size={15} color={theme.colors.textSecondary} />
                             ) : hasText ? (
@@ -2146,7 +2157,7 @@ export const AgentInput = React.memo(React.forwardRef<MultiTextInputHandle, Agen
                                         opacity: p.pressed ? 0.7 : 1,
                                     })}
                                     hitSlop={6}
-                                    onPress={handleMobilePrimaryPress}
+                                    onPress={handlePrimaryPress}
                                     disabled={!canPressSendButton}
                                     accessibilityRole="button"
                                     accessibilityLabel={shouldShowStopButton ? 'Stop'

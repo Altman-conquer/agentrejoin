@@ -480,6 +480,8 @@ export const en: TranslationStructure = {
     },
 
     agentInput: {
+        stop: 'Stop',
+        queuedFollowUp: 'Queued for the next turn',
         permissionMode: {
             title: 'PERMISSION MODE',
             default: 'default permissions',

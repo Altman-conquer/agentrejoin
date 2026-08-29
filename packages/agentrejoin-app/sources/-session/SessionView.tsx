@@ -842,6 +842,11 @@ export function SessionViewLoaded({
     ), [availableEffortLevels, session.effortLevel, effectiveAgentDefaults.effortLevel, session.metadata, modelKey, isRig]);
 
     const sessionStatus = useSessionStatus(session);
+    const agentIsWorking = sessionStatus.state === 'thinking';
+    const [hasQueuedFollowUp, setHasQueuedFollowUp] = React.useState(false);
+    React.useEffect(() => {
+        if (!agentIsWorking) setHasQueuedFollowUp(false);
+    }, [agentIsWorking]);
     const sessionUsage = useSessionUsage(sessionId);
     const gitStatus = useSessionGitStatus(sessionId);
     const alwaysShowContextSize = useSetting('alwaysShowContextSize');
@@ -920,11 +925,12 @@ export function SessionViewLoaded({
         const liveMessage = composerHandleRef.current?.getMessage() ?? '';
         if (liveMessage.trim() || (expImageUpload && selectedImages.length > 0)) {
             const attachments = expImageUpload ? selectedImages : undefined;
+            if (agentIsWorking) setHasQueuedFollowUp(true);
             composerHandleRef.current?.clearMessage();
             if (expImageUpload) clearImages();
             sync.sendMessage(sessionId, liveMessage, { source: 'chat', attachments });
         }
-    }, [sessionId, expImageUpload, selectedImages, clearImages]);
+    }, [sessionId, expImageUpload, selectedImages, clearImages, agentIsWorking]);
 
     const handleAbort = React.useCallback(() => {
         // Mode picks live in synced metadata — clear them there, otherwise the
@@ -944,11 +950,11 @@ export function SessionViewLoaded({
     ), [sessionId]);
 
     const connectionStatus = React.useMemo(() => ({
-        text: sessionStatus.statusText,
+        text: hasQueuedFollowUp ? t('agentInput.queuedFollowUp') : sessionStatus.statusText,
         color: sessionStatus.statusColor,
         dotColor: sessionStatus.statusDotColor,
         isPulsing: sessionStatus.isPulsing,
-    }), [sessionStatus.statusText, sessionStatus.statusColor, sessionStatus.statusDotColor, sessionStatus.isPulsing]);
+    }), [hasQueuedFollowUp, sessionStatus.statusText, sessionStatus.statusColor, sessionStatus.statusDotColor, sessionStatus.isPulsing]);
 
     const usageData = React.useMemo(() => {
         const source = sessionUsage ?? session.latestUsage;
@@ -1123,9 +1129,7 @@ export function SessionViewLoaded({
             onMicPress={(!canUseVoice || embedded || isDisconnected) ? undefined : micButtonState.onMicPress}
             isMicActive={(!canUseVoice || embedded || isDisconnected) ? false : micButtonState.isMicActive}
             onAbort={isDisconnected || !rigCanAbort(session.metadata) ? undefined : handleAbort}
-            showAbortButton={rigCanAbort(session.metadata) && (Platform.OS === 'web'
-                ? sessionStatus.state === 'thinking' || sessionStatus.state === 'waiting'
-                : sessionStatus.state === 'thinking')}
+            showAbortButton={rigCanAbort(session.metadata) && sessionStatus.state === 'thinking'}
             onFileViewerPress={experiments && !isTablet && rigCanBrowseFiles(session.metadata) && rigCanReadFiles(session.metadata) ? handleFileViewerPress : undefined}
             selectedImages={expImageUpload && canUseAttachments ? selectedImages : undefined}
             onPickImages={expImageUpload && canUseAttachments ? pickImages : undefined}

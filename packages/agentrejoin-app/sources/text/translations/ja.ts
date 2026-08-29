@@ -467,6 +467,8 @@ export const ja: TranslationStructure = {
     },
 
     agentInput: {
+        stop: '停止',
+        queuedFollowUp: '次のターンに送信待ち',
         permissionMode: {
             title: '権限モード',
             default: 'デフォルト',

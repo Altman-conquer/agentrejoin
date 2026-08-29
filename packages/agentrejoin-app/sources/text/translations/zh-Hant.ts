@@ -466,6 +466,8 @@ export const zhHant: TranslationStructure = {
     },
 
     agentInput: {
+        stop: '停止',
+        queuedFollowUp: '已排隊，將在目前回覆後傳送',
         permissionMode: {
             title: '權限模式',
             default: '預設',

@@ -466,6 +466,8 @@ export const ca: TranslationStructure = {
     },
 
     agentInput: {
+        stop: 'Atura',
+        queuedFollowUp: 'En cua per al torn següent',
         permissionMode: {
             title: 'MODE DE PERMISOS',
             default: 'Per defecte',

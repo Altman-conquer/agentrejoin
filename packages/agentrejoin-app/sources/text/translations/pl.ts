@@ -482,6 +482,8 @@ export const pl: TranslationStructure = {
     },
 
     agentInput: {
+        stop: 'Zatrzymaj',
+        queuedFollowUp: 'W kolejce do następnej tury',
         permissionMode: {
             title: 'TRYB UPRAWNIEŃ',
             default: 'Domyślny',

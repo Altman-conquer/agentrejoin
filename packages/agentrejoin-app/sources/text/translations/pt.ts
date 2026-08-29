@@ -465,6 +465,8 @@ export const pt: TranslationStructure = {
     },
 
     agentInput: {
+        stop: 'Parar',
+        queuedFollowUp: 'Na fila para o próximo turno',
         permissionMode: {
             title: 'MODO DE PERMISSÃO',
             default: 'Padrão',
