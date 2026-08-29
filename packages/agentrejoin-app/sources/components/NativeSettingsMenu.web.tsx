@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { createPortal } from 'react-dom';
+import { Pressable, Text, View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { Typography } from '@/constants/Typography';
 import { FloatingOverlay } from './FloatingOverlay';
@@ -8,20 +9,6 @@ import type { NativeSettingsMenuProps } from './NativeSettingsMenu';
 const styles = StyleSheet.create((theme) => ({
     container: {
         position: 'relative',
-    },
-    modal: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 16,
-    },
-    backdrop: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.42)',
-    },
-    panel: {
-        width: '100%',
-        maxWidth: 380,
     },
     title: {
         color: theme.colors.text,
@@ -75,6 +62,22 @@ const styles = StyleSheet.create((theme) => ({
     },
 }));
 
+const portalStyle: React.CSSProperties = {
+    position: 'fixed',
+    inset: 0,
+    zIndex: 2147483647,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.42)',
+};
+
+const panelStyle: React.CSSProperties = {
+    width: '100%',
+    maxWidth: 380,
+};
+
 export function NativeSettingsMenu({
     accessibilityLabel,
     children,
@@ -96,10 +99,20 @@ export function NativeSettingsMenu({
             >
                 {children}
             </Pressable>
-            <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-                <View style={styles.modal}>
-                    <Pressable style={styles.backdrop} onPress={() => setOpen(false)} />
-                    <View style={styles.panel}>
+            {open && typeof document !== 'undefined' && createPortal(
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={title}
+                    style={portalStyle}
+                    onClick={(event) => {
+                        if (event.target === event.currentTarget) setOpen(false);
+                    }}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') setOpen(false);
+                    }}
+                >
+                    <div style={panelStyle}>
                         <FloatingOverlay maxHeight={420} keyboardShouldPersistTaps="always">
                             <Text style={styles.title}>{title}</Text>
                             {groups.map((group) => (
@@ -138,9 +151,10 @@ export function NativeSettingsMenu({
                                 </View>
                             ))}
                         </FloatingOverlay>
-                    </View>
-                </View>
-            </Modal>
+                    </div>
+                </div>,
+                document.body,
+            )}
         </View>
     );
 }
