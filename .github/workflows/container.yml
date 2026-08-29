@@ -1,0 +1,69 @@
+name: Production Container
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/agentrejoin-app/**'
+      - 'packages/agentrejoin-server/**'
+      - 'packages/agentrejoin-wire/**'
+      - 'packages/agentrejoin-cli/package.json'
+      - 'packages/agentrejoin-cli/scripts/**'
+      - 'packages/agentrejoin-cli/tools/**'
+      - 'packages/agentrejoin-agent/package.json'
+      - 'Dockerfile'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.npmrc'
+      - 'scripts/**'
+      - 'patches/**'
+      - '.github/workflows/container.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: production-container
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/altman-conquer/agentrejoin
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set build metadata
+        run: echo "BUILD_TIMESTAMP=$(git show -s --format=%cI "$GITHUB_SHA")" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push production image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: |
+            AGENTREJOIN_BUILD_COMMIT_SHA=${{ github.sha }}
+            AGENTREJOIN_BUILD_COMMIT_TIMESTAMP=${{ env.BUILD_TIMESTAMP }}
+          cache-from: type=gha,scope=production-container
+          cache-to: type=gha,mode=max,scope=production-container
