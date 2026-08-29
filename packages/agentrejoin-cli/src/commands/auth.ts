@@ -7,6 +7,7 @@ import { createInterface } from 'node:readline';
 import { stopDaemon, checkIfDaemonRunningAndCleanupStaleState } from '@/daemon/controlClient';
 import { logger } from '@/ui/logger';
 import { ensureDaemonRunning } from '@/daemon/ensureDaemonRunning';
+import { disableShellAutostart, enableShellAutostart } from '@/daemon/shellAutostart';
 import os from 'node:os';
 
 export async function handleAuthCommand(args: string[]): Promise<void> {
@@ -95,7 +96,7 @@ async function handleAuthLogin(args: string[]): Promise<void> {
       console.log(chalk.gray(`  Machine ID: ${settings.machineId}`));
       console.log(chalk.gray(`  Host: ${os.hostname()}`));
       console.log(chalk.gray(`  Use 'agentrejoin auth login --force' to re-authenticate`));
-      await ensureDaemonRunning();
+      await configureDaemonAfterLogin();
       return;
     } else if (existingCreds && !settings?.machineId) {
       console.log(chalk.yellow('⚠️  Credentials exist but machine ID is missing'));
@@ -108,12 +109,58 @@ async function handleAuthLogin(args: string[]): Promise<void> {
   // "Finally we'll run the auth and setup machine if needed"
   try {
     const result = await authAndSetupMachineIfNeeded();
-    await ensureDaemonRunning();
     console.log(chalk.green('\n✓ Authentication successful'));
     console.log(chalk.gray(`  Machine ID: ${result.machineId}`));
+    await configureDaemonAfterLogin();
   } catch (error) {
     console.error(chalk.red('Authentication failed:'), error instanceof Error ? error.message : 'Unknown error');
     process.exit(1);
+  }
+}
+
+async function configureDaemonAfterLogin(): Promise<void> {
+  if (!process.stdin.isTTY || !process.stdout.isTTY || process.env.CI || process.env.HEADLESS) {
+    await ensureDaemonRunning();
+    return;
+  }
+
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const confirm = async (question: string): Promise<boolean> => {
+    while (true) {
+      const answer = (await new Promise<string>((resolve) => rl.question(question, resolve))).trim().toLowerCase();
+      if (!answer || answer === 'y' || answer === 'yes') return true;
+      if (answer === 'n' || answer === 'no') return false;
+      console.log(chalk.yellow('Please answer y or n.'));
+    }
+  };
+
+  try {
+    if (await confirm(chalk.cyan('\nStart the AgentRejoin daemon now? (Y/n): '))) {
+      await ensureDaemonRunning();
+      console.log(chalk.green('✓ Daemon is running'));
+    }
+
+    if (await confirm(chalk.cyan('Start AgentRejoin automatically when you open a terminal? (Y/n): '))) {
+      try {
+        const profile = await enableShellAutostart();
+        if (profile) {
+          console.log(chalk.green(`✓ Automatic startup enabled in ${profile}`));
+        } else {
+          console.log(chalk.yellow(`Automatic startup is currently supported for bash and zsh (detected: ${process.env.SHELL || 'unknown'}).`));
+        }
+      } catch (error) {
+        console.log(chalk.yellow(`Could not enable automatic startup: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      }
+    } else {
+      try {
+        const removed = await disableShellAutostart();
+        if (removed.length) console.log(chalk.gray('Automatic startup disabled.'));
+      } catch (error) {
+        console.log(chalk.yellow(`Could not disable automatic startup: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      }
+    }
+  } finally {
+    rl.close();
   }
 }
 
@@ -150,6 +197,12 @@ async function handleAuthLogout(): Promise<void> {
         await stopDaemon();
         console.log(chalk.gray('Stopped daemon'));
       } catch { }
+
+      try {
+        await disableShellAutostart();
+      } catch (error) {
+        logger.debug('Failed to remove shell autostart configuration:', error);
+      }
 
       // Remove entire agentrejoin directory (as current logout does)
       if (existsSync(happyDir)) {

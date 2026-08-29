@@ -63,23 +63,7 @@ The daemon starts automatically when you run `agentrejoin`, so you usually don't
 
 ### Keeping the daemon running across reboots
 
-If you want the daemon to come back automatically after a reboot — without opening a `agentrejoin` session first — start it from your shell profile so it inherits your normal user session context (PATH, keychain access, OAuth credentials):
-
-```bash
-# ~/.zshrc or ~/.bashrc
-if [[ -o interactive ]] && [[ -z "$AGENTREJOIN_DAEMON_CHECKED" ]]; then
-    export AGENTREJOIN_DAEMON_CHECKED=1
-    () {
-        local state=$HOME/.agentrejoin/daemon.state.json
-        local pid=$(grep -oE '"pid"[[:space:]]*:[[:space:]]*[0-9]+' "$state" 2>/dev/null | grep -oE '[0-9]+')
-        if [[ -z "$pid" ]] || ! kill -0 "$pid" 2>/dev/null; then
-            agentrejoin daemon start >/dev/null 2>&1
-        fi
-    } &!
-fi
-```
-
-The first interactive shell after a reboot triggers the start; subsequent shells short-circuit because the daemon is already running.
+`agentrejoin auth login` asks whether to start the daemon now and whether to start it automatically from your bash or zsh profile. Re-run the login command to change that setting; logging out removes the managed profile entry.
 
 > **macOS users:** prefer this shell-init approach over a `launchd` LaunchAgent. A LaunchAgent runs in an agent domain that is **detached from your GUI/Aqua login session**, which means the bundled `claude-agent-sdk` cannot reach the macOS keychain and silently fails authentication ("Failed to authenticate. API Error: 401 terminated", `duration_api_ms: 0`). If you must use launchd, your wrapper has to read the OAuth access token from `~/.claude/.credentials.json` and export it as `CLAUDE_CODE_OAUTH_TOKEN` before exec'ing the daemon — and you'll need to handle token rotation yourself.
 
