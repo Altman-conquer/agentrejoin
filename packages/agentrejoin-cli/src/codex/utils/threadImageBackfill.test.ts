@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, truncate, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -14,6 +14,7 @@ vi.mock('@/configuration', () => ({
 }));
 
 import {
+    FULL_CODEX_HISTORY_BACKFILL_MAX_BYTES,
     buildCodexThreadBackfillEnvelopes,
     codexThreadHistoryLocalId,
     prepareCodexThreadSync,
@@ -27,6 +28,15 @@ async function makePngFile(name: string): Promise<string> {
     tempDirs.push(dir);
     const filePath = join(dir, name);
     await writeFile(filePath, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1]));
+    return filePath;
+}
+
+async function makeSizedFile(name: string, size: number): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), 'agentrejoin-codex-backfill-'));
+    tempDirs.push(dir);
+    const filePath = join(dir, name);
+    await writeFile(filePath, '');
+    await truncate(filePath, size);
     return filePath;
 }
 
@@ -79,6 +89,68 @@ describe('buildCodexThreadBackfillEnvelopes', () => {
             codexItemId: 'agent-1',
             ev: { t: 'text', text: 'previous response' },
         });
+    });
+
+    it.each([
+        {
+            name: 'keeps full history at 10 MiB',
+            size: FULL_CODEX_HISTORY_BACKFILL_MAX_BYTES,
+            expectedEvents: [
+                'turn-start',
+                'text',
+                'start',
+                'text',
+                'text',
+                'tool-call-start',
+                'text',
+                'tool-call-end',
+                'stop',
+                'turn-end',
+            ],
+        },
+        {
+            name: 'keeps only messages above 10 MiB',
+            size: FULL_CODEX_HISTORY_BACKFILL_MAX_BYTES + 1,
+            expectedEvents: ['turn-start', 'text', 'text', 'turn-end'],
+        },
+    ])('$name', async ({ size, expectedEvents }) => {
+        const path = await makeSizedFile('rollout.jsonl', size);
+        const sendEnvelope = vi.fn();
+        const readThread = vi.fn();
+        const result = await replayCodexThreadHistory({
+            threadId: 'thread-sized',
+            thread: {
+                path,
+                turns: [{
+                    id: 'turn-1',
+                    status: 'completed',
+                    items: [
+                        { id: 'user-1', type: 'userMessage', content: [{ type: 'text', text: 'request' }] },
+                        {
+                            id: 'agent-1',
+                            type: 'agentMessage',
+                            text: 'response',
+                            agentThreadId: 'provider-subagent',
+                        } as any,
+                        { id: 'reasoning-1', type: 'reasoning', summary: ['thinking'] },
+                        {
+                            id: 'command-1',
+                            type: 'commandExecution',
+                            command: 'pnpm test',
+                            aggregatedOutput: 'large output',
+                        },
+                    ],
+                }],
+            },
+            readThread,
+            sendEnvelope,
+            uploadLocalImage: vi.fn(),
+        });
+
+        expect(readThread).not.toHaveBeenCalled();
+        expect(result.messagesOnly).toBe(size > FULL_CODEX_HISTORY_BACKFILL_MAX_BYTES);
+        expect(result.sourceSizeBytes).toBe(size);
+        expect(sendEnvelope.mock.calls.map(([envelope]) => envelope.ev.t)).toEqual(expectedEvents);
     });
 
     it('inserts uploaded local image file envelopes before the matching user text', async () => {

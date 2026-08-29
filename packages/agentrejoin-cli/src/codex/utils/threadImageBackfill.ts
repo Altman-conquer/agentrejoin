@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
 import type { CreateEnvelopeOptions, SessionEnvelope } from 'agentrejoin-wire';
@@ -15,6 +15,10 @@ import {
     turnStatus,
     turnTimestampMs,
 } from './sessionProtocolMapper';
+
+export const FULL_CODEX_HISTORY_BACKFILL_MAX_BYTES = 10 * 1024 * 1024;
+
+type BackfillThread = Pick<Thread, 'turns' | 'name' | 'preview' | 'path'>;
 
 type LocalImageUpload = (
     attachment: { data: Uint8Array; mimeType: string; name: string },
@@ -64,6 +68,7 @@ async function localImagePathToAttachment(
 export async function buildCodexThreadBackfillEnvelopes(opts: {
     thread: Pick<Thread, 'turns'>;
     uploadLocalImage: LocalImageUpload;
+    messagesOnly?: boolean;
 }): Promise<SessionEnvelope[]> {
     const envelopes: SessionEnvelope[] = [];
     const providerSubagentToSessionSubagent = new Map<string, string>();
@@ -90,6 +95,9 @@ export async function buildCodexThreadBackfillEnvelopes(opts: {
         }));
 
         for (const item of turn.items ?? []) {
+            if (opts.messagesOnly && item.type !== 'userMessage' && item.type !== 'agentMessage') {
+                continue;
+            }
             const paths = localImagePaths(item);
             for (let index = 0; index < paths.length; index += 1) {
                 const attachment = await localImagePathToAttachment(paths[index], index + 1);
@@ -106,7 +114,16 @@ export async function buildCodexThreadBackfillEnvelopes(opts: {
                     });
                 }
             }
-            envelopes.push(...mapCodexThreadItemToSessionEnvelopes(turn, item, {
+            const mappedItem = opts.messagesOnly && item.type === 'agentMessage'
+                ? {
+                    type: item.type,
+                    id: item.id,
+                    text: item.text,
+                    phase: item.phase,
+                    memoryCitation: item.memoryCitation,
+                } satisfies ThreadItem
+                : item;
+            envelopes.push(...mapCodexThreadItemToSessionEnvelopes(turn, mappedItem, {
                 startedAt,
                 completedAt,
             }, state));
@@ -133,6 +150,27 @@ export async function buildCodexThreadBackfillEnvelopes(opts: {
     return envelopes;
 }
 
+async function backfillMode(thread: BackfillThread): Promise<{
+    messagesOnly: boolean;
+    sourceSizeBytes: number | null;
+}> {
+    let sourceSizeBytes: number;
+    try {
+        sourceSizeBytes = thread.path
+            ? (await stat(thread.path)).size
+            : Buffer.byteLength(JSON.stringify(thread));
+    } catch (error) {
+        logger.debug('[Codex history backfill] Failed to read rollout size; measuring loaded thread', {
+            errorName: error instanceof Error ? error.name : typeof error,
+        });
+        sourceSizeBytes = Buffer.byteLength(JSON.stringify(thread));
+    }
+    return {
+        messagesOnly: sourceSizeBytes > FULL_CODEX_HISTORY_BACKFILL_MAX_BYTES,
+        sourceSizeBytes,
+    };
+}
+
 /**
  * Read a persisted Codex thread and replay its historical items into a new
  * AgentRejoin session. Keeping this separate from the live event mapper lets both
@@ -140,24 +178,32 @@ export async function buildCodexThreadBackfillEnvelopes(opts: {
  */
 export async function replayCodexThreadHistory(opts: {
     threadId: string;
+    thread?: BackfillThread;
     readThread: (params: { threadId: string; includeTurns: boolean }) => Promise<{
-        thread: Pick<Thread, 'turns' | 'name' | 'preview'>;
+        thread: BackfillThread;
     }>;
     sendEnvelope: (envelope: SessionEnvelope) => void;
     uploadLocalImage: LocalImageUpload;
-}): Promise<{ envelopeCount: number; thread: Pick<Thread, 'turns' | 'name' | 'preview'> }> {
-    const { thread } = await opts.readThread({
+}): Promise<{
+    envelopeCount: number;
+    messagesOnly: boolean;
+    sourceSizeBytes: number | null;
+    thread: BackfillThread;
+}> {
+    const thread = opts.thread ?? (await opts.readThread({
         threadId: opts.threadId,
         includeTurns: true,
-    });
+    })).thread;
+    const { messagesOnly, sourceSizeBytes } = await backfillMode(thread);
     const envelopes = await buildCodexThreadBackfillEnvelopes({
         thread,
         uploadLocalImage: opts.uploadLocalImage,
+        messagesOnly,
     });
     for (const envelope of envelopes) {
         opts.sendEnvelope(envelope);
     }
-    return { envelopeCount: envelopes.length, thread };
+    return { envelopeCount: envelopes.length, messagesOnly, sourceSizeBytes, thread };
 }
 
 export type PreparedCodexThreadSync = {
@@ -201,7 +247,7 @@ export async function prepareCodexThreadSync(opts: {
     threadId: string;
     knownCompletedTurnIds: ReadonlySet<string>;
     readThread: (params: { threadId: string; includeTurns: boolean }) => Promise<{
-        thread: Pick<Thread, 'turns' | 'updatedAt'>;
+        thread: Pick<Thread, 'turns' | 'updatedAt' | 'path'>;
     }>;
     uploadLocalImage: LocalImageUpload;
 }): Promise<PreparedCodexThreadSync> {
@@ -227,9 +273,11 @@ export async function prepareCodexThreadSync(opts: {
     }
 
     const newTurns = completedTurns.filter((turn) => !opts.knownCompletedTurnIds.has(turn.id));
+    const { messagesOnly } = await backfillMode(thread);
     const rawEnvelopes = await buildCodexThreadBackfillEnvelopes({
         thread: { turns: newTurns },
         uploadLocalImage: opts.uploadLocalImage,
+        messagesOnly,
     });
     const envelopes = rawEnvelopes.map((envelope) => {
         return {

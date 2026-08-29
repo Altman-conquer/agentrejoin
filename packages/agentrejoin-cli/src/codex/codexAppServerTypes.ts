@@ -33,11 +33,7 @@ export type NewConversationParams = {
 };
 
 export type NewConversationResponse = {
-    thread: {
-        id: ThreadId;
-        path: string;
-        [key: string]: unknown;
-    };
+    thread: Thread;
     model: string;
     modelProvider: string;
     cwd: string;

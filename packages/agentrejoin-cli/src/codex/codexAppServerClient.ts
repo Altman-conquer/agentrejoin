@@ -829,7 +829,7 @@ export class CodexAppServerClient {
         approvalPolicy?: ApprovalPolicy;
         sandbox?: SandboxMode;
         mcpServers?: Record<string, unknown>;
-    }): Promise<{ threadId: string; model: string }> {
+    }): Promise<{ threadId: string; model: string; thread: Thread }> {
         const threadId = opts?.threadId ?? this._threadId;
         if (!threadId) {
             throw new Error('No thread available to resume.');
@@ -849,7 +849,11 @@ export class CodexAppServerClient {
             persistExtendedHistory: true,
         };
 
-        const result = await this.request('thread/resume', params) as ResumeConversationResponse;
+        const result = await this.request(
+            'thread/resume',
+            params,
+            CodexAppServerClient.HISTORY_REQUEST_TIMEOUT_MS,
+        ) as ResumeConversationResponse;
         this._threadId = result.thread.id;
         this._turnId = null;
         this.rawSubagentActivitySignaturesByItemId.clear();
@@ -861,7 +865,7 @@ export class CodexAppServerClient {
             mcpServers: opts?.mcpServers ?? defaults.mcpServers,
         });
         logger.debug('[CodexAppServer] Thread resumed:', this._threadId);
-        return { threadId: result.thread.id, model: result.model };
+        return { threadId: result.thread.id, model: result.model, thread: result.thread };
     }
 
     async forkThread(opts: {
@@ -887,7 +891,11 @@ export class CodexAppServerClient {
             threadSource: null,
         };
 
-        const result = await this.request('thread/fork', params) as ForkConversationResponse;
+        const result = await this.request(
+            'thread/fork',
+            params,
+            CodexAppServerClient.HISTORY_REQUEST_TIMEOUT_MS,
+        ) as ForkConversationResponse;
         this._threadId = result.thread.id;
         this._turnId = null;
         this.rememberThreadDefaults({
@@ -909,7 +917,11 @@ export class CodexAppServerClient {
             threadId: opts.threadId,
             includeTurns: opts.includeTurns ?? true,
         };
-        return await this.request('thread/read', params) as ReadConversationResponse;
+        return await this.request(
+            'thread/read',
+            params,
+            CodexAppServerClient.HISTORY_REQUEST_TIMEOUT_MS,
+        ) as ReadConversationResponse;
     }
 
     async listThreads(opts: {
@@ -1263,6 +1275,7 @@ export class CodexAppServerClient {
 
     /** Default timeout for RPC requests (ms). */
     private static readonly REQUEST_TIMEOUT_MS = 30_000;
+    private static readonly HISTORY_REQUEST_TIMEOUT_MS = 5 * 60_000;
 
     private request(method: string, params?: unknown, timeoutMs?: number): Promise<unknown> {
         const timeout = timeoutMs ?? CodexAppServerClient.REQUEST_TIMEOUT_MS;

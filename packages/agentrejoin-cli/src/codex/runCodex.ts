@@ -971,10 +971,15 @@ export async function runCodex(opts: {
         await client.connect();
         logger.debug('[codex]: client.connect done');
 
-        const backfillCodexThread = async (threadId: string, source: 'resume' | 'fork') => {
+        const backfillCodexThread = async (
+            threadId: string,
+            source: 'resume' | 'fork',
+            thread?: Awaited<ReturnType<typeof client.resumeThread>>['thread'],
+        ) => {
             try {
                 const result = await replayCodexThreadHistory({
                     threadId,
+                    thread,
                     readThread: (params) => client.readThread(params),
                     sendEnvelope: (envelope) => {
                         sendCodexEnvelope(
@@ -986,7 +991,10 @@ export async function runCodex(opts: {
                         session.uploadLocalImageAttachmentEnvelope(attachment, imageOpts)
                     ),
                 });
-                logger.debug(`[CODEX ${source.toUpperCase()} BACKFILL] Replayed ${result.envelopeCount} historical envelopes from thread ${threadId}`);
+                logger.debug(`[CODEX ${source.toUpperCase()} BACKFILL] Replayed ${result.envelopeCount} historical envelopes from thread ${threadId}`, {
+                    mode: result.messagesOnly ? 'messages-only' : 'full',
+                    sourceSizeBytes: result.sourceSizeBytes,
+                });
                 return result.thread;
             } catch (error) {
                 logger.debug(`[CODEX ${source.toUpperCase()} BACKFILL] Failed to read thread ${threadId}:`, error);
@@ -1092,7 +1100,7 @@ export async function runCodex(opts: {
         };
 
         if (opts.resumeThreadId) {
-            await resumeExistingThread({
+            const resumed = await resumeExistingThread({
                 client,
                 session,
                 messageBuffer,
@@ -1103,19 +1111,11 @@ export async function runCodex(opts: {
                 announce: !isSideChat,
             });
             if (!isSideChat) {
-                const thread = await backfillCodexThread(opts.resumeThreadId, 'resume');
-                if (!thread) {
-                    await session.updateMetadata((currentMetadata) => ({
-                        ...currentMetadata,
-                        resumeStatus: 'failed',
-                    }));
-                    throw new Error(`Failed to load history for Codex thread ${opts.resumeThreadId}`);
-                }
-                const title = thread ? codexThreadDisplayTitle(thread) : null;
+                const title = resumed.thread ? codexThreadDisplayTitle(resumed.thread) : null;
                 if (title) {
                     setSessionTitle(title);
                 }
-                await session.flush();
+                void backfillCodexThread(opts.resumeThreadId, 'resume', resumed.thread);
             }
             await session.updateMetadata((currentMetadata) => {
                 const nextMetadata = { ...currentMetadata };
@@ -1127,7 +1127,7 @@ export async function runCodex(opts: {
         }
 
         const forkCodexThreadId = process.env.AGENTREJOIN_FORK_CODEX_THREAD_ID;
-        if (!reconnectSessionId && forkCodexThreadId) {
+        if (!reconnectSessionId && forkCodexThreadId && !opts.resumeThreadId) {
             // Side chats inherit the forked thread's context inside the model
             // (thread/fork copies it), but we deliberately do NOT replay the
             // pre-fork history into the UI: a side chat starts empty from the

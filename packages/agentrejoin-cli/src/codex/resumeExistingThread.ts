@@ -1,11 +1,13 @@
 import { trimIdent } from '@/utils/trimIdent';
 
+import type { Thread } from './codexAppServerTypes';
+
 type ResumeThreadClient = {
     resumeThread: (opts: {
         threadId: string;
         cwd: string;
         mcpServers: Record<string, unknown>;
-    }) => Promise<{ threadId: string; model: string }>;
+    }) => Promise<{ threadId: string; model: string; thread?: Thread }>;
 };
 
 type ResumeThreadSession = {
@@ -30,7 +32,7 @@ export async function resumeExistingThread(opts: {
      * internal resume detail out of the conversation. Defaults to `true`.
      */
     announce?: boolean;
-}): Promise<{ threadId: string; model: string }> {
+}): Promise<{ threadId: string; model: string; thread?: Thread }> {
     try {
         const resumedThread = await opts.client.resumeThread({
             threadId: opts.threadId,
