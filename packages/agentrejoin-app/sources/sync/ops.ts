@@ -1082,21 +1082,44 @@ export async function sessionKill(sessionId: string): Promise<SessionKillRespons
     }
 }
 
-/**
- * Archive a session by deactivating it on the server.
- * Use this when the CLI process is already dead and sessionKill can't reach it.
- */
-export async function sessionArchive(sessionId: string): Promise<{ success: boolean; message?: string }> {
-    try {
-        const response = await apiSocket.request(`/v1/sessions/${sessionId}/archive`, {
-            method: 'POST'
-        });
-        if (!response.ok) {
-            return { success: false, message: `Server error: ${response.status}` };
+/** Archive an offline session after marking its encrypted metadata as archived. */
+export async function sessionArchive(sessionId: string): Promise<void> {
+    const encryption = sync.encryption.getSessionEncryption(sessionId);
+    const session = storage.getState().sessions[sessionId];
+    if (!encryption || !session?.metadata) {
+        throw new Error(`Session ${sessionId} is not ready for metadata updates`);
+    }
+
+    const patch = {
+        lifecycleState: 'archived',
+        lifecycleStateSince: Date.now(),
+        archivedBy: 'app',
+        archiveReason: 'User archived',
+    };
+    let version = session.metadataVersion;
+    let metadata: Record<string, unknown> = { ...session.metadata, ...patch };
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+        const encrypted = await encryption.encryptRaw(metadata);
+        const result = await apiSocket.emitWithAck<{
+            result: 'success' | 'version-mismatch' | 'error';
+            version?: number;
+            metadata?: string;
+        }>('update-metadata', { sid: sessionId, metadata: encrypted, expectedVersion: version });
+        if (result.result === 'success') break;
+        if (result.result !== 'version-mismatch' || result.version === undefined || !result.metadata) {
+            throw new Error('Failed to archive session metadata');
         }
-        return { success: true };
-    } catch (error) {
-        return { success: false, message: error instanceof Error ? error.message : 'Unknown error' };
+        version = result.version;
+        metadata = { ...await encryption.decryptRaw(result.metadata), ...patch };
+        if (attempt === 2) {
+            throw new Error('Failed to archive session metadata after 3 version conflicts');
+        }
+    }
+
+    const response = await apiSocket.request(`/v1/sessions/${sessionId}/archive`, { method: 'POST' });
+    if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
     }
 }
 
