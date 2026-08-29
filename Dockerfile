@@ -28,8 +28,7 @@ COPY packages/agentrejoin-cli/scripts packages/agentrejoin-cli/scripts
 COPY packages/agentrejoin-cli/tools packages/agentrejoin-cli/tools
 
 ARG NPM_CONFIG_REGISTRY
-RUN --mount=type=cache,id=agentrejoin-pnpm,target=/root/.local/share/pnpm/store \
-    ELECTRON_SKIP_BINARY_DOWNLOAD=1 SKIP_AGENTREJOIN_WIRE_BUILD=1 pnpm install --frozen-lockfile --network-concurrency=4 --fetch-timeout=120000
+RUN ELECTRON_SKIP_BINARY_DOWNLOAD=1 SKIP_AGENTREJOIN_WIRE_BUILD=1 pnpm install --frozen-lockfile --network-concurrency=4 --fetch-timeout=120000
 
 # Stage 2: copy source and type-check
 FROM deps AS builder
@@ -41,9 +40,7 @@ COPY packages/agentrejoin-app ./packages/agentrejoin-app
 RUN pnpm --filter agentrejoin-wire --fail-if-no-match build
 RUN pnpm --filter agentrejoin-server --fail-if-no-match build
 RUN APP_ENV=production NODE_ENV=production pnpm --filter agentrejoin-app exec expo export --platform web --output-dir dist
-RUN --mount=type=cache,id=agentrejoin-pnpm,target=/root/.local/share/pnpm/store \
-    --mount=type=cache,id=agentrejoin-pnpm-metadata,target=/root/.cache/pnpm \
-    pnpm --filter agentrejoin-server deploy --prod --legacy /repo/runtime --network-concurrency=4 --fetch-timeout=120000
+RUN pnpm --filter agentrejoin-server deploy --prod --legacy /repo/runtime --network-concurrency=4 --fetch-timeout=120000
 RUN cd /repo/runtime && node_modules/.bin/prisma generate --schema=prisma/schema.prisma --generator client
 
 # Stage 3: runtime
