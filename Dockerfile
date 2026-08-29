@@ -39,6 +39,12 @@ COPY packages/agentrejoin-app ./packages/agentrejoin-app
 
 RUN pnpm --filter agentrejoin-wire --fail-if-no-match build
 RUN pnpm --filter agentrejoin-server --fail-if-no-match build
+
+ARG AGENTREJOIN_BUILD_COMMIT_SHA=""
+ARG AGENTREJOIN_BUILD_COMMIT_TIMESTAMP=""
+ENV AGENTREJOIN_BUILD_COMMIT_SHA=$AGENTREJOIN_BUILD_COMMIT_SHA
+ENV AGENTREJOIN_BUILD_COMMIT_TIMESTAMP=$AGENTREJOIN_BUILD_COMMIT_TIMESTAMP
+
 RUN APP_ENV=production NODE_ENV=production pnpm --filter agentrejoin-app exec expo export --platform web --output-dir dist
 RUN pnpm --filter agentrejoin-server deploy --prod --legacy /repo/runtime --network-concurrency=4 --fetch-timeout=120000
 RUN cd /repo/runtime && node_modules/.bin/prisma generate --schema=prisma/schema.prisma --generator client
