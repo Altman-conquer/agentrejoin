@@ -342,10 +342,12 @@ export function getClaudeEffortLevels(): EffortLevel[] {
 
 export function getCodexEffortLevels(): EffortLevel[] {
     return [
+        { key: 'none', name: 'none' },
         { key: 'low', name: 'low' },
         { key: 'medium', name: 'medium' },
         { key: 'high', name: 'high' },
         { key: 'xhigh', name: 'xhigh' },
+        { key: 'max', name: 'max' },
     ];
 }
 

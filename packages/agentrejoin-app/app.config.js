@@ -86,7 +86,7 @@ export default {
                 : {})
         },
         android: {
-            versionCode: Number(process.env.AGENTREJOIN_ANDROID_VERSION_CODE) || 7,
+            versionCode: Number(process.env.AGENTREJOIN_ANDROID_VERSION_CODE) || 8,
             adaptiveIcon: {
                 foregroundImage: "./sources/assets/images/icon-adaptive.png",
                 monochromeImage: "./sources/assets/images/icon-monochrome.png",

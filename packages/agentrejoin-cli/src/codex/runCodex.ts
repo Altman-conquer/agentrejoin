@@ -88,8 +88,8 @@ function hasCodexSubagentReference(message: Record<string, unknown>): boolean {
     return false;
 }
 
-const DEFAULT_CODEX_MODEL = 'gpt-5.5';
-const DEFAULT_CODEX_EFFORT: ReasoningEffort = 'medium';
+const DEFAULT_CODEX_MODEL = 'gpt-5.6-sol';
+const DEFAULT_CODEX_EFFORT: ReasoningEffort = 'xhigh';
 const DEFAULT_CODEX_PERMISSION_MODE: PermissionMode = 'yolo';
 
 type SyncCodexThreadResult =
@@ -370,7 +370,7 @@ export async function runCodex(opts: {
     ];
 
     const VALID_REMOTE_EFFORTS: readonly ReasoningEffort[] = [
-        'none', 'minimal', 'low', 'medium', 'high', 'xhigh',
+        'none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max',
     ];
 
     const handleUserMessage = createSerialAsyncHandler<UserMessage>(async (message) => {
