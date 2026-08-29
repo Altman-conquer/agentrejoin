@@ -16,10 +16,11 @@ type Locale = 'en' | 'zh';
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const GITHUB_URL = 'https://github.com/Altman-conquer/agentrejoin';
+const ANDROID_URL = `${GITHUB_URL}/releases/latest`;
 
 const copy = {
     en: {
-        nav: ['Features', 'How it works', 'Security'],
+        nav: ['Features', 'Get started', 'Security'],
         openApp: 'Open app',
         eyebrow: 'CLAUDE CODE · CODEX · GEMINI · OPENCLAW · ACP',
         product: 'AgentRejoin',
@@ -40,12 +41,18 @@ const copy = {
         mobileTitle: 'Leave the desk. Keep the agent moving.',
         mobileBody: 'Check a long-running refactor on your phone, answer a question, approve the next step, and return to the same session on your computer later.',
         mobilePoints: ['Conversation-first mobile UI', 'Live status and permission requests', 'One account across your devices'],
-        workflowEyebrow: 'THREE STEPS',
-        workflowTitle: 'Your existing agents, connected.',
+        workflowEyebrow: 'GET STARTED',
+        workflowTitle: 'Connect your first server in a few minutes.',
+        workflowBody: 'Start in the desktop browser, then connect every server and phone to the same encrypted account.',
+        installLabel: 'RUN ON EACH SERVER',
+        installCommand: 'npm install -g agentrejoin\nagentrejoin auth login',
+        openWeb: 'Open Web app',
+        downloadAndroid: 'Download Android APK',
         workflow: [
-            ['01', 'Connect a server', 'Run the AgentRejoin daemon on the machine where Claude Code or Codex stores its sessions.'],
-            ['02', 'Find a conversation', 'The daemon indexes supported local sessions and makes the encrypted list available to your account.'],
-            ['03', 'Rejoin and continue', 'Open any conversation from web or mobile and resume it with its original context.'],
+            ['01', 'Create your account', 'Open the Web app on your computer, choose Create Account, and save the recovery key somewhere safe. Keep this browser signed in.'],
+            ['02', 'Connect a server', 'Run the commands above on the machine that stores your agent sessions. Open the generated link in your signed-in browser, approve it, and accept the daemon startup prompts.'],
+            ['03', 'Work from the Web', 'Return to the Web app. The connected server and its Claude Code, Codex, or Gemini conversations will appear automatically.'],
+            ['04', 'Add your phone', 'For mobile Web, use Settings > Account > Link New Device on your computer and scan with the phone camera. For the Android app, install the APK and restore the same account with your saved key.'],
         ],
         agentsTitle: 'Made for the agents you already use.',
         agentsBody: 'Resume existing Claude Code and Codex sessions, or start and control Gemini, OpenClaw, Antigravity, and other ACP-compatible agents.',
@@ -78,7 +85,7 @@ const copy = {
         },
     },
     zh: {
-        nav: ['产品能力', '工作方式', '安全'],
+        nav: ['产品能力', '开始使用', '安全'],
         openApp: '打开应用',
         eyebrow: 'CLAUDE CODE · CODEX · GEMINI · OPENCLAW · ACP',
         product: 'AgentRejoin',
@@ -99,12 +106,18 @@ const copy = {
         mobileTitle: '离开电脑，Agent 仍然继续。',
         mobileBody: '在手机上检查长时间运行的重构任务，回答问题、批准下一步，之后回到电脑仍是同一个会话。',
         mobilePoints: ['以对话为核心的手机界面', '实时状态与授权请求', '一个账号连接所有设备'],
-        workflowEyebrow: '只需三步',
-        workflowTitle: '连接你已经在使用的 Agent。',
+        workflowEyebrow: '开始使用',
+        workflowTitle: '几分钟内连接第一台服务器。',
+        workflowBody: '先在电脑浏览器创建账号，再把每台服务器和手机连接到同一个加密账号。',
+        installLabel: '在每台服务器上运行',
+        installCommand: 'npm install -g agentrejoin\nagentrejoin auth login',
+        openWeb: '打开 Web 应用',
+        downloadAndroid: '下载 Android APK',
         workflow: [
-            ['01', '连接服务器', '在保存 Claude Code 或 Codex 会话的服务器上运行 AgentRejoin daemon。'],
-            ['02', '找到已有对话', 'daemon 索引受支持的本地会话，并向你的账号提供加密后的会话列表。'],
-            ['03', '恢复并继续', '从网页或手机打开任意对话，带着原始上下文继续工作。'],
+            ['01', '创建账号', '在电脑上打开 Web 应用，选择“创建账号”，保存好恢复密钥，并保持这个浏览器已登录。'],
+            ['02', '连接服务器', '在保存 Agent 会话的服务器上运行上方命令，用已登录的电脑浏览器打开生成的链接并确认连接；daemon 启动和自动启动提示保持默认即可。'],
+            ['03', '从网页使用', '返回 Web 应用，刚连接的服务器及其中的 Claude Code、Codex 或 Gemini 对话会自动出现。'],
+            ['04', '加入手机', '手机网页：在电脑进入“设置 > 账号 > 链接新设备”，用手机系统相机扫码。Android App：安装 APK 后，用已保存的恢复密钥恢复同一账号。'],
         ],
         agentsTitle: '为你已经在用的 Agent 而生。',
         agentsBody: '恢复已有的 Claude Code 与 Codex 会话，也可以启动并控制 Gemini、OpenClaw、Antigravity 和其他兼容 ACP 的 Agent。',
@@ -322,12 +335,40 @@ export function LandingPage() {
                 <View style={styles.container}>
                     <Text style={styles.eyebrow}>{text.workflowEyebrow}</Text>
                     <Text accessibilityRole="header" style={[styles.sectionTitle, mobile && styles.sectionTitleMobile]}>{text.workflowTitle}</Text>
+                    <Text style={styles.sectionBody}>{text.workflowBody}</Text>
+                    <View style={[styles.setupPanel, compact && styles.setupPanelStacked]}>
+                        <View style={styles.setupCommand}>
+                            <View style={styles.setupLabelRow}>
+                                <Ionicons name="terminal-outline" size={17} color="#4ADE80" />
+                                <Text style={styles.setupLabel}>{text.installLabel}</Text>
+                            </View>
+                            <Text selectable style={styles.setupCommandText}>{text.installCommand}</Text>
+                        </View>
+                        <View style={[styles.setupActions, compact && styles.setupActionsStacked]}>
+                            <Pressable
+                                onPress={openApp}
+                                accessibilityRole="link"
+                                style={({ pressed }) => [styles.setupPrimaryButton, pressed && styles.buttonPressed]}
+                            >
+                                <Ionicons name="globe-outline" size={18} color="#111318" />
+                                <Text style={styles.setupPrimaryText}>{text.openWeb}</Text>
+                            </Pressable>
+                            <Pressable
+                                onPress={() => Linking.openURL(ANDROID_URL)}
+                                accessibilityRole="link"
+                                style={({ pressed }) => [styles.setupSecondaryButton, pressed && styles.secondaryButtonPressed]}
+                            >
+                                <Ionicons name="logo-android" size={18} color="#FFFFFF" />
+                                <Text style={styles.setupSecondaryText}>{text.downloadAndroid}</Text>
+                            </Pressable>
+                        </View>
+                    </View>
                     <View style={styles.workflowList}>
                         {text.workflow.map((step, index) => (
                             <View key={step[0]} style={[styles.workflowRow, compact && styles.workflowRowStacked]}>
                                 <Text style={styles.workflowNumber}>{step[0]}</Text>
                                 <View style={styles.workflowIcon}>
-                                    <Ionicons name={(['server-outline', 'search-outline', 'chatbubbles-outline'] as IconName[])[index]} size={22} color="#111318" />
+                                    <Ionicons name={(['key-outline', 'server-outline', 'desktop-outline', 'phone-portrait-outline'] as IconName[])[index]} size={22} color="#111318" />
                                 </View>
                                 <Text style={styles.workflowName}>{step[1]}</Text>
                                 <Text style={styles.workflowBody}>{step[2]}</Text>
@@ -700,6 +741,18 @@ const styles = StyleSheet.create({
     phoneComposerText: { color: '#999DA6', fontSize: 10, fontFamily: 'IBMPlexSans-Regular' },
     phoneSend: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center', borderRadius: 5, backgroundColor: '#4ADE80' },
     workflowSection: { paddingVertical: 104, backgroundColor: '#F7F8F5' },
+    setupPanel: { marginTop: 36, padding: 24, flexDirection: 'row', alignItems: 'center', gap: 28, borderRadius: 7, backgroundColor: '#111318' },
+    setupPanelStacked: { flexDirection: 'column', alignItems: 'stretch' },
+    setupCommand: { flex: 1, minWidth: 240 },
+    setupLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    setupLabel: { color: '#A8ADB7', fontSize: 12, fontFamily: 'IBMPlexSans-SemiBold' },
+    setupCommandText: { marginTop: 12, color: '#FFFFFF', fontSize: 14, lineHeight: 24, fontFamily: 'IBMPlexMono-Regular' },
+    setupActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    setupActionsStacked: { width: '100%', flexWrap: 'wrap' },
+    setupPrimaryButton: { minHeight: 46, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 6, backgroundColor: '#4ADE80' },
+    setupPrimaryText: { color: '#111318', fontSize: 14, fontFamily: 'IBMPlexSans-SemiBold' },
+    setupSecondaryButton: { minHeight: 46, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 6, borderWidth: 1, borderColor: '#4C525D' },
+    setupSecondaryText: { color: '#FFFFFF', fontSize: 14, fontFamily: 'IBMPlexSans-SemiBold' },
     workflowList: { marginTop: 48, borderTopWidth: 1, borderTopColor: '#C9CDC6' },
     workflowRow: { minHeight: 132, paddingVertical: 25, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#C9CDC6', gap: 22 },
     workflowRowStacked: { alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 },
