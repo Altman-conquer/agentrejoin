@@ -12,6 +12,7 @@ services:
       DATA_DIR: /data
       PGLITE_DIR: /data/pglite
       AGENTREJOIN_MASTER_SECRET: ${AGENTREJOIN_MASTER_SECRET:?required}
+      AGENTREJOIN_ANNOUNCEMENT: ${AGENTREJOIN_ANNOUNCEMENT:-}
       AGENTREJOIN_INJECT_HTML_CONFIG: '{"serverUrl":"https://agentrejoin.zhandj.com","disableAnalytics":true}'
     volumes:
       - agentrejoin-data:/data

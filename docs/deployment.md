@@ -35,10 +35,17 @@ This document describes how to deploy the AgentRejoin backend (`packages/agentre
 
 **Common**
 - `PORT`: API server port (default `3005`).
+- `AGENTREJOIN_ANNOUNCEMENT`: optional JSON notice shown once per account. Change its `id` to publish a new notice; localized `title`, `message`, and optional `url`/`actionLabel` are supported.
 - `METRICS_ENABLED`: set to `false` to disable metrics server.
 - `METRICS_PORT`: metrics server port (default `9090`).
 - `S3_PORT`: optional S3 port.
 - `S3_USE_SSL`: `true`/`false` (default `true`).
+
+Example announcement (put it on one line in `.env`):
+
+```dotenv
+AGENTREJOIN_ANNOUNCEMENT='{"id":"release-2026-08-29","title":{"en":"Update available","zh-Hans":"发现新版本"},"message":{"en":"A new AgentRejoin release is available.","zh-Hans":"AgentRejoin 新版本现已可用。"},"url":"https://github.com/Altman-conquer/agentrejoin/releases","actionLabel":{"en":"View update","zh-Hans":"查看更新"}}'
+```
 
 **Optional integrations**
 - GitHub OAuth/App: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_APP_ID`, `GITHUB_PRIVATE_KEY`, `GITHUB_WEBHOOK_SECRET`, plus redirect URL/URI.
