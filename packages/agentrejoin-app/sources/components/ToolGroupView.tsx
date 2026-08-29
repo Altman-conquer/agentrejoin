@@ -18,6 +18,7 @@ import { t } from '@/text';
 import { Message, ToolCallMessage } from '@/sync/typesMessage';
 import { getToolActivityLabel, getToolSummaryCategory, ToolSummaryCategory } from '@/utils/toolDisplay';
 import { useRouter } from 'expo-router';
+import { useSession } from '@/sync/storage';
 
 interface ToolGroupViewProps {
     group: ToolGroupItem;
@@ -33,9 +34,10 @@ interface ToolGroupViewProps {
 export const ToolGroupView = React.memo<ToolGroupViewProps>((props) => {
     const { group, metadata, sessionId, expanded, onToggle, nested, hideSingleToolChildren, forceCompleted } = props;
     const router = useRouter();
+    const session = useSession(sessionId);
     const summary = React.useMemo(() => generateGroupSummary(group.messages), [group.messages]);
     const summaryCategory = React.useMemo(() => getGroupSummaryCategory(group.messages), [group.messages]);
-    const hasRunning = !forceCompleted && group.hasRunning;
+    const hasRunning = !forceCompleted && session?.active !== false && group.hasRunning;
     const suppressChildren = hideSingleToolChildren && group.messages.length === 1 && group.messages[0]?.kind === 'tool-call';
     const singleToolMessage = suppressChildren && group.messages[0]?.kind === 'tool-call'
         ? group.messages[0]
@@ -106,11 +108,13 @@ interface AgentWorkGroupViewProps {
 
 export const AgentWorkGroupView = React.memo<AgentWorkGroupViewProps>((props) => {
     const { group, metadata, sessionId, expanded, onToggle } = props;
-    const isCompleted = group.completedAt !== null;
-    const runningElapsedSeconds = useElapsedTime(group.completedAt === null ? group.startedAt : null);
-    const durationMs = group.completedAt === null
+    const session = useSession(sessionId);
+    const stoppedAt = group.completedAt ?? (session?.active === false ? session.activeAt : null);
+    const isCompleted = stoppedAt !== null;
+    const runningElapsedSeconds = useElapsedTime(isCompleted ? null : group.startedAt);
+    const durationMs = stoppedAt === null
         ? runningElapsedSeconds * 1000
-        : group.completedAt - group.startedAt;
+        : Math.max(0, stoppedAt - group.startedAt);
     const label = t('toolGroup.workedFor', { duration: formatWorkDuration(durationMs) });
     const nestedItemsNewestFirst = React.useMemo(
         () => groupToolCallsForDisplay(group.messages, true, { groupSingleToolCalls: true }),

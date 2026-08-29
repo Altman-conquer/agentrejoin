@@ -19,6 +19,7 @@ import { Message } from "./typesMessage";
 import { NormalizedMessage } from "./typesRaw";
 import { isMachineOnline } from '@/utils/machineUtils';
 import { getSessionName, getSessionSubtitle, getSessionAvatarId, type SessionState } from '@/utils/sessionUtils';
+import { isSessionOutsideArchive } from '@/utils/sessionLifecycle';
 import { applySettings, Settings } from "./settings";
 import { LocalSettings, applyLocalSettings } from "./localSettings";
 import { Purchases, customerInfoToPurchases } from "./purchases";
@@ -53,11 +54,6 @@ function resolveSessionOnlineState(session: { active: boolean; activeAt: number 
 /**
  * Checks if a session should be shown in the active sessions group
  */
-function isSessionActive(session: { active: boolean; activeAt: number }): boolean {
-    // Use the active flag directly, no timeout checks
-    return session.active;
-}
-
 // Known entitlement IDs
 export type KnownEntitlements = 'pro';
 
@@ -286,7 +282,7 @@ function buildSessionListViewData(
         }
         if (isProjectSession(session)) {
             projectSessions.push(session);
-        } else if (isSessionActive(session)) {
+        } else if (isSessionOutsideArchive(session)) {
             activeSessions.push(session);
         } else {
             inactiveSessions.push(session);
@@ -304,7 +300,7 @@ function buildSessionListViewData(
     inactiveSessions.sort((a, b) => sortKey(b) - sortKey(a));
     // Active first so a project surfaces its live work, newest-first within each.
     projectSessions.sort((a, b) => {
-        const activeDelta = Number(isSessionActive(b)) - Number(isSessionActive(a));
+        const activeDelta = Number(b.active) - Number(a.active);
         return activeDelta !== 0 ? activeDelta : sortKey(b) - sortKey(a);
     });
 
@@ -315,7 +311,7 @@ function buildSessionListViewData(
     const projects = buildProjectGroups(
         projectSessions,
         s => buildSessionRowData(s, unreadSessionIds),
-        isSessionActive,
+        s => s.active,
     );
     if (projects.length > 0) {
         listData.push({ type: 'projects-header' });
@@ -512,7 +508,7 @@ export const storage = create<StorageState>()((set, get) => {
             // Build active set from all sessions (including existing ones)
             const activeSet = new Set<string>();
             Object.values(mergedSessions).forEach(session => {
-                if (isSessionActive(session)) {
+                if (isSessionOutsideArchive(session)) {
                     activeSet.add(session.id);
                 }
             });

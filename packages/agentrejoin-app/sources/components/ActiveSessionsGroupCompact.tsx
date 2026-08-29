@@ -274,7 +274,7 @@ export const CompactSessionRow = React.memo(({ session, selected, showBorder }: 
         } else if (session.state === 'permission_required' || session.state === 'thinking') {
             indicator = <StatusDot color={status.dotColor} isPulsing={status.isPulsing} />;
         } else if (session.state === 'waiting') {
-            indicator = <StatusDot color={theme.colors.textSecondary} isPulsing={false} />;
+            indicator = <StatusDot color={status.dotColor} isPulsing={false} />;
         }
 
         return (

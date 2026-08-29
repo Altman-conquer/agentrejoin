@@ -586,21 +586,20 @@ export async function runCodex(opts: {
      * Abort stops the current inference but keeps the session alive.
      * Kill terminates the entire process.
      */
-    const handleKillSession = async (archiveReason = 'User terminated') => {
+    const handleKillSession = async (archiveReason = 'User terminated', archive = true) => {
         clearCodexIdleTimer();
         logger.debug(`[Codex] Terminating session: ${archiveReason}`);
         await handleAbort();
         logger.debug('[Codex] Abort completed, proceeding with termination');
 
         try {
-            // Update lifecycle state to archived before closing
             if (session) {
                 session.updateMetadata((currentMetadata) => ({
                     ...currentMetadata,
-                    lifecycleState: 'archived',
+                    lifecycleState: archive ? 'archived' : 'paused',
                     lifecycleStateSince: Date.now(),
-                    archivedBy: 'cli',
-                    archiveReason
+                    archivedBy: archive ? 'cli' : undefined,
+                    archiveReason: archive ? archiveReason : undefined,
                 }));
                 
                 // Send session death message
@@ -644,7 +643,7 @@ export async function runCodex(opts: {
                 scheduleCodexIdleTermination();
                 return;
             }
-            void handleKillSession('Idle timeout');
+            void handleKillSession('Idle timeout', false);
         }, codexIdleTimeoutMs);
         codexIdleTimer.unref();
     };

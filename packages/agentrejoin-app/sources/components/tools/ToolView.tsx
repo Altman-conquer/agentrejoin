@@ -21,7 +21,7 @@ import {
     shouldRenderToolCardHeader,
     shouldUseCompactToolRow,
 } from '@/utils/toolDisplay';
-import { useSetting } from '@/sync/storage';
+import { useSession, useSetting } from '@/sync/storage';
 
 interface ToolViewProps {
     metadata: Metadata | null;
@@ -37,6 +37,8 @@ export const ToolView = React.memo<ToolViewProps>((props) => {
     const router = useRouter();
     const { theme } = useUnistyles();
     const compactToolCalls = useSetting('compactToolCalls');
+    const session = useSession(sessionId ?? '');
+    const isInterrupted = tool.state === 'running' && session?.active === false;
 
     // For file-editing tools, navigate to file route instead of message detail
     const fileEditTools = ['Edit', 'MultiEdit', 'Write'];
@@ -156,6 +158,10 @@ export const ToolView = React.memo<ToolViewProps>((props) => {
     } else {
         switch (tool.state) {
             case 'running':
+                if (isInterrupted) {
+                    statusIcon = <Ionicons name="pause-circle-outline" size={20} color={theme.colors.textSecondary} />;
+                    break;
+                }
                 if (!noStatus) {
                     statusIcon = <ActivityIndicator size="small" color={theme.colors.text} style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }} />;
                 }
@@ -195,7 +201,7 @@ export const ToolView = React.memo<ToolViewProps>((props) => {
                     <Text style={styles.compactActivityText} numberOfLines={1}>
                         {activityLabel}
                     </Text>
-                    {tool.state === 'running' && (
+                    {tool.state === 'running' && !isInterrupted && (
                         <View style={styles.elapsedContainer}>
                             <ElapsedView from={tool.createdAt} />
                         </View>
@@ -218,7 +224,7 @@ export const ToolView = React.memo<ToolViewProps>((props) => {
                         </Text>
                     )}
                 </View>
-                {tool.state === 'running' && (
+                {tool.state === 'running' && !isInterrupted && (
                     <View style={styles.elapsedContainer}>
                         <ElapsedView from={tool.createdAt} />
                     </View>
