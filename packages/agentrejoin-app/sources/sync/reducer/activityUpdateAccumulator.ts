@@ -13,6 +13,10 @@ export class ActivityUpdateAccumulator {
     addUpdate(update: ApiEphemeralActivityUpdate): void {
         const sessionId = update.id;
         const lastState = this.lastEmittedStates.get(sessionId);
+        const pendingState = this.pendingUpdates.get(sessionId);
+        if (update.activeAt < Math.max(lastState?.activeAt ?? 0, pendingState?.activeAt ?? 0)) {
+            return;
+        }
 
         // Check if this is a critical timestamp update (more than half of disconnect timeout old)
         const timeSinceLastUpdate = lastState ? update.activeAt - lastState.activeAt : 0;

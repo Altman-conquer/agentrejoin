@@ -238,7 +238,7 @@ describe('ApiSessionClient v3 messages API migration', () => {
         expect(payload.messages).toHaveLength(1);
         expect(typeof payload.messages[0].localId).toBe('string');
         expect((client as any).pendingOutbox).toHaveLength(0);
-        expect((client as any).lastSeq).toBe(1);
+        expect((client as any).lastSeq).toBe(0);
 
         const decrypted = decrypt(
             session.encryptionKey,
@@ -302,7 +302,7 @@ describe('ApiSessionClient v3 messages API migration', () => {
         const secondPayload = mockAxiosPost.mock.calls[1][1];
         expect(secondPayload.messages).toHaveLength(2);
         expect((client as any).pendingOutbox).toHaveLength(0);
-        expect((client as any).lastSeq).toBe(3);
+        expect((client as any).lastSeq).toBe(0);
     });
 
     it('retries failed POST and succeeds without dropping queued messages', async () => {
@@ -328,7 +328,7 @@ describe('ApiSessionClient v3 messages API migration', () => {
         const secondPayload = mockAxiosPost.mock.calls[1][1];
         expect(secondPayload).toEqual(firstPayload);
         expect((client as any).pendingOutbox).toHaveLength(0);
-        expect((client as any).lastSeq).toBe(1);
+        expect((client as any).lastSeq).toBe(0);
     });
 
     it('sends claude user text as modern session envelope', async () => {
@@ -802,6 +802,32 @@ describe('ApiSessionClient v3 messages API migration', () => {
         expect((client as any).lastSeq).toBe(1);
     });
 
+    it('resumes after the captured sequence and routes messages sent during startup', async () => {
+        session.seq = 7;
+        const client = new ApiSessionClient('fake-token', session);
+        const onUserMessage = vi.fn();
+        client.onUserMessage(onUserMessage);
+        const userMessage = { role: 'user', content: { type: 'text', text: 'sent during resume' } };
+        mockAxiosGet.mockResolvedValueOnce({
+            data: {
+                messages: [{
+                    id: 'msg-8',
+                    seq: 8,
+                    content: { t: 'encrypted', c: encryptContent(session, userMessage) },
+                    localId: null,
+                    createdAt: 8000,
+                    updatedAt: 8000
+                }],
+                hasMore: false
+            }
+        });
+
+        await (client as any).fetchMessages();
+
+        expect(mockAxiosGet.mock.calls[0][1].params.after_seq).toBe(7);
+        expect(onUserMessage).toHaveBeenCalledWith(userMessage);
+    });
+
     it('fetchMessages uses incremental cursor and paginates while hasMore is true', async () => {
         const client = new ApiSessionClient('fake-token', session);
         const onUserMessage = vi.fn();
@@ -1117,33 +1143,23 @@ describe('ApiSessionClient v3 messages API migration', () => {
         expect(mockAxiosGet.mock.calls[1][1].params.after_seq).toBe(5);
     });
 
-    it('updates lastSeq after successful outbox flush and never moves it backward', async () => {
+    it('does not advance the receive cursor from an interleaved outbox response', async () => {
         const client = new ApiSessionClient('fake-token', session);
         (client as any).lastSeq = 10;
 
         mockAxiosPost.mockResolvedValueOnce({
             data: {
-                messages: [{ id: 'msg-9', seq: 9, localId: 'l9', createdAt: 9, updatedAt: 9 }]
+                // seq=11 may belong to a user prompt that arrived while this
+                // agent output was being stored as seq=12.
+                messages: [{ id: 'msg-12', seq: 12, localId: 'l12', createdAt: 12, updatedAt: 12 }]
             }
         });
 
-        client.sendCodexMessage({ type: 'older' });
+        client.sendCodexMessage({ type: 'output' });
         await waitForCheck(() => {
             expect(mockAxiosPost).toHaveBeenCalledTimes(1);
         });
         expect((client as any).lastSeq).toBe(10);
-
-        mockAxiosPost.mockResolvedValueOnce({
-            data: {
-                messages: [{ id: 'msg-11', seq: 11, localId: 'l11', createdAt: 11, updatedAt: 11 }]
-            }
-        });
-
-        client.sendCodexMessage({ type: 'newer' });
-        await waitForCheck(() => {
-            expect(mockAxiosPost).toHaveBeenCalledTimes(2);
-        });
-        expect((client as any).lastSeq).toBe(11);
     });
 
     it('flushOutbox tolerates missing response.data.messages and keeps lastSeq unchanged', async () => {

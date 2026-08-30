@@ -37,7 +37,7 @@ export const ToolGroupView = React.memo<ToolGroupViewProps>((props) => {
     const session = useSession(sessionId);
     const summary = React.useMemo(() => generateGroupSummary(group.messages), [group.messages]);
     const summaryCategory = React.useMemo(() => getGroupSummaryCategory(group.messages), [group.messages]);
-    const hasRunning = !forceCompleted && session?.active !== false && group.hasRunning;
+    const hasRunning = !forceCompleted && session?.active !== false && session?.thinking === true && group.hasRunning;
     const suppressChildren = hideSingleToolChildren && group.messages.length === 1 && group.messages[0]?.kind === 'tool-call';
     const singleToolMessage = suppressChildren && group.messages[0]?.kind === 'tool-call'
         ? group.messages[0]

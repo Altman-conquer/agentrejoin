@@ -104,5 +104,9 @@ describe('claudeRemote', () => {
             type: 'assistant',
             isCompactSummary: true,
         }));
+        expect(query).toHaveBeenCalledOnce();
+        const options = vi.mocked(query).mock.calls[0]![0].options!;
+        expect(options.customSystemPrompt).toBeUndefined();
+        expect(options.appendSystemPrompt).toBeUndefined();
     });
 });

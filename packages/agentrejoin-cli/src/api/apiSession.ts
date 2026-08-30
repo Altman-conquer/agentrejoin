@@ -212,7 +212,6 @@ export class ApiSessionClient extends EventEmitter {
     private encryptionVariant: 'legacy' | 'dataKey';
     private reconnectInterval: NodeJS.Timeout | null = null;
     private ignoreArchiveSignal = false;
-    private skipInitialMessages = false;
     private claudeSessionProtocolState: ClaudeSessionProtocolState = {
         currentTurnId: null,
         uuidToProviderSubagent: new Map<string, string>(),
@@ -224,7 +223,7 @@ export class ApiSessionClient extends EventEmitter {
         startedSubagents: new Set<string>(),
         activeSubagents: new Set<string>(),
     };
-    private lastSeq = 0;
+    private lastSeq: number;
     private pendingOutbox: Array<{ content: string; localId: string }> = [];
     private readonly sendSync: InvalidateSync;
     private readonly receiveSync: InvalidateSync;
@@ -239,6 +238,7 @@ export class ApiSessionClient extends EventEmitter {
         this.agentStateVersion = session.agentStateVersion;
         this.encryptionKey = session.encryptionKey;
         this.encryptionVariant = session.encryptionVariant;
+        this.lastSeq = session.seq;
         this.sendSync = new InvalidateSync(() => this.flushOutbox());
         this.receiveSync = new InvalidateSync(() => this.fetchMessages());
 
@@ -579,13 +579,6 @@ export class ApiSessionClient extends EventEmitter {
     }
 
     private async fetchMessages() {
-        // On reconnect, skip processing existing messages — just advance lastSeq
-        const skipRouting = this.skipInitialMessages;
-        if (skipRouting) {
-            this.skipInitialMessages = false;
-            logger.debug('[API] Reconnect mode: skipping existing messages, advancing lastSeq');
-        }
-
         let afterSeq = this.lastSeq;
         while (true) {
             const response = await axios.get<V3GetSessionMessagesResponse>(
@@ -607,8 +600,6 @@ export class ApiSessionClient extends EventEmitter {
                 if (message.seq > maxSeq) {
                     maxSeq = message.seq;
                 }
-
-                if (skipRouting) continue;
 
                 if (message.content?.t !== 'encrypted') {
                     continue;
@@ -663,11 +654,6 @@ export class ApiSessionClient extends EventEmitter {
                 }
             );
 
-            const messages = Array.isArray(response.data.messages) ? response.data.messages : [];
-            const maxSeq = messages.reduce((acc, message) => (
-                message.seq > acc ? message.seq : acc
-            ), this.lastSeq);
-            this.lastSeq = maxSeq;
             this.pendingOutbox.splice(batchStart, batch.length);
         }
     }
@@ -918,10 +904,6 @@ export class ApiSessionClient extends EventEmitter {
      */
     suppressNextArchiveSignal() {
         this.ignoreArchiveSignal = true;
-    }
-
-    skipExistingMessages() {
-        this.skipInitialMessages = true;
     }
 
     updateMetadata(handler: (metadata: Metadata) => Metadata) {

@@ -1124,7 +1124,7 @@ export function SessionViewLoaded({
             onEffortLevelChange={isRigReasoningSelectionEnabled(session.metadata) ? updateEffortLevel : undefined}
             metadata={session.metadata}
             connectionStatus={connectionStatus}
-            blockSend={resumeBlocked || (isRig && session.thinking && session.metadata?.capabilities?.steering !== true)}
+            blockSend={isDisconnected || resumingSession || resumeBlocked || (isRig && session.thinking && session.metadata?.capabilities?.steering !== true)}
             onSend={handleSend}
             onMicPress={(!canUseVoice || embedded || isDisconnected) ? undefined : micButtonState.onMicPress}
             isMicActive={(!canUseVoice || embedded || isDisconnected) ? false : micButtonState.isMicActive}

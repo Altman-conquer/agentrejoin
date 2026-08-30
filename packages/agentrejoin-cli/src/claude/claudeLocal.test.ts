@@ -36,10 +36,6 @@ vi.mock('./utils/path', () => ({
     getProjectPath: vi.fn((path: string) => path)
 }));
 
-vi.mock('./utils/systemPrompt', () => ({
-    systemPrompt: 'test-system-prompt'
-}));
-
 vi.mock('node:fs', () => ({
     mkdirSync: vi.fn(),
     existsSync: vi.fn(() => true)
@@ -113,6 +109,7 @@ describe('claudeLocal --continue handling', () => {
         // Should contain --resume with the found session ID
         expect(spawnArgs).toContain('--resume');
         expect(spawnArgs).toContain('123e4567-e89b-12d3-a456-426614174000');
+        expect(spawnArgs).not.toContain('--append-system-prompt');
 
         // Should notify about the session
         expect(onSessionFound).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174000');

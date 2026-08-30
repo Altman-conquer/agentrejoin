@@ -38,7 +38,7 @@ export const ToolView = React.memo<ToolViewProps>((props) => {
     const { theme } = useUnistyles();
     const compactToolCalls = useSetting('compactToolCalls');
     const session = useSession(sessionId ?? '');
-    const isInterrupted = tool.state === 'running' && session?.active === false;
+    const isInterrupted = tool.state === 'running' && !!session && (session.active === false || session.thinking !== true);
 
     // For file-editing tools, navigate to file route instead of message detail
     const fileEditTools = ['Edit', 'MultiEdit', 'Write'];

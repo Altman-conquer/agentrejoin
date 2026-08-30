@@ -452,6 +452,21 @@ describe('ActivityUpdateAccumulator Smart Debounce', () => {
             );
         });
 
+        it('ignores an older activity update that arrives after a newer state', () => {
+            const newer: ApiEphemeralActivityUpdate = {
+                type: 'activity', id: 'session1', active: true, activeAt: 1200, thinking: false
+            };
+            const stale: ApiEphemeralActivityUpdate = {
+                type: 'activity', id: 'session1', active: true, activeAt: 1100, thinking: true
+            };
+
+            accumulator.addUpdate(newer);
+            accumulator.addUpdate(stale);
+
+            expect(mockFlushHandler).toHaveBeenCalledTimes(1);
+            expect(mockFlushHandler).toHaveBeenCalledWith(new Map([['session1', newer]]));
+        });
+
         it('should reset all state', () => {
             const update1: ApiEphemeralActivityUpdate = {
                 type: 'activity',

@@ -704,6 +704,16 @@ export async function startDaemon(): Promise<void> {
       }
     };
 
+    const fetchLatestSessionMessageSeq = async (sessionId: string): Promise<number> => {
+      const response = await axios.get(`${configuration.serverUrl}/v3/sessions/${encodeURIComponent(sessionId)}/messages`, {
+        params: { before_seq: 2_147_483_647, limit: 1 },
+        headers: { Authorization: `Bearer ${credentials.token}` },
+        timeout: 10_000,
+      });
+      const messages = (response.data as { messages?: Array<{ seq?: number }> }).messages;
+      return typeof messages?.[0]?.seq === 'number' ? messages[0].seq : 0;
+    };
+
     const resumeSession = async (agentRejoinSessionId: string, options?: { model?: string; permissionMode?: string }): Promise<SpawnSessionResult> => {
       try {
         const tracked = findTrackedSessionById(agentRejoinSessionId);
@@ -747,6 +757,7 @@ export async function startDaemon(): Promise<void> {
         }
 
         await fs.access(launch.cwd);
+        const reconnectSeq = await fetchLatestSessionMessageSeq(agentRejoinSessionId);
 
         return spawnTrackedHappyProcess({
           args: launch.args,
@@ -755,7 +766,7 @@ export async function startDaemon(): Promise<void> {
             AGENTREJOIN_RECONNECT_SESSION_ID: agentRejoinSessionId,
             AGENTREJOIN_RECONNECT_ENCRYPTION_KEY: encodeBase64(tracked.encryption.encryptionKey),
             AGENTREJOIN_RECONNECT_ENCRYPTION_VARIANT: tracked.encryption.encryptionVariant,
-            AGENTREJOIN_RECONNECT_SEQ: String(tracked.encryption.seq),
+            AGENTREJOIN_RECONNECT_SEQ: String(reconnectSeq),
             AGENTREJOIN_RECONNECT_METADATA_VERSION: String(tracked.encryption.metadataVersion),
             AGENTREJOIN_RECONNECT_AGENT_STATE_VERSION: String(tracked.encryption.agentStateVersion),
           }),

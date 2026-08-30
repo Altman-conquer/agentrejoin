@@ -50,7 +50,6 @@ import { AsyncLock } from '@/utils/lock';
 import { voiceHooks } from '@/realtime/hooks/voiceHooks';
 import { Message } from './typesMessage';
 import { EncryptionCache } from './encryption/encryptionCache';
-import { systemPrompt } from './prompt/systemPrompt';
 import { fetchArtifact, fetchArtifacts, createArtifact, updateArtifact } from './apiArtifacts';
 import { DecryptedArtifact, Artifact, ArtifactCreateRequest, ArtifactUpdateRequest } from './artifactTypes';
 import { ArtifactEncryption } from './encryption/artifactEncryption';
@@ -721,7 +720,6 @@ class Sync {
             },
             meta: {
                 sentFrom,
-                appendSystemPrompt: systemPrompt,
                 ...(modeMeta.permissionMode !== undefined ? { permissionMode: modeMeta.permissionMode } : {}),
                 ...(modeMeta.model !== undefined ? { model: modeMeta.model } : {}),
                 ...(modeMeta.modelProviderId !== undefined ? { modelProviderId: modeMeta.modelProviderId } : {}),
@@ -752,6 +750,15 @@ class Sync {
         // Stamp local activity time so the (opt-in) activity sort bubbles this session
         // up on user action only — not on background agent output.
         storage.getState().markSessionMessageSent(sessionId);
+
+        const currentSession = storage.getState().sessions[sessionId];
+        if (currentSession && !currentSession.thinking) {
+            this.applySessions([{
+                ...currentSession,
+                thinking: true,
+                thinkingAt: createdAt,
+            }]);
+        }
 
         this.getSendSync(sessionId).invalidate();
         this.maybeStartBackgroundSendWatchdog();
@@ -2224,7 +2231,8 @@ class Sync {
                     const isTaskComplete = 
                         ((contentType === 'acp' || contentType === 'codex') && 
                             (dataType === 'task_complete' || dataType === 'turn_aborted')) ||
-                        (contentType === 'session' && sessionEventType === 'turn-end');
+                        (contentType === 'session' && sessionEventType === 'turn-end') ||
+                        (lastMessage?.role === 'event' && lastMessage.content.type === 'ready');
                     
                     const isTaskStarted = 
                         ((contentType === 'acp' || contentType === 'codex') && dataType === 'task_started') ||

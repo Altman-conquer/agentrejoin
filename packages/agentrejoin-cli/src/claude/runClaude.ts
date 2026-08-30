@@ -279,10 +279,10 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
     // Create realtime session
     const session = api.sessionSyncClient(response);
 
-    // On reconnect, un-archive the session and skip replaying old messages.
+    // On reconnect, un-archive the session. ApiSessionClient starts reading
+    // after the server sequence captured immediately before this process spawned.
     if (reconnectSessionId) {
         session.suppressNextArchiveSignal();
-        session.skipExistingMessages();
         session.updateMetadata((meta) => ({
             ...meta,
             lifecycleState: 'running',

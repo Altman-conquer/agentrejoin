@@ -24,7 +24,6 @@ import { getIntegrationEnv } from '@/testing/currentIntegrationEnv';
 import { PushableAsyncIterable } from '@/utils/PushableAsyncIterable';
 import { query, type QueryOptions, type SDKAssistantMessage, type SDKMessage, type SDKResultMessage, type SDKSystemMessage } from './sdk';
 import { startHappyServer } from './utils/startHappyServer';
-import { systemPrompt } from './utils/systemPrompt';
 
 const MODEL_OPUS = 'claude-opus-4-1-20250805';
 const MODEL_SONNET = 'claude-sonnet-4-20250514';
@@ -193,7 +192,6 @@ class ClaudeQueryDriver {
         }
 
         return {
-            appendSystemPrompt: systemPrompt,
             canCallTool: options.canCallTool ?? (async (_toolName, input) => {
                 return {
                     behavior: 'allow',

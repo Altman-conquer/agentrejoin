@@ -26,16 +26,14 @@ After completing and verifying a user-requested code change:
    `ghcr.io/altman-conquer/agentrejoin`, pull the image tagged with the full Git
    commit on the server, and only then recreate the container. Never build a
    production image on the local workstation or production server.
-3. Rebuild the Android arm64 APK when the change affects
-   `packages/agentrejoin-app`, mobile/shared UI or behavior, app assets,
-   configuration, or native dependencies. Increment `versionCode`, verify the
-   package, ABI, and signature, and place the APK in `releases/`. Do not commit
-   large APK files to Git history. Documentation-only and server-only changes
-   do not require an APK rebuild.
-   Sign public APKs with the long-lived release key stored outside the repository
-   at `~/.local/share/agentrejoin/signing/agentrejoin-release.p12`; never ship an
-   APK signed with the Android debug key. Build standalone APKs only. Do not add
-   Google Play, AAB, or Play App Signing configuration unless explicitly requested.
+3. When a change affects `packages/agentrejoin-app`, mobile/shared UI or behavior,
+   app assets, configuration, or native dependencies, rely on
+   `.github/workflows/android-apk.yml` to build, sign, verify, and publish the
+   arm64 APK from GitHub Actions. Wait for that workflow and verify its GitHub
+   Release artifact. Do not build APKs on the local workstation or production
+   server. Documentation-only and server-only changes do not require an APK.
+   Build standalone APKs only. Do not add Google Play, AAB, or Play App Signing
+   configuration unless explicitly requested.
 
 If push, deployment, or packaging is genuinely blocked, report the blocker
 and the completed local work instead of silently skipping delivery.
