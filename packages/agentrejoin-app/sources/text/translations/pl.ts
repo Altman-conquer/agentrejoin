@@ -939,6 +939,7 @@ export const pl: TranslationStructure = {
 
     message: {
         switchedToMode: ({ mode }: { mode: string }) => `Przełączono na tryb ${mode}`,
+        interrupted: 'Conversation interrupted. Tell the model what to do differently, then continue.',
         unknownEvent: 'Nieznane zdarzenie',
         usageLimitUntil: ({ time }: { time: string }) => `Osiągnięto limit użycia do ${time}`,
         sentAsGoal: 'Sent as goal',

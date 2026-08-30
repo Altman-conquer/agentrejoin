@@ -3016,6 +3016,25 @@ describe('reducer', () => {
             expect(result.hasReadyEvent).toBe(true);
         });
 
+        it('shows interrupted events while ending the active turn', () => {
+            const state = createReducer();
+            const result = reducer(state, [{
+                id: 'interrupted-1',
+                localId: null,
+                createdAt: 1000,
+                role: 'event',
+                content: { type: 'interrupted' },
+                isSidechain: false
+            }]);
+
+            expect(result.messages).toHaveLength(1);
+            expect(result.messages[0]).toMatchObject({
+                kind: 'agent-event',
+                event: { type: 'interrupted' }
+            });
+            expect(result.hasReadyEvent).toBe(true);
+        });
+
         it('hides turn-start lifecycle messages', () => {
             const state = createReducer();
             const result = reducer(state, [{

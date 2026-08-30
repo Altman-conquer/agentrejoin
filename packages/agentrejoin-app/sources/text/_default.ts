@@ -939,6 +939,7 @@ export const en = {
 
     message: {
         switchedToMode: ({ mode }: { mode: string }) => `Switched to ${mode} mode`,
+        interrupted: 'Conversation interrupted. Tell the model what to do differently, then continue.',
         unknownEvent: 'Unknown event',
         usageLimitUntil: ({ time }: { time: string }) => `Usage limit reached until ${time}`,
         sentAsGoal: 'Sent as goal',

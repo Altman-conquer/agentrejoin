@@ -30,6 +30,8 @@ const agentEventSchema = z.discriminatedUnion('type', [z.object({
     endsAt: z.number(),
 }), z.object({
     type: z.literal('ready'),
+}), z.object({
+    type: z.literal('interrupted'),
 })]);
 export type AgentEvent = z.infer<typeof agentEventSchema>;
 
@@ -582,7 +584,9 @@ function normalizeSessionEnvelope(
             createdAt: messageCreatedAt,
             role: 'event',
             isSidechain: false,
-            content: { type: 'ready' },
+            content: envelope.ev.status === 'cancelled'
+                ? { type: 'interrupted' }
+                : { type: 'ready' },
             meta
         } satisfies NormalizedMessage;
     }

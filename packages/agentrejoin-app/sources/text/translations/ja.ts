@@ -924,6 +924,7 @@ export const ja: TranslationStructure = {
 
     message: {
         switchedToMode: ({ mode }: { mode: string }) => `${mode}モードに切り替えました`,
+        interrupted: 'Conversation interrupted. Tell the model what to do differently, then continue.',
         unknownEvent: '不明なイベント',
         usageLimitUntil: ({ time }: { time: string }) => `${time}まで使用制限中`,
         sentAsGoal: 'Sent as goal',

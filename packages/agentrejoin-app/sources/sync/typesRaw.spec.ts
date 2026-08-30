@@ -1816,7 +1816,7 @@ describe('Zod Transform - WOLOG Content Normalization', () => {
             }
         });
 
-        it('maps turn-end to ready event and drops turn-start', () => {
+        it('maps completed and cancelled turn-end events and drops turn-start', () => {
             const turnStart = normalizeRawMessage('db-5', null, 1, {
                 ...base,
                 content: {
@@ -1849,6 +1849,25 @@ describe('Zod Transform - WOLOG Content Normalization', () => {
                 id: 'env-6',
                 role: 'event',
                 content: { type: 'ready' }
+            });
+
+            const cancelledTurnEnd = normalizeRawMessage('db-7', null, 1, {
+                ...base,
+                content: {
+                    type: 'session',
+                    data: {
+                        id: 'env-7',
+                        time: 1,
+                        role: 'agent',
+                        turn: 'turn-5',
+                        ev: { t: 'turn-end', status: 'cancelled' }
+                    }
+                }
+            });
+            expect(cancelledTurnEnd).toMatchObject({
+                id: 'env-7',
+                role: 'event',
+                content: { type: 'interrupted' }
             });
         });
 

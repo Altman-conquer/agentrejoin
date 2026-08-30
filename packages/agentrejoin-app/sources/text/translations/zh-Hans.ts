@@ -924,6 +924,7 @@ export const zhHans: TranslationStructure = {
 
     message: {
         switchedToMode: ({ mode }: { mode: string }) => `已切换到 ${mode} 模式`,
+        interrupted: '对话已中断，你可以调整指令后继续。',
         unknownEvent: '未知事件',
         usageLimitUntil: ({ time }: { time: string }) => `使用限制到 ${time}`,
         sentAsGoal: 'Sent as goal',

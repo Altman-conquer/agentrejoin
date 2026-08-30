@@ -308,12 +308,13 @@ export function reducer(state: ReducerState, messages: NormalizedMessage[], agen
             continue;
         }
 
-        // Filter out ready events completely - they should not create any message
-        if (msg.role === 'event' && msg.content.type === 'ready') {
-            // Mark as processed to prevent duplication but don't add to messages
+        // Both events finish the active turn; only interruptions remain visible.
+        if (msg.role === 'event' && (msg.content.type === 'ready' || msg.content.type === 'interrupted')) {
             state.messageIds.set(msg.id, msg.id);
             hasReadyEvent = true;
-            continue;
+            if (msg.content.type === 'ready') {
+                continue;
+            }
         }
 
         // Session protocol turn-start markers are lifecycle-only and should stay invisible.

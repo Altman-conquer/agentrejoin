@@ -195,6 +195,13 @@ function AgentEventBlock(props: {
       </View>
     );
   }
+  if (props.event.type === 'interrupted') {
+    return (
+      <View style={styles.agentEventContainer}>
+        <Text style={styles.agentEventText}>{t('message.interrupted')}</Text>
+      </View>
+    );
+  }
   if (props.event.type === 'limit-reached') {
     const formatTime = (timestamp: number): string => {
       try {
