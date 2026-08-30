@@ -394,6 +394,9 @@ importers:
       livekit-client:
         specifier: ^2.15.4
         version: 2.17.0(@types/dom-mediacapture-record@1.0.22)
+      katex:
+        specifier: ^0.16.45
+        version: 0.16.45
       lottie-react-native:
         specifier: ~7.3.1
         version: 7.3.5(@lottiefiles/dotlottie-react@0.14.4(react@19.2.0))(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.2.0))(react@19.2.0)
@@ -545,6 +548,9 @@ importers:
       '@stablelib/hex':
         specifier: ^2.0.1
         version: 2.0.1
+      '@types/katex':
+        specifier: ^0.16.8
+        version: 0.16.8
       '@types/react':
         specifier: ~19.1.10
         version: 19.1.17

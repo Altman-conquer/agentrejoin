@@ -138,6 +138,10 @@ This function handles validation, transformation, and normalization in a single 
 
 Inline code now renders as \`happy render\` without a background highlight.
 
+Inline math renders as $E = mc^2$ and \\(a^2 + b^2 = c^2\\).
+
+$$\\int_0^1 x^2 \\, dx = \\frac{1}{3}$$
+
 ![Markdown renderable image](${MARKDOWN_RENDERER_TEST_IMAGE})`
     },
     createSectionTitle('missing-tool-call-title', 'What happens when a tool call Message has zero tools? If the empty tools array would render anything, it would show up between these two messages\nvvvvvvvvvvvvvvvvvvvv'),

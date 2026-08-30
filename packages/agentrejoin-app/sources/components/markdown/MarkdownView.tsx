@@ -17,6 +17,7 @@ import { MermaidRenderer } from './MermaidRenderer';
 import { t } from '@/text';
 import { isHttpMarkdownLink } from './linkUtils';
 import { openExternalUrl } from '@/utils/openExternalUrl';
+import { MathRenderer } from './MathRenderer';
 
 // Option type for callback
 export type Option = {
@@ -80,6 +81,8 @@ export const MarkdownView = React.memo((props: {
                         return <RenderTableBlock headers={block.headers} rows={block.rows} onLinkPress={handleLinkPress} selectable={selectable} key={index} first={index === 0} last={index === blocks.length - 1} />;
                     } else if (block.type === 'image') {
                         return <RenderImageBlock url={block.url} alt={block.alt} key={index} first={index === 0} last={index === blocks.length - 1} />;
+                    } else if (block.type === 'math') {
+                        return <MathRenderer formula={block.content} displayMode containerStyle={style.mathBlock} key={index} />;
                     } else {
                         return null;
                     }
@@ -122,12 +125,20 @@ type RenderSpanProps = {
 };
 
 function RenderTextBlock(props: { spans: MarkdownSpan[], first: boolean, last: boolean, selectable: boolean, onLinkPress: (url: string) => void }) {
-    return <Text selectable={props.selectable} style={[style.text, props.first && style.first, props.last && style.last]}><RenderSpans spans={props.spans} baseStyle={style.text} selectable={props.selectable} onLinkPress={props.onLinkPress} /></Text>;
+    const textStyle = [style.text, props.first && style.first, props.last && style.last];
+    if (props.spans.some((span) => span.math)) {
+        return <MathRenderer spans={props.spans} containerStyle={style.mathText} />;
+    }
+    return <Text selectable={props.selectable} style={textStyle}><RenderSpans spans={props.spans} baseStyle={style.text} selectable={props.selectable} onLinkPress={props.onLinkPress} /></Text>;
 }
 
 function RenderHeaderBlock(props: { level: 1 | 2 | 3 | 4 | 5 | 6, spans: MarkdownSpan[], first: boolean, last: boolean, selectable: boolean, onLinkPress: (url: string) => void }) {
     const s = (style as any)[`header${props.level}`];
     const headerStyle = [style.header, s, props.first && style.first, props.last && style.last];
+    if (props.spans.some((span) => span.math)) {
+        const sizes = [16, 20, 16, 16, 16, 16];
+        return <MathRenderer spans={props.spans} fontSize={sizes[props.level - 1]} lineHeight={props.level === 3 ? 28 : 24} fontWeight="600" containerStyle={style.mathHeader} />;
+    }
     return <Text selectable={props.selectable} style={headerStyle}><RenderSpans spans={props.spans} baseStyle={headerStyle} selectable={props.selectable} onLinkPress={props.onLinkPress} /></Text>;
 }
 
@@ -140,7 +151,9 @@ function RenderListBlock(props: { items: { depth: number, spans: MarkdownSpan[] 
             {props.items.map((item, index) => (
                 <View key={index} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingLeft: item.depth * 16 }}>
                     <Text selectable={false} style={[listStyle, { marginRight: 8, marginTop: 1 }]}>{BULLETS[Math.min(item.depth, BULLETS.length - 1)]}</Text>
-                    <Text selectable={props.selectable} style={[listStyle, { flex: 1 }]}><RenderSpans spans={item.spans} baseStyle={listStyle} selectable={props.selectable} onLinkPress={props.onLinkPress} /></Text>
+                    {item.spans.some((span) => span.math)
+                        ? <MathRenderer spans={item.spans} containerStyle={{ flex: 1 }} />
+                        : <Text selectable={props.selectable} style={[listStyle, { flex: 1 }]}><RenderSpans spans={item.spans} baseStyle={listStyle} selectable={props.selectable} onLinkPress={props.onLinkPress} /></Text>}
                 </View>
             ))}
         </View>
@@ -154,7 +167,9 @@ function RenderNumberedListBlock(props: { items: { number: number, depth: number
             {props.items.map((item, index) => (
                 <View key={index} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingLeft: item.depth * 16 }}>
                     <Text selectable={false} style={[listStyle, { marginRight: 8, marginTop: 1 }]}>{item.number}.</Text>
-                    <Text selectable={props.selectable} style={[listStyle, { flex: 1 }]}><RenderSpans spans={item.spans} baseStyle={listStyle} selectable={props.selectable} onLinkPress={props.onLinkPress} /></Text>
+                    {item.spans.some((span) => span.math)
+                        ? <MathRenderer spans={item.spans} containerStyle={{ flex: 1 }} />
+                        : <Text selectable={props.selectable} style={[listStyle, { flex: 1 }]}><RenderSpans spans={item.spans} baseStyle={listStyle} selectable={props.selectable} onLinkPress={props.onLinkPress} /></Text>}
                 </View>
             ))}
         </View>
@@ -348,9 +363,9 @@ function RenderTableBlock(props: {
                                 key={`header-${colIndex}`}
                                 style={[style.tableCell, style.tableHeaderCell, { width: columnWidths[colIndex] }, !isLastCol(colIndex) && style.tableCellBorderRight]}
                             >
-                                <Text style={style.tableHeaderText}>
-                                    <RenderSpans spans={header} baseStyle={style.tableHeaderText} onLinkPress={props.onLinkPress} selectable={props.selectable} />
-                                </Text>
+                                {header.some((span) => span.math)
+                                    ? <MathRenderer spans={header} fontWeight="600" />
+                                    : <Text style={style.tableHeaderText}><RenderSpans spans={header} baseStyle={style.tableHeaderText} onLinkPress={props.onLinkPress} selectable={props.selectable} /></Text>}
                             </View>
                         ))}
                     </View>
@@ -365,9 +380,9 @@ function RenderTableBlock(props: {
                                     key={`cell-${rowIndex}-${colIndex}`}
                                     style={[style.tableCell, { width: columnWidths[colIndex] }, !isLastCol(colIndex) && style.tableCellBorderRight]}
                                 >
-                                    <Text style={style.tableCellText}>
-                                        <RenderSpans spans={row[colIndex] ?? []} baseStyle={style.tableCellText} onLinkPress={props.onLinkPress} selectable={props.selectable} />
-                                    </Text>
+                                    {(row[colIndex] ?? []).some((span) => span.math)
+                                        ? <MathRenderer spans={row[colIndex] ?? []} />
+                                        : <Text style={style.tableCellText}><RenderSpans spans={row[colIndex] ?? []} baseStyle={style.tableCellText} onLinkPress={props.onLinkPress} selectable={props.selectable} /></Text>}
                                 </View>
                             ))}
                         </View>
@@ -529,6 +544,20 @@ const style = StyleSheet.create((theme) => ({
         backgroundColor: theme.colors.divider,
         marginTop: 8,
         marginBottom: 8,
+    },
+    mathText: {
+        marginTop: 8,
+        marginBottom: 10,
+        width: '100%',
+    },
+    mathHeader: {
+        marginTop: 16,
+        marginBottom: 8,
+        width: '100%',
+    },
+    mathBlock: {
+        marginVertical: 8,
+        width: '100%',
     },
     imageBlock: {
         width: '100%',

@@ -33,12 +33,16 @@ export type MarkdownBlock = {
     type: 'image',
     alt: string,
     url: string
+} | {
+    type: 'math',
+    content: string
 }
 
 export type MarkdownSpan = {
     styles: ('italic' | 'bold' | 'semibold' | 'code')[],
     text: string,
-    url: string | null
+    url: string | null,
+    math?: boolean
 }
 
 export function parseMarkdown(markdown: string) {

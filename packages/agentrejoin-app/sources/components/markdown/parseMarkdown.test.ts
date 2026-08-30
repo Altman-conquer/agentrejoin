@@ -61,4 +61,26 @@ describe('parseMarkdown', () => {
             { styles: [], text: ' for more.', url: null },
         ]);
     });
+
+    it('parses inline and display math without changing code spans', () => {
+        const blocks = parseMarkdown([
+            'Energy is $E = mc^2$ and \\(a^2 + b^2 = c^2\\). Keep `$HOME` literal.',
+            '$$',
+            '\\int_0^1 x^2 \\, dx = \\frac{1}{3}',
+            '$$',
+        ].join('\n'));
+
+        expect(blocks[0]).toMatchObject({
+            type: 'text',
+            content: expect.arrayContaining([
+                expect.objectContaining({ text: 'E = mc^2', math: true }),
+                expect.objectContaining({ text: 'a^2 + b^2 = c^2', math: true }),
+                expect.objectContaining({ text: '$HOME', styles: ['code'] }),
+            ]),
+        });
+        expect(blocks[1]).toEqual({
+            type: 'math',
+            content: '\\int_0^1 x^2 \\, dx = \\frac{1}{3}',
+        });
+    });
 });

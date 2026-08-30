@@ -84,6 +84,29 @@ export function parseMarkdownBlock(markdown: string) {
         // Trim
         let trimmed = line.trim();
 
+        // Display math: $$...$$ or \[...\], including multiline formulas.
+        const mathDelimiter = trimmed.startsWith('$$') ? '$$' : trimmed.startsWith('\\[') ? '\\]' : null;
+        if (mathDelimiter) {
+            const opening = mathDelimiter === '$$' ? '$$' : '\\[';
+            let content = trimmed.slice(opening.length);
+            if (content.endsWith(mathDelimiter)) {
+                content = content.slice(0, -mathDelimiter.length);
+            } else {
+                const formulaLines = content ? [content] : [];
+                while (index < lines.length) {
+                    const nextLine = lines[index++];
+                    if (nextLine.trim().endsWith(mathDelimiter)) {
+                        formulaLines.push(nextLine.trim().slice(0, -mathDelimiter.length));
+                        break;
+                    }
+                    formulaLines.push(nextLine);
+                }
+                content = formulaLines.join('\n');
+            }
+            blocks.push({ type: 'math', content: content.trim() });
+            continue;
+        }
+
         // Code block
         if (trimmed.startsWith('```')) {
             const language = trimmed.slice(3).trim() || null;
