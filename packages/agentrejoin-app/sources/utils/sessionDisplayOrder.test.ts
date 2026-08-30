@@ -10,6 +10,7 @@ function session(
     machineId: string,
     path: string,
     createdAt = 0,
+    active = true,
 ): SessionRowData {
     return {
         id,
@@ -22,10 +23,10 @@ function session(
         providerKind: null,
         modelName: null,
         activitySummary: null,
-        state: 'waiting',
+        state: active ? 'waiting' : 'disconnected',
         createdAt,
         hasDraft: false,
-        active: true,
+        active,
         machineId,
         path,
         homeDir: null,
@@ -50,6 +51,7 @@ describe('session display order', () => {
             session('zulu', 'machine-z', '/project-b'),
             session('alpha-new', 'machine-a', '/project-z', 20),
             session('alpha-old', 'machine-a', '/project-z', 10),
+            session('alpha-inactive-newest', 'machine-a', '/project-z', 30, false),
             session('alpha-first-project', 'machine-a', '/project-a'),
         ], machines, 'Unknown');
 
@@ -57,7 +59,7 @@ describe('session display order', () => {
         expect(Array.from(groups[0].projects.values())
             .sort((a, b) => a.displayPath.localeCompare(b.displayPath))
             .flatMap((project) => project.sessions.map((item) => item.id)))
-            .toEqual(['alpha-first-project', 'alpha-new', 'alpha-old']);
+            .toEqual(['alpha-first-project', 'alpha-new', 'alpha-old', 'alpha-inactive-newest']);
     });
 
     it('numbers the first nine session rows from top to bottom', () => {

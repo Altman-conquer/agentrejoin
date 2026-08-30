@@ -69,7 +69,10 @@ export function buildActiveSessionDisplayGroups(
 
     byMachine.forEach((machineGroup) => {
         machineGroup.projects.forEach((projectGroup) => {
-            projectGroup.sessions.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+            projectGroup.sessions.sort((a, b) => (
+                Number(b.active) - Number(a.active)
+                || (b.createdAt ?? 0) - (a.createdAt ?? 0)
+            ));
         });
     });
 
