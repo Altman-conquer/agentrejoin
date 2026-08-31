@@ -58,8 +58,10 @@ describe('CodexPermissionHandler', () => {
             tool: 'Bash',
             arguments: { command: 'pwd' },
         });
+        expect(handler.hasPendingRequests()).toBe(true);
 
         handler.abortAll();
+        expect(handler.hasPendingRequests()).toBe(false);
 
         await expect(pending).resolves.toEqual({ decision: 'abort' });
     });

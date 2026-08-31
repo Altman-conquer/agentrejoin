@@ -812,6 +812,78 @@ describe('CodexAppServerClient sandbox integration', () => {
         await client.disconnect();
     });
 
+    it('waits for provider completion without a default turn timeout', async () => {
+        const requests: MockRpcMessage[] = [];
+        const proc = createMockProcess({
+            pid: 2803,
+            onRequest: (msg, stdout) => {
+                requests.push(msg);
+
+                if (msg.method === 'thread/start' && msg.id != null) {
+                    setTimeout(() => {
+                        pushJsonLine(stdout, {
+                            id: msg.id,
+                            result: {
+                                thread: { id: 'thread-long', path: '/tmp/thread-long' },
+                                model: 'gpt-test',
+                                modelProvider: 'openai',
+                                cwd: '/tmp/project',
+                                approvalPolicy: 'never',
+                                sandbox: { type: 'dangerFullAccess' },
+                                reasoningEffort: null,
+                            },
+                        });
+                    }, 0);
+                }
+
+                if (msg.method === 'turn/start' && msg.id != null) {
+                    setTimeout(() => {
+                        pushJsonLine(stdout, { id: msg.id, result: { turn: { id: 'turn-long' } } });
+                        pushJsonLine(stdout, {
+                            method: 'codex/event',
+                            params: { msg: { type: 'task_started', turn_id: 'turn-long' } },
+                        });
+                    }, 0);
+                }
+            },
+        });
+        mockSpawn.mockImplementation(() => proc);
+
+        const { CodexAppServerClient } = await import('./codexAppServerClient');
+        const client = new CodexAppServerClient();
+        await client.connect();
+        await client.startThread({
+            model: 'gpt-test',
+            cwd: '/tmp/project',
+            approvalPolicy: 'never',
+            sandbox: 'danger-full-access',
+        });
+
+        vi.useFakeTimers();
+        try {
+            let settled = false;
+            const pendingTurn = client.sendTurnAndWait('long task').then((result) => {
+                settled = true;
+                return result;
+            });
+
+            await vi.advanceTimersByTimeAsync(0);
+            expect(requests.some((msg) => msg.method === 'turn/start')).toBe(true);
+            await vi.advanceTimersByTimeAsync(10 * 60 * 1000 + 1);
+            expect(settled).toBe(false);
+
+            pushJsonLine(proc.stdout, {
+                method: 'codex/event',
+                params: { msg: { type: 'task_complete', turn_id: 'turn-long' } },
+            });
+            await vi.advanceTimersByTimeAsync(0);
+            await expect(pendingTurn).resolves.toEqual({ aborted: false });
+        } finally {
+            vi.useRealTimers();
+            await client.disconnect();
+        }
+    });
+
     it('maps raw item notifications into legacy events and deduplicates turn completion', async () => {
         const requests: MockRpcMessage[] = [];
         const proc = createMockProcess({

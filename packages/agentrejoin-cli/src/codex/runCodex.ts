@@ -635,7 +635,9 @@ export async function runCodex(opts: {
             if (
                 thinking
                 || handlingQueuedMessage
+                || client.turnId !== null
                 || messageQueue.size() > 0
+                || permissionHandler.hasPendingRequests()
                 || abortInProgress !== null
                 || codexThreadSyncInProgress !== null
                 || shouldExit

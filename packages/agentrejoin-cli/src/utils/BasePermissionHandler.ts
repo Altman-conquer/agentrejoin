@@ -147,6 +147,10 @@ export abstract class BasePermissionHandler {
         });
     }
 
+    hasPendingRequests(): boolean {
+        return this.pendingRequests.size > 0;
+    }
+
     /**
      * Abort all pending permission requests.
      * Unlike reset(), this resolves (not rejects) pending promises with { decision: 'abort' },
