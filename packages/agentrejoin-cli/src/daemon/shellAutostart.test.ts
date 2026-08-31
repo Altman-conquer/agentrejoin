@@ -21,7 +21,7 @@ it('adds one managed shell block and removes it without touching user config', a
 
   const enabled = await readFile(bashrc, 'utf8');
   expect(enabled.match(/AgentRejoin daemon autostart/g)).toHaveLength(2);
-  expect(enabled).toContain('command agentrejoin daemon start');
+  expect(enabled).toContain('command agentrejoin daemon start >/dev/null 2>&1 & disown');
 
   expect(await disableShellAutostart(tempDir)).toEqual([bashrc]);
   expect(await readFile(bashrc, 'utf8')).toBe('export KEEP_ME=1\n');

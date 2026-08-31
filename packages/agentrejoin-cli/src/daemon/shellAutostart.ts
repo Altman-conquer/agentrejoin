@@ -7,7 +7,7 @@ const END_MARKER = '# <<< AgentRejoin daemon autostart <<<';
 const AUTOSTART_BLOCK = `${START_MARKER}
 if [[ $- == *i* ]] && [[ -z "\${AGENTREJOIN_DAEMON_CHECKED:-}" ]]; then
   export AGENTREJOIN_DAEMON_CHECKED=1
-  command agentrejoin daemon start >/dev/null 2>&1 &
+  command agentrejoin daemon start >/dev/null 2>&1 & disown
 fi
 ${END_MARKER}`;
 
