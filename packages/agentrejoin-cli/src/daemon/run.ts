@@ -609,12 +609,14 @@ export async function startDaemon(): Promise<void> {
       env,
       directoryCreated = false,
       message,
+      sessionWebhookTimeoutMs = 15_000,
     }: {
       args: string[];
       cwd: string;
       env: NodeJS.ProcessEnv;
       directoryCreated?: boolean;
       message?: string;
+      sessionWebhookTimeoutMs?: number;
     }): Promise<SpawnSessionResult> => {
       const happyProcess = spawnHappyCLI(args, {
         cwd,
@@ -667,7 +669,7 @@ export async function startDaemon(): Promise<void> {
             type: 'error',
             errorMessage: `Session webhook timeout for PID ${happyProcess.pid}`
           });
-        }, 15_000);
+        }, sessionWebhookTimeoutMs);
 
         pidToAwaiter.set(happyProcess.pid!, (completedSession) => {
           clearTimeout(timeout);
@@ -762,6 +764,7 @@ export async function startDaemon(): Promise<void> {
         return spawnTrackedHappyProcess({
           args: launch.args,
           cwd: launch.cwd,
+          sessionWebhookTimeoutMs: 60_000,
           env: buildSessionChildEnvironment(ambientEnvironment, {
             AGENTREJOIN_RECONNECT_SESSION_ID: agentRejoinSessionId,
             AGENTREJOIN_RECONNECT_ENCRYPTION_KEY: encodeBase64(tracked.encryption.encryptionKey),

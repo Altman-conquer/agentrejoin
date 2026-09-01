@@ -6,3 +6,11 @@ export function isSessionOutsideArchive(session: {
         || session.metadata?.lifecycleState !== 'archived'
         || session.metadata.archiveReason === 'Idle timeout';
 }
+
+export function shouldNavigateAfterResume(
+    startedPathname: string,
+    currentPathname: string,
+    isMounted: boolean,
+): boolean {
+    return isMounted && startedPathname === currentPathname;
+}

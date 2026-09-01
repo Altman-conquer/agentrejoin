@@ -14,11 +14,12 @@ import { copySessionMetadataToClipboard, copySessionMetadataAndLogsToClipboard }
 import { useSessionStatus } from '@/utils/sessionUtils';
 import { isMachineOnline } from '@/utils/machineUtils';
 import { getSessionForkSource } from '@/utils/sessionFork';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { useSession } from '@/sync/storage';
 import { DuplicateSheet } from '@/components/DuplicateSheet';
 import type { SessionActionShortcutId } from '@/keyboard/shortcuts';
 import { isRigMetadata } from '@/sync/rig';
+import { shouldNavigateAfterResume } from '@/utils/sessionLifecycle';
 
 export interface SessionActionItem {
     id: SessionActionShortcutId;
@@ -117,6 +118,16 @@ export function useSessionQuickActions(
         onAfterCopySessionMetadata,
     } = options;
     const router = useRouter();
+    const pathname = usePathname();
+    const pathnameRef = React.useRef(pathname);
+    const mountedRef = React.useRef(true);
+    pathnameRef.current = pathname;
+    React.useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
     const navigateToSession = useNavigateToSession();
     const sessionStatus = useSessionStatus(session);
     const machineId = session.metadata?.machineId ?? '';
@@ -167,6 +178,7 @@ export function useSessionQuickActions(
     }, [onAfterCopySessionMetadata, session]);
 
     const [resumingSession, performResume] = useHappyAction(async () => {
+        const startedPathname = pathnameRef.current;
         if (!resumeAvailability.canResume) {
             throw new HappyError(resumeAvailability.message, false);
         }
@@ -195,7 +207,9 @@ export function useSessionQuickActions(
                 // Model / effort picks survive resume on their own — they live
                 // in the session's synced metadata (#1492).
 
-                navigateToSession(result.sessionId);
+                if (shouldNavigateAfterResume(startedPathname, pathnameRef.current, mountedRef.current)) {
+                    navigateToSession(result.sessionId);
+                }
                 return;
             }
             case 'requestToApproveDirectoryCreation':
