@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CODEX_IDLE_TIMEOUT_MS, resolveCodexIdleTimeoutMs } from './codexIdleTimeout';
+import { DEFAULT_CODEX_IDLE_TIMEOUT_MS, remainingCodexIdleTimeoutMs, resolveCodexIdleTimeoutMs } from './codexIdleTimeout';
 
 describe('resolveCodexIdleTimeoutMs', () => {
     it('uses ten minutes by default, accepts overrides, and rejects invalid values', () => {
@@ -8,5 +8,11 @@ describe('resolveCodexIdleTimeoutMs', () => {
         expect(resolveCodexIdleTimeoutMs('0')).toBe(0);
         expect(resolveCodexIdleTimeoutMs('-1')).toBe(DEFAULT_CODEX_IDLE_TIMEOUT_MS);
         expect(resolveCodexIdleTimeoutMs('invalid')).toBe(DEFAULT_CODEX_IDLE_TIMEOUT_MS);
+    });
+
+    it('counts idle time from the latest Codex activity', () => {
+        expect(remainingCodexIdleTimeoutMs(600, 100, 250)).toBe(450);
+        expect(remainingCodexIdleTimeoutMs(600, 100, 50)).toBe(600);
+        expect(remainingCodexIdleTimeoutMs(600, 100, 800)).toBe(0);
     });
 });

@@ -8,3 +8,7 @@ export function resolveCodexIdleTimeoutMs(value = process.env.AGENTREJOIN_CODEX_
         ? timeout
         : DEFAULT_CODEX_IDLE_TIMEOUT_MS;
 }
+
+export function remainingCodexIdleTimeoutMs(timeoutMs: number, lastActivityAt: number, now = Date.now()): number {
+    return Math.max(0, timeoutMs - Math.max(0, now - lastActivityAt));
+}

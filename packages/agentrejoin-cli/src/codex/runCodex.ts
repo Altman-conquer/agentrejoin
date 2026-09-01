@@ -61,7 +61,7 @@ import {
     type CodexGoalCommand,
 } from './codexGoalStatus';
 import type { SessionEnvelope } from 'agentrejoin-wire';
-import { resolveCodexIdleTimeoutMs } from './codexIdleTimeout';
+import { remainingCodexIdleTimeoutMs, resolveCodexIdleTimeoutMs } from './codexIdleTimeout';
 
 /**
  * Extracts a human-readable error from a codex task_complete/turn_aborted event.
@@ -287,6 +287,7 @@ export async function runCodex(opts: {
 
     const messageQueue = new MessageQueue2<EnhancedMode>(hashCodexEnhancedMode);
     const codexIdleTimeoutMs = resolveCodexIdleTimeoutMs();
+    let lastCodexActivityAt = Date.now();
     let codexIdleTimer: NodeJS.Timeout | undefined;
 
     const clearCodexIdleTimer = () => {
@@ -374,6 +375,7 @@ export async function runCodex(opts: {
     ];
 
     const handleUserMessage = createSerialAsyncHandler<UserMessage>(async (message) => {
+        lastCodexActivityAt = Date.now();
         clearCodexIdleTimer();
         const attachmentsForThisMessage = await session.drainAttachmentsForUserMessage();
 
@@ -626,7 +628,7 @@ export async function runCodex(opts: {
         }
     };
 
-    const scheduleCodexIdleTermination = () => {
+    const scheduleCodexIdleTermination = (delayMs = codexIdleTimeoutMs) => {
         clearCodexIdleTimer();
         if (codexIdleTimeoutMs === 0 || shouldExit) return;
 
@@ -636,6 +638,7 @@ export async function runCodex(opts: {
                 thinking
                 || handlingQueuedMessage
                 || client.turnId !== null
+                || codexActiveSubagents.size > 0
                 || messageQueue.size() > 0
                 || permissionHandler.hasPendingRequests()
                 || abortInProgress !== null
@@ -645,8 +648,13 @@ export async function runCodex(opts: {
                 scheduleCodexIdleTermination();
                 return;
             }
+            const remainingMs = remainingCodexIdleTimeoutMs(codexIdleTimeoutMs, lastCodexActivityAt);
+            if (remainingMs > 0) {
+                scheduleCodexIdleTermination(remainingMs);
+                return;
+            }
             void handleKillSession('Idle timeout', false);
-        }, codexIdleTimeoutMs);
+        }, delayMs);
         codexIdleTimer.unref();
     };
 
@@ -827,6 +835,7 @@ export async function runCodex(opts: {
 
     // Event handler: same EventMsg types as the legacy MCP server — no changes needed
     client.setEventHandler((msg) => {
+        lastCodexActivityAt = Date.now();
         logger.debug(`[Codex] Event: ${JSON.stringify(msg)}`);
         const isSubagentScopedEvent = hasCodexSubagentReference(msg as Record<string, unknown>);
 
