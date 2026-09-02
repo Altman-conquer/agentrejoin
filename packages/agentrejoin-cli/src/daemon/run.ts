@@ -35,6 +35,8 @@ import {
 } from './sessionEnvironment';
 import { findAllHappyProcesses } from './doctor';
 import { resolvePersistedDesiredState, resolveSessionRecoveryAction } from './sessionRecovery';
+import { hasPublicIpv6 } from './network';
+import { setDefaultAutoSelectFamily } from 'node:net';
 
 /** Shell-escape a string for safe interpolation into tmux commands. */
 function shellescape(s: string): string {
@@ -79,6 +81,10 @@ export const initialMachineMetadata: MachineMetadata = {
 };
 
 export async function startDaemon(): Promise<void> {
+  if (!hasPublicIpv6()) {
+    setDefaultAutoSelectFamily(false);
+  }
+
   // The daemon may have been launched from a session process. Keep its normal
   // environment, but never let session lineage or reconnect state reach a
   // later, unrelated child session.
