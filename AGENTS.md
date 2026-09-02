@@ -25,7 +25,11 @@ After completing and verifying a user-requested code change:
    Wait for `.github/workflows/container.yml` to publish the production image to
    `ghcr.io/altman-conquer/agentrejoin`, pull the image tagged with the full Git
    commit on the server, and only then recreate the container. Never build a
-   production image on the local workstation or production server.
+   production image on the local workstation or production server. After the
+   new deployment is healthy and verified, promptly remove unused older
+   `ghcr.io/altman-conquer/agentrejoin` and local `agentrejoin` images, while
+   preserving the running image and persistent data volumes, then recheck disk
+   usage.
 3. When a change affects `packages/agentrejoin-app`, mobile/shared UI or behavior,
    app assets, configuration, or native dependencies, rely on
    `.github/workflows/android-apk.yml` to build, sign, verify, and publish the
