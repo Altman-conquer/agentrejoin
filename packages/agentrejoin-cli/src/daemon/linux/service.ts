@@ -36,7 +36,7 @@ export function buildSystemdUnit(options: {
     '[Service]',
     'Type=simple',
     `ExecStart=${quoteUnitValue(options.nodePath)} ${quoteUnitValue(options.scriptPath)} daemon foreground`,
-    `WorkingDirectory=${quoteUnitValue(options.homeDir)}`,
+    `WorkingDirectory=${options.homeDir.replace(/%/g, '%%')}`,
     ...environment,
     'Restart=on-failure',
     'RestartSec=5',

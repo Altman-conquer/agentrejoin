@@ -1,6 +1,6 @@
 {
   "name": "agentrejoin",
-  "version": "1.2.11",
+  "version": "1.2.12",
   "description": "AgentRejoin - resume Claude Code and Codex sessions from mobile or web",
   "author": "AgentRejoin contributors",
   "license": "AGPL-3.0-only",

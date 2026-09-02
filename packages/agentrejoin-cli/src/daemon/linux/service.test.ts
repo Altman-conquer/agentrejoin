@@ -13,6 +13,8 @@ describe('buildSystemdUnit', () => {
     });
 
     expect(unit).toContain('ExecStart="/opt/node with space/bin/node" "/opt/agentrejoin/bin/agentrejoin.mjs" daemon foreground');
+    expect(unit).toContain('WorkingDirectory=/home/user');
+    expect(unit).not.toContain('WorkingDirectory="/home/user"');
     expect(unit).toContain('Restart=on-failure');
     expect(unit).toContain('KillMode=process');
     expect(unit).toContain('Environment="AGENTREJOIN_HOME_DIR=/data/agentrejoin"');
