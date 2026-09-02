@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { codexClientMethods } = vi.hoisted(() => ({
+const { codexClientMethods, takeoverCodexThread } = vi.hoisted(() => ({
     codexClientMethods: {
         connect: vi.fn(),
         disconnect: vi.fn(),
@@ -10,11 +10,14 @@ const { codexClientMethods } = vi.hoisted(() => ({
         rollbackThread: vi.fn(),
         injectItems: vi.fn(),
     },
+    takeoverCodexThread: vi.fn(),
 }));
 
 vi.mock('@/codex/codexAppServerClient', () => ({
     CodexAppServerClient: vi.fn().mockImplementation(() => codexClientMethods),
 }));
+
+vi.mock('@/codex/codexThreadTakeover', () => ({ takeoverCodexThread }));
 
 function machineClient() {
     return {
@@ -35,6 +38,7 @@ describe('ApiMachineClient Codex fork RPCs', () => {
         }
         codexClientMethods.connect.mockResolvedValue(undefined);
         codexClientMethods.disconnect.mockResolvedValue(undefined);
+        takeoverCodexThread.mockReset();
     });
 
     it('registers a full Codex thread fork RPC', async () => {
@@ -265,5 +269,27 @@ describe('ApiMachineClient Codex fork RPCs', () => {
                 content: [{ type: 'input_text', text: 'one' }],
             }],
         });
+    });
+
+    it('terminates the active Codex writer before takeover', async () => {
+        takeoverCodexThread.mockResolvedValue({ terminated: true });
+
+        const { ApiMachineClient } = await import('./apiMachine');
+        const client = new ApiMachineClient('token', machineClient());
+        client.setRPCHandlers({
+            spawnSession: vi.fn(),
+            stopSession: vi.fn(),
+            requestShutdown: vi.fn(),
+        });
+
+        const handler = handlersFrom(client).get('machine-1:codex-takeover-thread')!;
+        await expect(handler({
+            codexThreadId: '01a05b71-cfe3-7762-b503-a381cf5a8059',
+        })).rejects.toThrow('Codex takeover requires explicit confirmation');
+        await expect(handler({
+            codexThreadId: '01a05b71-cfe3-7762-b503-a381cf5a8059',
+            confirmed: true,
+        })).resolves.toEqual({ terminated: true });
+        expect(takeoverCodexThread).toHaveBeenCalledWith('01a05b71-cfe3-7762-b503-a381cf5a8059');
     });
 });

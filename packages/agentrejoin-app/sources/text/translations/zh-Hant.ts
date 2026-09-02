@@ -344,9 +344,11 @@ export const zhHant: TranslationStructure = {
         resumeLoading: '正在恢復對話…',
         resumeLoadingDescription: '正在載入 Codex 對話及其歷史訊息。',
         resumeFailed: '無法恢復此對話',
-        resumeActiveWriter: '此對話仍在另一個 Codex 程序中執行。請先在伺服器上結束該程序，然後重試。',
+        resumeActiveWriter: '此對話仍在另一個 Codex 程序中執行。你可以終止該程序並在這裡接管。',
         resumeFailedDescription: '伺服器拒絕了恢復請求。請返回對話清單後重試。',
         resumeRetry: '重新嘗試恢復',
+        resumeTakeover: '終止並接管',
+        resumeTakeoverConfirm: '這會終止目前占用此對話的 Codex 程序。正在產生的回覆或執行中的命令可能會被中斷。',
     },
 
     commandPalette: {

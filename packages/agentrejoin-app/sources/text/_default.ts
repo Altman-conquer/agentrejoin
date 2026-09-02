@@ -358,9 +358,11 @@ export const en = {
         resumeLoading: 'Resuming conversation…',
         resumeLoadingDescription: 'Loading the Codex conversation and its message history.',
         resumeFailed: 'Could not resume this conversation',
-        resumeActiveWriter: 'This conversation is still open in another Codex process. Exit it on the server, then try again.',
+        resumeActiveWriter: 'This conversation is still open in another Codex process. You can stop that process and take over here.',
         resumeFailedDescription: 'The server rejected the resume request. Return to the conversation list and try again.',
         resumeRetry: 'Retry resume',
+        resumeTakeover: 'Stop and take over',
+        resumeTakeoverConfirm: 'This will stop the Codex process currently using this conversation. Any in-progress response or command may be interrupted.',
     },
 
     commandPalette: {

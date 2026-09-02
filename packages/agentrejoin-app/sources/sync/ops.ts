@@ -496,6 +496,14 @@ export async function codexDuplicateThread(
     }
 }
 
+export async function codexTakeoverThread(machineId: string, codexThreadId: string): Promise<void> {
+    await apiSocket.machineRPC<{ terminated: boolean }, { codexThreadId: string; confirmed: true }>(
+        machineId,
+        'codex-takeover-thread',
+        { codexThreadId, confirmed: true },
+    );
+}
+
 export async function codexListRewindPoints(
     options: CodexForkThreadOptions,
 ): Promise<CodexListRewindPointsResult> {

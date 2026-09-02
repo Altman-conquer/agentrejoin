@@ -74,6 +74,19 @@ describe('codex fork ops', () => {
         expect(machineRPC).toHaveBeenCalledWith('machine-1', 'codex-list-threads', {});
     });
 
+    it('requests takeover of the active Codex writer on the selected machine', async () => {
+        machineRPC.mockResolvedValue({ terminated: true });
+
+        const { codexTakeoverThread } = await import('./ops');
+        await codexTakeoverThread('machine-1', 'thread-source');
+
+        expect(machineRPC).toHaveBeenCalledWith(
+            'machine-1',
+            'codex-takeover-thread',
+            { codexThreadId: 'thread-source', confirmed: true },
+        );
+    });
+
     it('forks a full Codex thread and spawns a Codex session resumed to the new thread', async () => {
         machineRPC.mockImplementation(async (_machineId: string, method: string) => {
             if (method === 'codex-fork-thread') {

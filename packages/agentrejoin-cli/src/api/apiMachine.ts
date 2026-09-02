@@ -30,6 +30,7 @@ import {
     forkCodexThread,
     listCodexRewindPoints,
 } from '@/codex/codexThreadFork';
+import { takeoverCodexThread } from '@/codex/codexThreadTakeover';
 import { listGeminiSessions } from '@/resume/listGeminiSessions';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -442,6 +443,12 @@ export class ApiMachineClient {
                 }
                 throw error;
             }
+        });
+
+        this.rpcHandlerManager.registerHandler('codex-takeover-thread', async (params: any) => {
+            const codexThreadId = requireNonEmptyString(params?.codexThreadId, 'codexThreadId');
+            if (params?.confirmed !== true) throw new Error('Codex takeover requires explicit confirmation');
+            return takeoverCodexThread(codexThreadId);
         });
 
         // Register stop daemon handler

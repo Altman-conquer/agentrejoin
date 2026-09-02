@@ -6,7 +6,7 @@ import { Session } from '@/sync/storageTypes';
 import { useSessionStatus, formatPathRelativeToHome } from '@/utils/sessionUtils';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { t } from '@/text';
-import { machineSpawnNewSession } from '@/sync/ops';
+import { codexTakeoverThread, machineSpawnNewSession } from '@/sync/ops';
 import { sync } from '@/sync/sync';
 import { Modal } from '@/modal';
 import { useNavigateToSession } from '@/hooks/useNavigateToSession';
@@ -115,13 +115,23 @@ export function EmptyMessages({ session }: EmptyMessagesProps) {
     const navigateToSession = useNavigateToSession();
     const [retrying, setRetrying] = React.useState(false);
 
-    const retryResume = React.useCallback(async () => {
+    const resumeConversation = React.useCallback(async (takeover: boolean) => {
         const machineId = session.metadata?.machineId;
         const directory = session.metadata?.path;
         if (!machineId || !directory || !resumeThreadId || retrying) return;
 
+        if (takeover) {
+            const confirmed = await Modal.confirm(
+                t('session.resumeTakeover'),
+                t('session.resumeTakeoverConfirm'),
+                { confirmText: t('session.resumeTakeover'), destructive: true },
+            );
+            if (!confirmed) return;
+        }
+
         setRetrying(true);
         try {
+            if (takeover) await codexTakeoverThread(machineId, resumeThreadId);
             const result = await machineSpawnNewSession({
                 machineId,
                 directory,
@@ -197,14 +207,32 @@ export function EmptyMessages({ session }: EmptyMessagesProps) {
             {resumeFailed && resumeThreadId && session.metadata?.machineId && (
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={t('session.resumeRetry')}
+                    accessibilityLabel={resumeStatus === 'active-writer'
+                        ? t('session.resumeTakeover')
+                        : t('session.resumeRetry')}
                     accessibilityState={{ disabled: retrying, busy: retrying }}
                     disabled={retrying}
-                    onPress={retryResume}
-                    style={({ pressed }) => [styles.retryButton, { opacity: retrying ? 0.6 : pressed ? 0.8 : 1 }]}
+                    onPress={() => resumeConversation(resumeStatus === 'active-writer')}
+                    style={({ pressed }) => [
+                        styles.retryButton,
+                        resumeStatus === 'active-writer' && { backgroundColor: theme.colors.status.error },
+                        { opacity: retrying ? 0.6 : pressed ? 0.8 : 1 },
+                    ]}
                 >
-                    {retrying && <ActivityIndicator size="small" color={theme.colors.button.primary.tint} />}
-                    <Text style={styles.retryButtonText}>{t('session.resumeRetry')}</Text>
+                    {retrying ? (
+                        <ActivityIndicator size="small" color={theme.colors.button.primary.tint} />
+                    ) : (
+                        <Ionicons
+                            name={resumeStatus === 'active-writer' ? 'stop-circle-outline' : 'refresh-outline'}
+                            size={18}
+                            color={theme.colors.button.primary.tint}
+                        />
+                    )}
+                    <Text style={styles.retryButtonText}>
+                        {resumeStatus === 'active-writer'
+                            ? t('session.resumeTakeover')
+                            : t('session.resumeRetry')}
+                    </Text>
                 </Pressable>
             )}
         </View>

@@ -345,9 +345,11 @@ export const zhHans: TranslationStructure = {
         resumeLoading: '正在恢复对话…',
         resumeLoadingDescription: '正在加载 Codex 对话及其历史消息。',
         resumeFailed: '无法恢复此对话',
-        resumeActiveWriter: '此对话仍在另一个 Codex 进程中运行。请先在服务器上退出该进程，然后重试。',
+        resumeActiveWriter: '此对话仍在另一个 Codex 进程中运行。你可以终止该进程并在这里接管。',
         resumeFailedDescription: '服务器拒绝了恢复请求。请返回对话列表后重试。',
         resumeRetry: '重新尝试恢复',
+        resumeTakeover: '终止并接管',
+        resumeTakeoverConfirm: '这会终止当前占用此对话的 Codex 进程。正在生成的回复或执行中的命令可能会被中断。',
     },
 
     commandPalette: {
