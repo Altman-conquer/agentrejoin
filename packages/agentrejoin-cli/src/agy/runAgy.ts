@@ -103,6 +103,7 @@ export async function runAgy(opts: RunAgyOptions): Promise<void> {
   const sessionManager = new AcpSessionManager();
   const messageQueue = new MessageQueue2<Record<string, never>>(() => '');
   let shouldExit = false;
+  let archiveOnExit = false;
   let abortController = new AbortController();
   let thinking = false;
 
@@ -213,6 +214,7 @@ export async function runAgy(opts: RunAgyOptions): Promise<void> {
 
   session.rpcHandlerManager.registerHandler('abort', handleAbort);
   registerKillSessionHandler(session.rpcHandlerManager, async () => {
+    archiveOnExit = true;
     shouldExit = true;
     messageQueue.close();
     await handleAbort();
@@ -254,13 +256,15 @@ export async function runAgy(opts: RunAgyOptions): Promise<void> {
     inkInstance?.unmount();
 
     try {
-      session.updateMetadata((currentMetadata) => ({
-        ...currentMetadata,
-        lifecycleState: 'archived',
-        lifecycleStateSince: Date.now(),
-        archivedBy: 'cli',
-        archiveReason: 'Session ended',
-      }));
+      if (archiveOnExit) {
+        session.updateMetadata((currentMetadata) => ({
+          ...currentMetadata,
+          lifecycleState: 'archived',
+          lifecycleStateSince: Date.now(),
+          archivedBy: 'cli',
+          archiveReason: 'User terminated',
+        }));
+      }
       session.sendSessionDeath();
       await session.flush();
       await session.close();

@@ -1,4 +1,4 @@
-export const DEFAULT_CODEX_IDLE_TIMEOUT_MS = 10 * 60 * 1000;
+export const DEFAULT_CODEX_IDLE_TIMEOUT_MS = 0;
 
 export function resolveCodexIdleTimeoutMs(value = process.env.AGENTREJOIN_CODEX_IDLE_TIMEOUT_MS): number {
     if (value === undefined || value.trim() === '') return DEFAULT_CODEX_IDLE_TIMEOUT_MS;

@@ -36,7 +36,7 @@ export async function findAllHappyProcesses(): Promise<Array<{ pid: number, comm
         type = 'current';
       } else if (cmd.includes('--version')) {
         type = cmd.includes('tsx') ? 'dev-daemon-version-check' : 'daemon-version-check';
-      } else if (cmd.includes('daemon start-sync') || cmd.includes('daemon start')) {
+      } else if (cmd.includes('daemon start-sync') || cmd.includes('daemon foreground') || cmd.includes('daemon start')) {
         type = cmd.includes('tsx') ? 'dev-daemon' : 'daemon';
       } else if (cmd.includes('--started-by daemon')) {
         type = cmd.includes('tsx') ? 'dev-daemon-spawned' : 'daemon-spawned-session';

@@ -67,7 +67,7 @@ describe('ensureDaemonRunning', () => {
 
     await ensureDaemonRunning()
 
-    expect(mocks.mockSpawnHappyCLI).toHaveBeenCalledWith(['daemon', 'start-sync'], expect.objectContaining({
+    expect(mocks.mockSpawnHappyCLI).toHaveBeenCalledWith(['daemon', 'foreground'], expect.objectContaining({
       detached: true,
       stdio: 'ignore',
       env: expect.objectContaining({ AGENTREJOIN_SAFE_ENV: 'kept' }),

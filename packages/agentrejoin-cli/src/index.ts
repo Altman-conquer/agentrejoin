@@ -20,6 +20,7 @@ import { getLatestDaemonLog } from './ui/logger'
 import { killRunawayHappyProcesses } from './daemon/doctor'
 import { install } from './daemon/install'
 import { uninstall } from './daemon/uninstall'
+import { runDaemonSupervisor } from './daemon/supervisor'
 import { ApiClient } from './api/api'
 import { runDoctorCommand, runDoctorDaemon } from './ui/doctor'
 import { listDaemonSessions, stopDaemonSession } from './daemon/controlClient'
@@ -537,7 +538,7 @@ Conversation history is preserved on the server, but in-flight tool calls are in
 
     } else if (daemonSubcommand === 'start') {
       // Spawn detached daemon process
-      const child = spawnHappyCLI(['daemon', 'start-sync'], {
+      const child = spawnHappyCLI(['daemon', 'foreground'], {
         detached: true,
         stdio: 'ignore',
         env: sanitizeSessionEnvironment(process.env)
@@ -563,6 +564,9 @@ Conversation history is preserved on the server, but in-flight tool calls are in
       process.exit(0);
     } else if (daemonSubcommand === 'start-sync') {
       await startDaemon()
+      process.exit(0)
+    } else if (daemonSubcommand === 'foreground') {
+      await runDaemonSupervisor()
       process.exit(0)
     } else if (daemonSubcommand === 'stop') {
       await stopDaemon()
@@ -599,9 +603,11 @@ ${chalk.bold('agentrejoin daemon')} - Daemon management
 
 ${chalk.bold('Usage:')}
   agentrejoin daemon start              Start the daemon (detached)
+  agentrejoin daemon foreground         Run under Docker or another process supervisor
   agentrejoin daemon stop               Stop the daemon (sessions stay alive)
   agentrejoin daemon status             Show daemon status
   agentrejoin daemon list               List active sessions
+  agentrejoin daemon install            Install boot-time startup (systemd, with fallbacks)
 
   If you want to kill all agentrejoin related processes run
   ${chalk.cyan('agentrejoin doctor clean')}

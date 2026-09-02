@@ -917,16 +917,16 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
     process.on('SIGTERM', () => { void cleanup({ archive: false }); });
     process.on('SIGINT', () => { void cleanup({ archive: false }); });
 
-    // Crashes archive on the way out so the session shows up correctly
-    // in the app rather than masquerading as live.
+    // Crashes remain resumable. Presence will go offline immediately and the
+    // daemon supervisor can restore daemon-managed sessions on its next pass.
     process.on('uncaughtException', (error) => {
         logger.debug('[START] Uncaught exception:', error);
-        void cleanup({ archive: true });
+        void cleanup({ archive: false });
     });
 
     process.on('unhandledRejection', (reason) => {
         logger.debug('[START] Unhandled rejection:', reason);
-        void cleanup({ archive: true });
+        void cleanup({ archive: false });
     });
 
     // Browser-side "Archive" button routes through this RPC and DOES

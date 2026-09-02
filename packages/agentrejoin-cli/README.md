@@ -57,13 +57,30 @@ agentrejoin daemon start
 agentrejoin daemon stop
 agentrejoin daemon status
 agentrejoin daemon list
+agentrejoin daemon install
 ```
 
 The daemon starts automatically when you run `agentrejoin`, so you usually don't need to manage it manually.
 
+Daemon-managed Claude and Codex sessions keep running when the browser is closed,
+backgrounded, or navigates to another conversation. If a supported agent process
+or the daemon crashes, the local supervisor restores it; only an explicit Stop or
+Archive prevents recovery.
+
 ### Keeping the daemon running across reboots
 
 `agentrejoin auth login` asks whether to start the daemon now and whether to start it automatically from your bash or zsh profile. Re-run the login command to change that setting; logging out removes the managed profile entry.
+
+On Linux, `agentrejoin daemon install` installs and starts a systemd service when
+systemd is usable. Inside a container without systemd, it starts AgentRejoin's own
+background supervisor immediately and adds a shell startup hook when bash or zsh
+is available. This does not require changing the Docker, Podman, or Kubernetes
+command. A full container restart cannot be observed from inside the stopped
+container; without an editable container startup policy, run any AgentRejoin CLI
+command or `agentrejoin daemon start` after the container starts again.
+
+If you do control the container command, `agentrejoin daemon foreground` is the
+native foreground supervisor and can be paired with the runtime's restart policy.
 
 > **macOS users:** prefer this shell-init approach over a `launchd` LaunchAgent. A LaunchAgent runs in an agent domain that is **detached from your GUI/Aqua login session**, which means the bundled `claude-agent-sdk` cannot reach the macOS keychain and silently fails authentication ("Failed to authenticate. API Error: 401 terminated", `duration_api_ms: 0`). If you must use launchd, your wrapper has to read the OAuth access token from `~/.claude/.credentials.json` and export it as `CLAUDE_CODE_OAUTH_TOKEN` before exec'ing the daemon — and you'll need to handle token rotation yourself.
 

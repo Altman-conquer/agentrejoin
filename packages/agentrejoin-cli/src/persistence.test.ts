@@ -2,7 +2,8 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { acquireDaemonLock, releaseDaemonLock, SandboxConfigSchema } from './persistence';
+import type { Metadata } from '@/api/types';
+import { acquireDaemonLock, persistSession, readPersistedSessions, releaseDaemonLock, SandboxConfigSchema } from './persistence';
 
 const mockConfiguration = vi.hoisted(() => ({
     daemonLockFile: '',
@@ -132,5 +133,43 @@ describe('acquireDaemonLock', () => {
 
         expect(lockHandle).toBeNull();
         expect(readFileSync(mockConfiguration.daemonLockFile, 'utf-8')).toBe(String(process.pid));
+    });
+});
+
+describe('persisted sessions', () => {
+    let testDir: string;
+
+    beforeEach(() => {
+        testDir = mkdtempSync(join(tmpdir(), 'agentrejoin-sessions-'));
+        mockConfiguration.sessionsFile = join(testDir, 'sessions.json');
+    });
+
+    afterEach(() => {
+        rmSync(testDir, { recursive: true, force: true });
+    });
+
+    it('keeps desired running sessions beyond the historical resume window', () => {
+        persistSession('running', {
+            encryptionKey: 'key',
+            encryptionVariant: 'dataKey',
+            seq: 0,
+            metadataVersion: 0,
+            agentStateVersion: 0,
+            metadata: { path: '/repo' } as Metadata,
+            savedAt: 0,
+            desiredState: 'running',
+        });
+        persistSession('stopped', {
+            encryptionKey: 'key',
+            encryptionVariant: 'dataKey',
+            seq: 0,
+            metadataVersion: 0,
+            agentStateVersion: 0,
+            metadata: { path: '/repo' } as Metadata,
+            savedAt: 0,
+            desiredState: 'stopped',
+        });
+
+        expect(Object.keys(readPersistedSessions())).toEqual(['running']);
     });
 });

@@ -15,7 +15,7 @@ export async function ensureDaemonRunning(): Promise<void> {
 
   logger.debug('Starting AgentRejoin background service...')
 
-  const daemonProcess = spawnHappyCLI(['daemon', 'start-sync'], {
+  const daemonProcess = spawnHappyCLI(['daemon', 'foreground'], {
     detached: true,
     stdio: 'ignore',
     env: sanitizeSessionEnvironment(process.env),

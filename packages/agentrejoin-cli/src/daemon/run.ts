@@ -14,7 +14,7 @@ import { startCaffeinate, stopCaffeinate } from '@/utils/caffeinate';
 import packageJson from '../../package.json';
 import { getEnvironmentInfo } from '@/ui/doctor';
 import { spawnHappyCLI } from '@/utils/spawnHappyCLI';
-import { writeDaemonState, DaemonLocallyPersistedState, readDaemonState, acquireDaemonLock, releaseDaemonLock, readPersistedSessions, persistSession } from '@/persistence';
+import { writeDaemonState, DaemonLocallyPersistedState, readDaemonState, acquireDaemonLock, releaseDaemonLock, readPersistedSessions, persistSession, setPersistedSessionDesiredState } from '@/persistence';
 import type { PersistedSession } from '@/persistence';
 
 import { cleanupDaemonState, isDaemonRunningCurrentlyInstalledHappyVersion, stopDaemon } from './controlClient';
@@ -33,6 +33,8 @@ import {
   sanitizeSessionEnvironment,
   wrapTmuxCommandWithSessionEnvironmentSanitizer,
 } from './sessionEnvironment';
+import { findAllHappyProcesses } from './doctor';
+import { resolvePersistedDesiredState, resolveSessionRecoveryAction } from './sessionRecovery';
 
 /** Shell-escape a string for safe interpolation into tmux commands. */
 function shellescape(s: string): string {
@@ -240,6 +242,9 @@ export async function startDaemon(): Promise<void> {
           agentStateVersion: encryption.agentStateVersion,
           metadata: sessionMetadata,
           savedAt: Date.now(),
+          desiredState: sessionMetadata.startedFromDaemon === true || sessionMetadata.startedBy === 'daemon'
+            ? 'running'
+            : 'stopped',
         });
       }
 
@@ -251,6 +256,7 @@ export async function startDaemon(): Promise<void> {
         existingSession.agentRejoinSessionId = sessionId;
         existingSession.happySessionMetadataFromLocalWebhook = sessionMetadata;
         existingSession.encryption = encryption;
+        sessionIdToFinishedSession.delete(sessionId);
         logger.debug(`[DAEMON RUN] Updated daemon-spawned session ${sessionId} with metadata`);
 
         // Resolve any awaiter for this PID
@@ -682,28 +688,61 @@ export async function startDaemon(): Promise<void> {
       });
     };
 
-    const findTrackedSessionById = (agentRejoinSessionId: string): TrackedSession | undefined => {
+    const findLiveTrackedSessionById = (agentRejoinSessionId: string): TrackedSession | undefined => {
       for (const session of pidToTrackedSession.values()) {
         if (session.agentRejoinSessionId === agentRejoinSessionId) return session;
       }
+      return undefined;
+    };
+
+    const findTrackedSessionById = (agentRejoinSessionId: string): TrackedSession | undefined => {
+      const live = findLiveTrackedSessionById(agentRejoinSessionId);
+      if (live) return live;
       return sessionIdToFinishedSession.get(agentRejoinSessionId);
     };
 
-    const fetchServerSessionMetadata = async (sessionId: string, encryptionKey: Uint8Array, encryptionVariant: 'legacy' | 'dataKey'): Promise<Metadata | null> => {
+    type ServerSessionRecord = {
+      id: string;
+      active: boolean;
+      activeAt: number;
+      metadata: string;
+      metadataVersion: number;
+      agentStateVersion: number;
+      seq: number;
+    };
+
+    type DecryptedServerSession = Omit<ServerSessionRecord, 'metadata'> & { metadata: Metadata };
+
+    const fetchServerSessions = async (
+      wantedIds: ReadonlySet<string>,
+      localSessions: Record<string, PersistedSession>,
+    ): Promise<Map<string, DecryptedServerSession>> => {
+      const found = new Map<string, DecryptedServerSession>();
+      let cursor: string | undefined;
+
       try {
-        const response = await axios.get(`${configuration.serverUrl}/v1/sessions`, {
-          headers: { Authorization: `Bearer ${credentials.token}` },
-          timeout: 10_000,
-        });
-        const sessions = (response.data as { sessions: { id: string; metadata: string }[] }).sessions;
-        const matched = sessions.find(s => s.id === sessionId);
-        if (!matched) return null;
-        const decrypted = decrypt(encryptionKey, encryptionVariant, decodeBase64(matched.metadata));
-        return decrypted as Metadata | null;
+        do {
+          const response = await axios.get(`${configuration.serverUrl}/v2/sessions`, {
+            params: { limit: 200, ...(cursor ? { cursor } : {}) },
+            headers: { Authorization: `Bearer ${credentials.token}` },
+            timeout: 10_000,
+          });
+          const page = response.data as { sessions: ServerSessionRecord[]; nextCursor: string | null };
+          for (const session of page.sessions) {
+            if (!wantedIds.has(session.id)) continue;
+            const local = localSessions[session.id];
+            if (!local) continue;
+            const metadata = decrypt(decodeBase64(local.encryptionKey), local.encryptionVariant, decodeBase64(session.metadata));
+            if (!metadata) continue;
+            found.set(session.id, { ...session, metadata: metadata as Metadata });
+          }
+          cursor = page.nextCursor ?? undefined;
+        } while (cursor && found.size < wantedIds.size);
       } catch (error) {
-        logger.debug(`[DAEMON RUN] Failed to fetch session metadata from server: ${error instanceof Error ? error.message : error}`);
-        return null;
+        logger.debug(`[DAEMON RUN] Failed to fetch persisted sessions from server: ${error instanceof Error ? error.message : error}`);
       }
+
+      return found;
     };
 
     const fetchLatestSessionMessageSeq = async (sessionId: string): Promise<number> => {
@@ -716,7 +755,7 @@ export async function startDaemon(): Promise<void> {
       return typeof messages?.[0]?.seq === 'number' ? messages[0].seq : 0;
     };
 
-    const resumeSession = async (agentRejoinSessionId: string, options?: { model?: string; permissionMode?: string }): Promise<SpawnSessionResult> => {
+    const resumeSessionOnce = async (agentRejoinSessionId: string, options?: { model?: string; permissionMode?: string }): Promise<SpawnSessionResult> => {
       try {
         const tracked = findTrackedSessionById(agentRejoinSessionId);
         if (!tracked) {
@@ -729,17 +768,29 @@ export async function startDaemon(): Promise<void> {
           return { type: 'error', errorMessage: `Session ${agentRejoinSessionId} has no stored encryption data. It was likely started before this feature was available. Restart the daemon and start a new session to enable resume.` };
         }
 
-        // Webhook metadata may be stale (missing claudeSessionId/codexThreadId set after startup).
-        // Fetch fresh metadata from server if needed.
         let metadata = tracked.happySessionMetadataFromLocalWebhook;
-        const needsFetch = (!metadata.claudeSessionId && (!metadata.flavor || metadata.flavor === 'claude'))
-          || (!metadata.codexThreadId && metadata.flavor === 'codex');
-        if (needsFetch) {
-          logger.debug(`[DAEMON RUN] Session ${agentRejoinSessionId} missing agent session ID in webhook metadata, fetching from server`);
-          const serverMetadata = await fetchServerSessionMetadata(agentRejoinSessionId, tracked.encryption.encryptionKey, tracked.encryption.encryptionVariant);
-          if (serverMetadata) {
-            metadata = serverMetadata;
-            tracked.happySessionMetadataFromLocalWebhook = serverMetadata;
+        const persistedSession = readPersistedSessions()[agentRejoinSessionId];
+        if (persistedSession) {
+          const serverSession = (await fetchServerSessions(new Set([agentRejoinSessionId]), {
+            [agentRejoinSessionId]: persistedSession,
+          })).get(agentRejoinSessionId);
+          if (serverSession) {
+            metadata = serverSession.metadata;
+            tracked.happySessionMetadataFromLocalWebhook = metadata;
+            tracked.encryption.seq = serverSession.seq;
+            tracked.encryption.metadataVersion = serverSession.metadataVersion;
+            tracked.encryption.agentStateVersion = serverSession.agentStateVersion;
+            persistSession(agentRejoinSessionId, {
+              ...persistedSession,
+              seq: serverSession.seq,
+              metadataVersion: serverSession.metadataVersion,
+              agentStateVersion: serverSession.agentStateVersion,
+              metadata,
+              desiredState: 'running',
+              savedAt: Date.now(),
+            });
+          } else {
+            setPersistedSessionDesiredState(agentRejoinSessionId, 'running');
           }
         }
 
@@ -784,14 +835,133 @@ export async function startDaemon(): Promise<void> {
       }
     };
 
+    const resumeInFlight = new Map<string, Promise<SpawnSessionResult>>();
+    const resumeSession = (agentRejoinSessionId: string, options?: { model?: string; permissionMode?: string }): Promise<SpawnSessionResult> => {
+      const live = findLiveTrackedSessionById(agentRejoinSessionId);
+      if (live) {
+        try {
+          process.kill(live.pid, 0);
+          return Promise.resolve({ type: 'success', sessionId: agentRejoinSessionId });
+        } catch {
+          onChildExited(live.pid);
+        }
+      }
+
+      const pending = resumeInFlight.get(agentRejoinSessionId);
+      if (pending) return pending;
+
+      const started = resumeSessionOnce(agentRejoinSessionId, options).finally(() => {
+        resumeInFlight.delete(agentRejoinSessionId);
+      });
+      resumeInFlight.set(agentRejoinSessionId, started);
+      return started;
+    };
+
+    const reconcilePersistedSessions = async (reason: 'startup' | 'heartbeat'): Promise<void> => {
+      const localSessions = readPersistedSessions();
+      const wantedIds = new Set(
+        Object.entries(localSessions)
+          .filter(([, session]) => resolvePersistedDesiredState(session) === 'running')
+          .map(([id]) => id),
+      );
+      if (wantedIds.size === 0) return;
+
+      const [serverSessions, processes] = await Promise.all([
+        fetchServerSessions(wantedIds, localSessions),
+        findAllHappyProcesses(),
+      ]);
+      const liveAgentPids = new Set(processes
+        .filter((entry) => [
+          'daemon-spawned-session',
+          'dev-daemon-spawned',
+          'user-session',
+          'dev-session',
+          'dev-related',
+        ].includes(entry.type))
+        .map((entry) => entry.pid));
+
+      await Promise.all(Array.from(wantedIds, async (sessionId) => {
+        const local = localSessions[sessionId];
+        const server = serverSessions.get(sessionId);
+        if (!local || !server) return;
+
+        let desiredState = resolvePersistedDesiredState(local);
+        if (server.metadata.lifecycleState !== 'running') {
+          desiredState = 'stopped';
+        }
+        const updated: PersistedSession = {
+          ...local,
+          seq: server.seq,
+          metadataVersion: server.metadataVersion,
+          agentStateVersion: server.agentStateVersion,
+          metadata: server.metadata,
+          desiredState,
+          savedAt: desiredState === 'stopped' ? Date.now() : local.savedAt,
+        };
+        persistSession(sessionId, updated);
+
+        const tracked = findTrackedSessionById(sessionId);
+        if (tracked) {
+          tracked.happySessionMetadataFromLocalWebhook = server.metadata;
+          tracked.encryption = {
+            encryptionKey: decodeBase64(local.encryptionKey),
+            encryptionVariant: local.encryptionVariant,
+            seq: server.seq,
+            metadataVersion: server.metadataVersion,
+            agentStateVersion: server.agentStateVersion,
+          };
+        }
+
+        const action = resolveSessionRecoveryAction({
+          desiredState,
+          metadata: server.metadata,
+          serverActive: server.active,
+          serverActiveAt: server.activeAt,
+          liveAgentPids,
+        });
+        if (action === 'adopt' && server.metadata.hostPid) {
+          if (!findLiveTrackedSessionById(sessionId)) {
+            pidToTrackedSession.set(server.metadata.hostPid, {
+              startedBy: 'daemon',
+              agentRejoinSessionId: sessionId,
+              happySessionMetadataFromLocalWebhook: server.metadata,
+              encryption: {
+                encryptionKey: decodeBase64(local.encryptionKey),
+                encryptionVariant: local.encryptionVariant,
+                seq: server.seq,
+                metadataVersion: server.metadataVersion,
+                agentStateVersion: server.agentStateVersion,
+              },
+              pid: server.metadata.hostPid,
+            });
+            sessionIdToFinishedSession.delete(sessionId);
+            logger.debug(`[DAEMON RUN] Adopted live session ${sessionId} with PID ${server.metadata.hostPid} during ${reason}`);
+          }
+          return;
+        }
+        if (action === 'resume') {
+          logger.debug(`[DAEMON RUN] Auto-resuming session ${sessionId} during ${reason}`);
+          const result = await resumeSession(sessionId);
+          if (result.type === 'error') {
+            logger.debug(`[DAEMON RUN] Auto-resume failed for ${sessionId}: ${result.errorMessage}`);
+          }
+        }
+      }));
+    };
+
     // Stop a session by sessionId or PID fallback
     const stopSession = (sessionId: string): boolean => {
       logger.debug(`[DAEMON RUN] Attempting to stop session ${sessionId}`);
+      setPersistedSessionDesiredState(sessionId, 'stopped');
 
       // Try to find by sessionId first
       for (const [pid, session] of pidToTrackedSession.entries()) {
         if (session.agentRejoinSessionId === sessionId ||
           (sessionId.startsWith('PID-') && pid === parseInt(sessionId.replace('PID-', '')))) {
+
+          if (session.agentRejoinSessionId) {
+            setPersistedSessionDesiredState(session.agentRejoinSessionId, 'stopped');
+          }
 
           if (session.startedBy === 'daemon' && session.childProcess) {
             try {
@@ -814,6 +984,11 @@ export async function startDaemon(): Promise<void> {
           logger.debug(`[DAEMON RUN] Removed session ${sessionId} from tracking`);
           return true;
         }
+      }
+
+      if (sessionIdToFinishedSession.has(sessionId)) {
+        logger.debug(`[DAEMON RUN] Marked inactive session ${sessionId} as explicitly stopped`);
+        return true;
       }
 
       logger.debug(`[DAEMON RUN] Session ${sessionId} not found`);
@@ -901,6 +1076,8 @@ export async function startDaemon(): Promise<void> {
     // Connect to server
     apiMachine.connect();
 
+    await reconcilePersistedSessions('startup');
+
     // Every 60 seconds:
     // 1. Prune stale sessions
     // 2. Check if daemon needs update
@@ -926,9 +1103,11 @@ export async function startDaemon(): Promise<void> {
         } catch (error) {
           // Process is dead, remove from tracking
           logger.debug(`[DAEMON RUN] Removing stale session with PID ${pid} (process no longer exists)`);
-          pidToTrackedSession.delete(pid);
+          onChildExited(pid);
         }
       }
+
+      await reconcilePersistedSessions('heartbeat');
 
       // Check if daemon needs update by detecting whether `dist/index.mjs` was
       // replaced on disk since the daemon started (npm install rewrites the file).
@@ -959,6 +1138,11 @@ export async function startDaemon(): Promise<void> {
         await cleanupDaemonState();
         await releaseDaemonLock(daemonLockHandle);
         await stopCaffeinate();
+
+        if (process.env.AGENTREJOIN_DAEMON_SUPERVISED === '1') {
+          logger.debug('[DAEMON RUN] Foreground supervisor will restart the updated daemon');
+          process.exit(1);
+        }
 
         try {
           spawnHappyCLI(['daemon', 'start'], {
@@ -1030,7 +1214,7 @@ export async function startDaemon(): Promise<void> {
       await releaseDaemonLock(daemonLockHandle);
 
       logger.debug('[DAEMON RUN] Cleanup completed, exiting process');
-      process.exit(0);
+      process.exit(source === 'exception' ? 1 : 0);
     };
 
     logger.debug('[DAEMON RUN] Daemon started successfully, waiting for shutdown request');

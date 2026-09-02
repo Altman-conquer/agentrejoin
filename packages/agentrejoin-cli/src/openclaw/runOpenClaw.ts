@@ -197,6 +197,7 @@ export async function runOpenClaw(opts: RunOpenClawOptions): Promise<void> {
   const sessionManager = new AcpSessionManager();
   const messageQueue = new MessageQueue2<Record<string, never>>(() => '');
   let shouldExit = false;
+  let archiveOnExit = false;
   let abortController = new AbortController();
   let pendingTurn: PendingTurn | null = null;
   let thinking = false;
@@ -302,6 +303,7 @@ export async function runOpenClaw(opts: RunOpenClawOptions): Promise<void> {
     backend.retryConnect();
   });
   registerKillSessionHandler(session.rpcHandlerManager, async () => {
+    archiveOnExit = true;
     shouldExit = true;
     messageQueue.close();
     clearPendingTurn(new Error('Session terminated'));
@@ -348,13 +350,15 @@ export async function runOpenClaw(opts: RunOpenClawOptions): Promise<void> {
     await backend.dispose();
 
     try {
-      session.updateMetadata((currentMetadata) => ({
-        ...currentMetadata,
-        lifecycleState: 'archived',
-        lifecycleStateSince: Date.now(),
-        archivedBy: 'cli',
-        archiveReason: 'Session ended',
-      }));
+      if (archiveOnExit) {
+        session.updateMetadata((currentMetadata) => ({
+          ...currentMetadata,
+          lifecycleState: 'archived',
+          lifecycleStateSince: Date.now(),
+          archivedBy: 'cli',
+          archiveReason: 'User terminated',
+        }));
+      }
       session.sendSessionDeath();
       await session.flush();
       await session.close();

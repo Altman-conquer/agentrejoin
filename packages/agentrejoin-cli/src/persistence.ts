@@ -423,6 +423,7 @@ export type PersistedSession = {
   agentStateVersion: number;
   metadata: Metadata;
   savedAt: number;
+  desiredState?: 'running' | 'stopped';
 };
 
 type SessionsFile = {
@@ -440,7 +441,7 @@ export function readPersistedSessions(): Record<string, PersistedSession> {
     const now = Date.now();
     const sessions: Record<string, PersistedSession> = {};
     for (const [id, session] of Object.entries(data.sessions)) {
-      if (now - session.savedAt < SESSION_MAX_AGE_MS) {
+      if (session.desiredState === 'running' || now - session.savedAt < SESSION_MAX_AGE_MS) {
         sessions[id] = session;
       }
     }
@@ -460,4 +461,11 @@ export function persistSession(sessionId: string, session: PersistedSession): vo
   } catch (error) {
     logger.debug(`[PERSISTENCE] Failed to persist session ${sessionId}:`, error);
   }
+}
+
+export function setPersistedSessionDesiredState(sessionId: string, desiredState: 'running' | 'stopped'): void {
+  const sessions = readPersistedSessions();
+  const session = sessions[sessionId];
+  if (!session) return;
+  persistSession(sessionId, { ...session, desiredState, savedAt: Date.now() });
 }
