@@ -35,8 +35,6 @@ import {
 } from './sessionEnvironment';
 import { findAllHappyProcesses } from './doctor';
 import { resolvePersistedDesiredState, resolveSessionRecoveryAction } from './sessionRecovery';
-import { hasPublicIpv6 } from './network';
-import { setDefaultAutoSelectFamily } from 'node:net';
 
 /** Shell-escape a string for safe interpolation into tmux commands. */
 function shellescape(s: string): string {
@@ -81,10 +79,6 @@ export const initialMachineMetadata: MachineMetadata = {
 };
 
 export async function startDaemon(): Promise<void> {
-  if (!hasPublicIpv6()) {
-    setDefaultAutoSelectFamily(false);
-  }
-
   // The daemon may have been launched from a session process. Keep its normal
   // environment, but never let session lineage or reconnect state reach a
   // later, unrelated child session.
@@ -291,6 +285,9 @@ export async function startDaemon(): Promise<void> {
       logger.debugLargeJson('[DAEMON RUN] Spawning session', options);
 
       const { directory, sessionId, machineId, approvedNewDirectoryCreation = true } = options;
+      const sessionWebhookTimeoutMs = options.resumeClaudeSessionId || options.resumeCodexThreadId || options.resumeGeminiSessionId
+        ? 60_000
+        : 15_000;
       let directoryCreated = false;
 
       try {
@@ -523,7 +520,7 @@ export async function startDaemon(): Promise<void> {
                   type: 'error',
                   errorMessage: `Session webhook timeout for PID ${tmuxResult.pid} (tmux)`
                 });
-              }, 15_000); // Same timeout as regular sessions
+              }, sessionWebhookTimeoutMs);
 
               // Register awaiter for tmux session (exact same as regular flow)
               pidToAwaiter.set(tmuxResult.pid!, (completedSession) => {
@@ -597,6 +594,7 @@ export async function startDaemon(): Promise<void> {
             env: buildSessionChildEnvironment(ambientEnvironment, extraEnv),
             directoryCreated,
             message: directoryCreated ? `The path '${directory}' did not exist. We created a new folder and spawned a new session there.` : undefined,
+            sessionWebhookTimeoutMs,
           });
         }
 

@@ -145,7 +145,7 @@ export function EmptyMessages({ session }: EmptyMessagesProps) {
             }
             Modal.alert(
                 t('common.error'),
-                result.type === 'error' ? result.errorMessage : t('errors.fileNotFound'),
+                result.type === 'error' ? result.errorMessage : t('sessionInfo.resumeSessionUnexpectedDirectoryPrompt'),
             );
         } catch (error) {
             Modal.alert(

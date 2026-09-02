@@ -96,6 +96,26 @@ async function createConversation(browser, credentials, storageState, machineId,
     return { context, page, session };
 }
 
+async function resumeCodexConversation(browser, credentials, storageState, originalSession, prompt) {
+    const context = await browser.newContext({
+        viewport: { width: 1440, height: 900 },
+        storageState,
+    });
+    const page = await context.newPage();
+    watchPage(page);
+    await page.goto(`${baseUrl}/new`);
+    await page.getByText(prompt, { exact: true }).first().click();
+    await page.getByText('Resume Session', { exact: true }).click();
+
+    const session = await waitFor('resumed Codex conversation', async () => {
+        const { sessions } = await api('/v1/sessions', credentials.token);
+        return sessions.find((candidate) => candidate.id === originalSession.id && candidate.active);
+    }, 90_000);
+    await page.getByText(prompt, { exact: true }).filter({ visible: true }).first().waitFor({ timeout: 90_000 });
+    await page.screenshot({ path: join(artifactsDir, 'codex-resume.png'), fullPage: true });
+    return { context, page, session };
+}
+
 await waitFor('server health', async () => (await fetch(`${baseUrl}/health`)).ok);
 await mkdir(artifactsDir, { recursive: true });
 
@@ -145,6 +165,16 @@ try {
     });
     await codex.context.close();
 
+    const resumedCodex = await resumeCodexConversation(browser, credentials, storageState, codex.session, codexPrompt);
+    currentPage = resumedCodex.page;
+    await resumedCodex.page.goto(`${baseUrl}/session/${resumedCodex.session.id}/info`);
+    await resumedCodex.page.getByText('Archive Session', { exact: true }).click();
+    await waitFor('resumed Codex conversation to archive', async () => {
+        const { sessions } = await api('/v1/sessions', credentials.token);
+        return sessions.find((candidate) => candidate.id === resumedCodex.session.id)?.active === false;
+    });
+    await resumedCodex.context.close();
+
     const claudePrompt = 'AgentRejoin Claude container end-to-end test';
     const claude = await createConversation(browser, credentials, storageState, machine.id, 'claude', claudePrompt);
     currentPage = claude.page;
@@ -184,7 +214,7 @@ try {
     await waitFor('machine deletion', async () => (await api('/v1/machines', credentials.token)).length === 0);
     await mobile.close();
 
-    console.log('E2E passed: account creation, Web pairing, Codex, Claude, desktop/mobile history, and machine deletion');
+    console.log('E2E passed: account creation, Web pairing, Codex resume, Claude, desktop/mobile history, and machine deletion');
 } catch (error) {
     if (currentPage && !currentPage.isClosed()) {
         await currentPage.screenshot({ path: join(artifactsDir, 'failure.png'), fullPage: true });

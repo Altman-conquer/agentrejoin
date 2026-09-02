@@ -36,7 +36,10 @@ import { handleResumeCommand } from '@/resume/handleResumeCommand'
 import { ensureDaemonRunning } from './daemon/ensureDaemonRunning'
 import { handleCodexCommand } from './commands/codexCommand'
 import { sanitizeSessionEnvironment } from './daemon/sessionEnvironment'
+import { hasPublicIpv6 } from './daemon/network'
+import { setDefaultAutoSelectFamily } from 'node:net'
 
+if (!hasPublicIpv6()) setDefaultAutoSelectFamily(false);
 
 (async () => {
   const args = process.argv.slice(2)

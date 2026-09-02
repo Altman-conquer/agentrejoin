@@ -243,7 +243,7 @@ function ExistingConversationsScreen() {
             }
             Modal.alert(
                 t('common.error'),
-                result.type === 'error' ? result.errorMessage : t('errors.fileNotFound'),
+                result.type === 'error' ? result.errorMessage : t('sessionInfo.resumeSessionUnexpectedDirectoryPrompt'),
             );
         } catch (resumeError) {
             Modal.alert(
