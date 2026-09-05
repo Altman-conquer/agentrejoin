@@ -7,7 +7,7 @@ const END_MARKER = '# <<< AgentRejoin daemon autostart <<<';
 const AUTOSTART_BLOCK = `${START_MARKER}
 if [[ $- == *i* ]] && [[ -z "\${AGENTREJOIN_DAEMON_CHECKED:-}" ]]; then
   export AGENTREJOIN_DAEMON_CHECKED=1
-  command agentrejoin daemon start >/dev/null 2>&1 & disown
+  (command agentrejoin daemon start </dev/null >/dev/null 2>&1 &)
 fi
 ${END_MARKER}`;
 
@@ -35,8 +35,14 @@ export async function enableShellAutostart(
   if (!file) return null;
 
   const existing = await readOptional(file) ?? '';
-  if (existing.includes(START_MARKER) && existing.includes(END_MARKER)) return file;
-  if (existing.includes(START_MARKER) || existing.includes(END_MARKER)) {
+  const start = existing.indexOf(START_MARKER);
+  const end = start === -1 ? -1 : existing.indexOf(END_MARKER, start);
+  if (start !== -1 && end !== -1) {
+    const updated = existing.slice(0, start) + AUTOSTART_BLOCK + existing.slice(end + END_MARKER.length);
+    if (updated !== existing) await writeFile(file, updated, 'utf8');
+    return file;
+  }
+  if (start !== -1 || existing.includes(END_MARKER)) {
     throw new Error(`Incomplete AgentRejoin autostart block in ${file}`);
   }
 

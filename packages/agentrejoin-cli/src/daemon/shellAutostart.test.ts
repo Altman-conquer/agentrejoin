@@ -21,8 +21,26 @@ it('adds one managed shell block and removes it without touching user config', a
 
   const enabled = await readFile(bashrc, 'utf8');
   expect(enabled.match(/AgentRejoin daemon autostart/g)).toHaveLength(2);
-  expect(enabled).toContain('command agentrejoin daemon start >/dev/null 2>&1 & disown');
+  expect(enabled).toContain('(command agentrejoin daemon start </dev/null >/dev/null 2>&1 &)');
 
   expect(await disableShellAutostart(tempDir)).toEqual([bashrc]);
   expect(await readFile(bashrc, 'utf8')).toBe('export KEEP_ME=1\n');
+});
+
+it('updates an existing managed shell block', async () => {
+  tempDir = await mkdtemp(path.join(os.tmpdir(), 'agentrejoin-autostart-'));
+  const bashrc = path.join(tempDir, '.bashrc');
+  await writeFile(bashrc, `before
+# >>> AgentRejoin daemon autostart >>>
+old command & disown
+# <<< AgentRejoin daemon autostart <<<
+after
+`, 'utf8');
+
+  await enableShellAutostart(tempDir, '/bin/bash');
+
+  const updated = await readFile(bashrc, 'utf8');
+  expect(updated).toContain('before\n# >>> AgentRejoin daemon autostart >>>');
+  expect(updated).toContain('# <<< AgentRejoin daemon autostart <<<\nafter\n');
+  expect(updated).not.toContain('disown');
 });
