@@ -19,7 +19,7 @@ After completing and verifying a user-requested code change:
    without waiting for a separate push request. Never force push or include
    unrelated user changes.
 2. Deploy the production web stack at `https://agentrejoin.zhandj.com` using
-   the existing deployment on `root@agentrejoin-prod` in `/opt/agentrejoin`,
+   the local SSH alias `agentrejoin-prod` in `/opt/agentrejoin`,
    then verify the website and web app. Preserve the server `.env`,
    `AGENTREJOIN_MASTER_SECRET`, and persistent data volumes.
    Wait for `.github/workflows/container.yml` to publish the production image to
